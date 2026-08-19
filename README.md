@@ -299,7 +299,7 @@ databricks bundle validate -t dev -p PAYMENTS_DEV
 
 | Milestone | Capability | Status |
 |---|---|---|
-| 1 | Platform and repository foundation | In Progress |
+| 1 | Platform and repository foundation | Complete |
 | 2 | Synthetic payments domain | Not Started |
 | 3 | Batch ingestion | Not Started |
 | 4 | Streaming ingestion | Not Started |
