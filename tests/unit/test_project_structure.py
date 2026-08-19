@@ -22,11 +22,13 @@ def test_required_project_directories_exist() -> None:
     required_directories = [
         "src/payments_intelligence",
         "src/payments_intelligence/domain",
+        "src/payments_intelligence/synthetic",
         "pipelines/bronze",
         "pipelines/silver",
         "pipelines/gold",
         "tests/unit",
         "tests/unit/domain",
+        "tests/unit/synthetic",
         "tests/integration",
         "bundle/resources",
         "infra/terraform/aws",
