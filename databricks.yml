@@ -1,0 +1,25 @@
+bundle:
+  name: enterprise-payments-intelligence-platform
+
+  # Keep local and CI/CD deployments on a modern CLI version.
+  databricks_cli_version: ">= 1.3.0"
+
+  # Use the newer Databricks-native deployment engine.
+  engine: direct
+
+include:
+  - bundle.targets.yml
+
+sync:
+  exclude:
+    - .git/**
+    - .github/**
+    - .venv/**
+    - .pytest_cache/**
+    - .ruff_cache/**
+    - .mypy_cache/**
+    - tests/**
+    - infra/**
+    - docs/**
+    - .env
+    - "**/__pycache__/**"
