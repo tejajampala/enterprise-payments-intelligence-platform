@@ -13,14 +13,19 @@ Future milestones must build on the implementation completed in previous milesto
 | 1A | Local developer workstation | COMPLETE |
 | 1B | Databricks development environment | COMPLETE |
 | 1C | Repository and Databricks bundle foundation | COMPLETE |
-| 1D | GitHub portfolio foundation | IN PROGRESS |
-| 1E | GitHub Actions foundation | NOT STARTED |
+| 1D | GitHub portfolio foundation | COMPLETE |
+| 1E | GitHub Actions foundation | COMPLETE |
 
 ---
 
 ## Milestone 2 — Synthetic Payments Domain
 
-Status: **NOT STARTED**
+| Step | Description | Status |
+|---|---|---|
+| 2A | Canonical payments domain and data contracts | COMPLETE |
+| 2B | Synthetic data generator | NOT STARTED |
+| 2C | Synthetic data quality scenarios | NOT STARTED |
+| 2D | Local source-system datasets | NOT STARTED |
 
 ---
 
