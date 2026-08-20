@@ -13,12 +13,20 @@ from payments_intelligence.synthetic.scenarios import (
     SyntheticScenarioBuilder,
     SyntheticScenarioSet,
 )
+from payments_intelligence.synthetic.source_export import (
+    LocalSourceDatasetExporter,
+    LocalSourceExportConfig,
+    SourceDatasetManifest,
+)
 
 __all__ = [
     "DataQualityIssue",
     "DeliveryScenario",
     "InvalidRawRecord",
+    "LocalSourceDatasetExporter",
+    "LocalSourceExportConfig",
     "PaymentEventDelivery",
+    "SourceDatasetManifest",
     "SyntheticDataConfig",
     "SyntheticDataGenerator",
     "SyntheticDataSet",

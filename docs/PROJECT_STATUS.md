@@ -25,7 +25,7 @@ Future milestones must build on the implementation completed in previous milesto
 | 2A | Canonical payments domain and data contracts | COMPLETE |
 | 2B | Synthetic data generator | COMPLETE |
 | 2C | Synthetic data quality scenarios | COMPLETE |
-| 2D | Local source-system datasets | NOT STARTED |
+| 2D | Local source-system datasets | COMPLETE |
 
 ---
 

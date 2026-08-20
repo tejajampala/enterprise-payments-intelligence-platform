@@ -292,6 +292,21 @@ Validate the Databricks bundle:
 ```powershell
 databricks bundle validate -t dev -p PAYMENTS_DEV
 ```
+### Generate Local Source-System Data
+
+Generate deterministic PostgreSQL-style, S3-style, and Kafka-style source datasets:
+
+```powershell
+uv run python scripts/generate_local_source_data.py
+```
+
+The generated files are written under:
+
+```text
+data/generated/source_systems/seed-42/
+```
+
+Generated datasets are intentionally excluded from Git.
 
 ---
 
@@ -300,7 +315,7 @@ databricks bundle validate -t dev -p PAYMENTS_DEV
 | Milestone | Capability | Status |
 |---|---|---|
 | 1 | Platform and repository foundation | Complete |
-| 2 | Synthetic payments domain | Not Started |
+| 2 | Synthetic payments domain | Complete |
 | 3 | Batch ingestion | Not Started |
 | 4 | Streaming ingestion | Not Started |
 | 5 | Lakeflow and Medallion architecture | Not Started |
