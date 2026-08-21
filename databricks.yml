@@ -4,11 +4,22 @@ bundle:
   # Keep local and CI/CD deployments on a modern CLI version.
   databricks_cli_version: ">= 1.3.0"
 
-  # Use the newer Databricks-native deployment engine.
+  # Use the Databricks-native direct deployment engine.
   engine: direct
+
+variables:
+  catalog_name:
+    description: Existing Unity Catalog catalog for the payments platform.
+    default: payments_dev
+
+experimental:
+  # Keep Unity Catalog schema names stable in development mode.
+  # Otherwise Databricks prefixes schemas with the developer identity.
+  skip_name_prefix_for_schema: true
 
 include:
   - bundle.targets.yml
+  - bundle/resources/*.yml
 
 sync:
   exclude:
@@ -21,5 +32,6 @@ sync:
     - tests/**
     - infra/**
     - docs/**
+    - data/**
     - .env
     - "**/__pycache__/**"

@@ -1,0 +1,22 @@
+resources:
+  schemas:
+    landing_schema:
+      name: landing
+      catalog_name: ${var.catalog_name}
+      comment: >-
+        Governed landing area for source-system files before ingestion.
+
+    ingestion_schema:
+      name: ingestion
+      catalog_name: ${var.catalog_name}
+      comment: >-
+        Raw batch-ingestion tables prior to the medallion transformation layer.
+
+  volumes:
+    batch_source_volume:
+      name: batch_source
+      catalog_name: ${var.catalog_name}
+      schema_name: ${resources.schemas.landing_schema.name}
+      volume_type: MANAGED
+      comment: >-
+        Development landing volume for deterministic batch source datasets.
