@@ -1,0 +1,16 @@
+resources:
+  volumes:
+    postgres_batch_source_volume:
+      name: postgres_batch_source
+
+      catalog_name: ${var.catalog_name}
+
+      schema_name: ${resources.schemas.landing_schema.name}
+
+      volume_type: EXTERNAL
+
+      storage_location: ${var.s3_landing_url}/postgres
+
+      comment: >-
+        AWS S3-backed external volume containing PostgreSQL
+        snapshot and CDC source extracts.
