@@ -1,0 +1,16 @@
+resources:
+  volumes:
+    s3_batch_source_volume:
+      name: s3_batch_source
+
+      catalog_name: ${var.catalog_name}
+
+      schema_name: ${resources.schemas.landing_schema.name}
+
+      volume_type: EXTERNAL
+
+      storage_location: ${var.s3_landing_url}/historical_transactions
+
+      comment: >-
+        AWS S3-backed external volume for historical payment
+        transaction batch ingestion.
