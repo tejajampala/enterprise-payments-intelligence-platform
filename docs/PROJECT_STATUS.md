@@ -35,7 +35,7 @@ Future milestones must build on the implementation completed in previous milesto
 |---|---|---|
 | 3A | Governed batch ingestion baseline with Unity Catalog and COPY INTO | COMPLETE |
 | 3B | AWS S3 landing zone and Unity Catalog external access | COMPLETE |
-| 3C | Production-style S3 batch ingestion | NOT STARTED |
+| 3C | Production-style S3 batch ingestion | COMPLETE |
 | 3D | PostgreSQL snapshot ingestion and reconciliation | NOT STARTED |
 
 ---
