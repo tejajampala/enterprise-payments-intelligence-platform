@@ -1,0 +1,18 @@
+resources:
+  external_locations:
+    payments_s3_landing:
+      name: payments_s3_landing_dev
+
+      url: ${var.s3_landing_url}
+
+      credential_name: ${var.storage_credential_name}
+
+      comment: >-
+        Governed AWS S3 landing location for the Enterprise Payments
+        Intelligence Platform.
+
+      read_only: false
+
+      # Keep file events disabled during the batch-ingestion milestone.
+      # We will introduce file-event-driven ingestion deliberately later.
+      enable_file_events: false

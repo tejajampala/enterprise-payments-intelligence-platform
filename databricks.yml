@@ -12,6 +12,13 @@ variables:
     description: Existing Unity Catalog catalog for the payments platform.
     default: payments_dev
 
+  s3_landing_url:
+    description: AWS S3 landing URL governed by the Unity Catalog external location.
+
+  storage_credential_name:
+    description: Existing Unity Catalog storage credential for AWS S3.
+    default: payments_s3_dev
+
 experimental:
   # Keep Unity Catalog schema names stable in development mode.
   # Otherwise Databricks prefixes schemas with the developer identity.
