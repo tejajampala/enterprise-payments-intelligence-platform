@@ -8,6 +8,8 @@ Future milestones must build on the implementation completed in previous milesto
 
 ## Milestone 1 — Platform Foundation
 
+Status: **COMPLETE**
+
 | Step | Description | Status |
 |---|---|---|
 | 1A | Local developer workstation | COMPLETE |
@@ -20,6 +22,8 @@ Future milestones must build on the implementation completed in previous milesto
 
 ## Milestone 2 — Synthetic Payments Domain
 
+Status: **COMPLETE**
+
 | Step | Description | Status |
 |---|---|---|
 | 2A | Canonical payments domain and data contracts | COMPLETE |
@@ -31,12 +35,14 @@ Future milestones must build on the implementation completed in previous milesto
 
 ## Milestone 3 — Batch Ingestion
 
+Status: **COMPLETE**
+
 | Step | Description | Status |
 |---|---|---|
 | 3A | Governed batch ingestion baseline with Unity Catalog and COPY INTO | COMPLETE |
 | 3B | AWS S3 landing zone and Unity Catalog external access | COMPLETE |
 | 3C | Production-style S3 batch ingestion | COMPLETE |
-| 3D | PostgreSQL snapshot ingestion and reconciliation | NOT STARTED |
+| 3D | PostgreSQL snapshot ingestion and reconciliation | COMPLETE |
 
 ---
 
