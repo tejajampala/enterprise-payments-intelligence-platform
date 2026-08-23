@@ -8,7 +8,9 @@ version = "0.1.0"
 description = "Enterprise Databricks payments data, ML, MLOps and GenAI platform"
 readme = "README.md"
 requires-python = ">=3.12,<3.13"
-dependencies = []
+dependencies = [
+    "confluent-kafka>=2.12,<3",
+]
 
 [dependency-groups]
 dev = [
@@ -17,6 +19,7 @@ dev = [
     "pyyaml>=6.0",
     "ruff>=0.8",
     "mypy>=1.10",
+    "types-pyyaml>=6.0.12.20260815",
 ]
 
 [tool.hatch.build.targets.wheel]
