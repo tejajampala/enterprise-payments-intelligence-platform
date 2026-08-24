@@ -12,14 +12,20 @@ from payments_intelligence.streaming import (
     KafkaDataset,
     KafkaPublisher,
     ReplayConfig,
+    build_msk_iam_kafka_config,
     replay_payment_events,
 )
 
-DEFAULT_SOURCE_ROOT = Path("data/generated/source_systems/seed-42/kafka/payment_events")
+
+DEFAULT_SOURCE_ROOT = Path(
+    "data/generated/source_systems/seed-42/kafka/payment_events"
+)
 
 
 def _build_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(description="Replay deterministic payment events into Kafka.")
+    parser = argparse.ArgumentParser(
+        description="Replay deterministic payment events into Kafka."
+    )
 
     parser.add_argument(
         "--source-root",
@@ -58,6 +64,20 @@ def _build_parser() -> argparse.ArgumentParser:
     )
 
     parser.add_argument(
+        "--aws-msk-iam",
+        action="store_true",
+        help="Authenticate to Amazon MSK using AWS IAM.",
+    )
+
+    parser.add_argument(
+        "--aws-region",
+        default=(
+            os.getenv("AWS_REGION")
+            or os.getenv("AWS_DEFAULT_REGION")
+        ),
+    )
+
+    parser.add_argument(
         "--dry-run",
         action="store_true",
         help="Validate and replay records without connecting to Kafka.",
@@ -82,6 +102,7 @@ def main() -> None:
     if args.dry_run:
         publisher = DryRunKafkaPublisher()
         mode = "DRY_RUN"
+
     else:
         if not args.bootstrap_servers:
             parser.error(
@@ -89,12 +110,32 @@ def main() -> None:
                 "is required unless --dry-run is used"
             )
 
+        extra_config: dict[str, object] | None = None
+
+        if args.aws_msk_iam:
+            if not args.aws_region:
+                parser.error(
+                    "--aws-region, AWS_REGION, or AWS_DEFAULT_REGION "
+                    "is required when --aws-msk-iam is used"
+                )
+
+            extra_config = (
+                build_msk_iam_kafka_config(
+                    args.aws_region
+                )
+            )
+
         publisher = ConfluentKafkaPublisher(
             bootstrap_servers=args.bootstrap_servers,
             client_id=args.client_id,
+            extra_config=extra_config,
         )
 
-        mode = "KAFKA"
+        mode = (
+            "AWS_MSK_IAM"
+            if args.aws_msk_iam
+            else "KAFKA"
+        )
 
     summary = replay_payment_events(
         config=config,

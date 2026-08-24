@@ -14,6 +14,9 @@ from payments_intelligence.streaming.kafka_producer import (
     iter_event_envelopes,
     replay_payment_events,
 )
+from payments_intelligence.streaming.msk_auth import (
+    build_msk_iam_kafka_config,
+)
 
 __all__ = [
     "ConfluentKafkaPublisher",
@@ -24,6 +27,7 @@ __all__ = [
     "KafkaRecord",
     "ReplayConfig",
     "ReplaySummary",
+    "build_msk_iam_kafka_config",
     "iter_event_envelopes",
     "replay_payment_events",
 ]
