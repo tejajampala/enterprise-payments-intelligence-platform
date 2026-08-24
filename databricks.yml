@@ -1,10 +1,8 @@
 bundle:
   name: enterprise-payments-intelligence-platform
 
-  # Keep local and CI/CD deployments on a modern CLI version.
   databricks_cli_version: ">= 1.3.0"
 
-  # Use the Databricks-native direct deployment engine.
   engine: direct
 
 variables:
@@ -19,9 +17,18 @@ variables:
     description: Existing Unity Catalog storage credential for AWS S3.
     default: payments_s3_dev
 
+  msk_bootstrap_servers:
+    description: Public SASL/IAM Amazon MSK bootstrap broker endpoints.
+
+  msk_topic:
+    description: Kafka topic containing payment events.
+    default: payments.events.v1
+
+  msk_service_credential_name:
+    description: Unity Catalog service credential used by Databricks to access Amazon MSK.
+    default: payments_msk_dev
+
 experimental:
-  # Keep Unity Catalog schema names stable in development mode.
-  # Otherwise Databricks prefixes schemas with the developer identity.
   skip_name_prefix_for_schema: true
 
 include:

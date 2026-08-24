@@ -20,3 +20,41 @@ enable_databricks_role_self_assume = false
 additional_tags = {
   Portfolio = "Enterprise Payments Intelligence Platform"
 }
+
+# Dedicated Amazon MSK networking.
+msk_vpc_cidr = "10.40.0.0/16"
+
+msk_public_subnet_cidrs = [
+  "10.40.10.0/24",
+  "10.40.20.0/24",
+]
+
+# Replace with your current public IP /32.
+#
+# Databricks serverless outbound CIDRs will also be added here locally
+# before testing Databricks-to-MSK connectivity.
+msk_public_ingress_cidrs = [
+  "203.0.113.10/32",
+]
+
+# Amazon MSK Provisioned cluster.
+msk_kafka_version         = "3.9.x"
+msk_broker_instance_type  = "kafka.t3.small"
+msk_broker_volume_size_gib = 10
+
+# MUST be false during initial MSK cluster creation.
+#
+# After the cluster becomes ACTIVE, Step 4B.4 changes this to true
+# to enable the public IAM-authenticated Kafka endpoint.
+enable_msk_public_access = false
+
+# Kafka topic consumed by Databricks.
+msk_topic_name = "payments.events.v1"
+
+# Initial Databricks service-credential bootstrap values.
+#
+# After payments_msk_dev is created, replace 0000 locally with
+# the Databricks-generated External ID and set self-assume to true.
+databricks_msk_service_credential_external_id = "0000"
+
+enable_databricks_msk_role_self_assume = false

@@ -1,0 +1,34 @@
+resources:
+  schemas:
+    bronze_schema:
+      name: bronze
+      catalog_name: ${var.catalog_name}
+      comment: >-
+        Bronze layer containing raw payment events ingested from Amazon MSK.
+
+  pipelines:
+    payment_events_streaming:
+      name: epip-${bundle.target}-payment-events-bronze
+
+      catalog: ${var.catalog_name}
+      schema: ${resources.schemas.bronze_schema.name}
+
+      serverless: true
+
+      # Triggered pipeline: consume available records and stop.
+      # We intentionally do not leave Kafka streaming continuously running.
+      continuous: false
+
+      development: true
+      channel: CURRENT
+
+      libraries:
+        - glob:
+            include: ../../pipelines/streaming/**
+
+      configuration:
+        payments.msk.bootstrapServers: ${var.msk_bootstrap_servers}
+        payments.msk.topic: ${var.msk_topic}
+        payments.msk.serviceCredential: ${var.msk_service_credential_name}
+
+        spark.sql.session.timeZone: UTC

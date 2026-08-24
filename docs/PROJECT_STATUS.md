@@ -48,7 +48,14 @@ Status: **COMPLETE**
 
 ## Milestone 4 — Streaming Ingestion
 
-Status: **NOT STARTED**
+Status: **COMPLETE**
+
+| Step | Description | Status |
+|---|---|---|
+| 4A | Kafka event contract and deterministic replay harness | COMPLETE |
+| 4B | Amazon MSK networking, IAM authentication, and secure connectivity | COMPLETE |
+| 4C | Databricks Bronze streaming ingestion from Amazon MSK | COMPLETE |
+| 4D | Streaming scenarios, checkpoint recovery, and reconciliation | COMPLETE |
 
 ---
 

@@ -308,6 +308,45 @@ data/generated/source_systems/seed-42/
 
 Generated datasets are intentionally excluded from Git.
 
+### Run the Real-Time Streaming Demo
+
+The project includes a complete reproducible streaming path:
+
+```text
+Synthetic Events
+      ↓
+Python Kafka Producer
+      ↓
+Amazon MSK
+      ↓
+Databricks Serverless
+      ↓
+Lakeflow Declarative Pipeline
+      ↓
+payments_dev.bronze.payment_events
+```
+
+The streaming implementation demonstrates:
+
+- AWS IAM authenticated Kafka publishing
+- Unity Catalog service credentials
+- Databricks Serverless Kafka consumption
+- Kafka topic / partition / offset lineage
+- raw Bronze event preservation
+- duplicate deliveries
+- late events
+- out-of-order events
+- checkpoint/restart recovery
+- streaming reconciliation
+- cost-conscious MSK lifecycle management
+
+For complete setup, execution, validation, troubleshooting, and teardown steps,
+see:
+
+```text
+docs/demo/streaming-demo-runbook.md
+```
+
 ---
 
 ## Implementation Roadmap
