@@ -19,16 +19,12 @@ def build_msk_iam_kafka_config(
     # MSKAuthTokenProvider is a submodule inside the AWS signer
     # package, rather than an attribute automatically loaded on the
     # top-level package.
-    token_provider: Any = import_module(
-        "aws_msk_iam_sasl_signer.MSKAuthTokenProvider"
-    )
+    token_provider: Any = import_module("aws_msk_iam_sasl_signer.MSKAuthTokenProvider")
 
     def oauth_cb(
         _: str,
     ) -> tuple[str, float]:
-        token, expiry_ms = token_provider.generate_auth_token(
-            region
-        )
+        token, expiry_ms = token_provider.generate_auth_token(region)
 
         # AWS returns expiry in milliseconds since epoch.
         # confluent-kafka requires seconds since epoch.

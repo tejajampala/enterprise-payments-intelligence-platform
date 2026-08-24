@@ -16,16 +16,11 @@ from payments_intelligence.streaming import (
     replay_payment_events,
 )
 
-
-DEFAULT_SOURCE_ROOT = Path(
-    "data/generated/source_systems/seed-42/kafka/payment_events"
-)
+DEFAULT_SOURCE_ROOT = Path("data/generated/source_systems/seed-42/kafka/payment_events")
 
 
 def _build_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(
-        description="Replay deterministic payment events into Kafka."
-    )
+    parser = argparse.ArgumentParser(description="Replay deterministic payment events into Kafka.")
 
     parser.add_argument(
         "--source-root",
@@ -71,10 +66,7 @@ def _build_parser() -> argparse.ArgumentParser:
 
     parser.add_argument(
         "--aws-region",
-        default=(
-            os.getenv("AWS_REGION")
-            or os.getenv("AWS_DEFAULT_REGION")
-        ),
+        default=(os.getenv("AWS_REGION") or os.getenv("AWS_DEFAULT_REGION")),
     )
 
     parser.add_argument(
@@ -119,11 +111,7 @@ def main() -> None:
                     "is required when --aws-msk-iam is used"
                 )
 
-            extra_config = (
-                build_msk_iam_kafka_config(
-                    args.aws_region
-                )
-            )
+            extra_config = build_msk_iam_kafka_config(args.aws_region)
 
         publisher = ConfluentKafkaPublisher(
             bootstrap_servers=args.bootstrap_servers,
@@ -131,11 +119,7 @@ def main() -> None:
             extra_config=extra_config,
         )
 
-        mode = (
-            "AWS_MSK_IAM"
-            if args.aws_msk_iam
-            else "KAFKA"
-        )
+        mode = "AWS_MSK_IAM" if args.aws_msk_iam else "KAFKA"
 
     summary = replay_payment_events(
         config=config,
