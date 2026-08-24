@@ -99,7 +99,7 @@ class ConfluentKafkaPublisher:
         producer_config: dict[str, object] = {
             "bootstrap.servers": bootstrap_servers,
             "client.id": client_id,
-            "enable.idempotence": True,
+            "enable.idempotence": False,
             "acks": "all",
         }
 
@@ -128,7 +128,6 @@ class ConfluentKafkaPublisher:
                     topic=record.topic,
                     key=record.key,
                     value=record.value,
-                    timestamp=record.timestamp_ms,
                     on_delivery=self._delivery_report,
                 )
                 self._producer.poll(0)
