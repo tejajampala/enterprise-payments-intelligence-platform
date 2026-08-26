@@ -31,3 +31,21 @@ resources:
 
       configuration:
         spark.sql.session.timeZone: UTC
+
+    gold_analytics:
+      name: epip-${bundle.target}-gold-analytics
+
+      catalog: ${var.catalog_name}
+      schema: ${resources.schemas.gold_schema.name}
+
+      serverless: true
+      continuous: false
+      development: true
+      channel: CURRENT
+
+      libraries:
+        - glob:
+            include: ../../pipelines/gold/**
+
+      configuration:
+        spark.sql.session.timeZone: UTC

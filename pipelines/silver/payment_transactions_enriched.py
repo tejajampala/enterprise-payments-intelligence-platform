@@ -32,29 +32,18 @@ def payment_transactions_enriched():
 
     spark = _spark()
 
-    transactions = spark.read.table(
-        "payment_transactions"
-    ).alias("t")
+    transactions = spark.read.table("payment_transactions").alias("t")
 
-    accounts = spark.read.table(
-        "accounts_current"
-    ).alias("a")
+    accounts = spark.read.table("accounts_current").alias("a")
 
-    customers = spark.read.table(
-        "customers_current"
-    ).alias("c")
+    customers = spark.read.table("customers_current").alias("c")
 
-    merchants = spark.read.table(
-        "merchants_current"
-    ).alias("m")
+    merchants = spark.read.table("merchants_current").alias("m")
 
-    fraud_cases = spark.read.table(
-        "fraud_cases_current"
-    ).alias("f")
+    fraud_cases = spark.read.table("fraud_cases_current").alias("f")
 
     enriched = (
-        transactions
-        .join(
+        transactions.join(
             accounts,
             F.col("t.account_id") == F.col("a.account_id"),
             "left",
@@ -81,30 +70,24 @@ def payment_transactions_enriched():
         # Transaction identity
         # -----------------------------------------------------------
         F.col("t.transaction_id"),
-
         F.col("t.account_id"),
         F.col("t.merchant_id"),
         F.col("a.customer_id").alias("customer_id"),
-
         # -----------------------------------------------------------
         # Transaction measures and timestamps
         # -----------------------------------------------------------
         F.col("t.event_timestamp"),
         F.col("t.event_date"),
         F.col("t.event_hour"),
-
         F.col("t.amount"),
         F.col("t.currency"),
-
         F.col("t.channel"),
         F.col("t.payment_method"),
         F.col("t.transaction_status"),
-
         F.col("t.card_present"),
         F.col("t.device_id"),
         F.col("t.ip_address"),
         F.col("t.country").alias("transaction_country"),
-
         # -----------------------------------------------------------
         # Account enrichment
         # -----------------------------------------------------------
@@ -113,7 +96,6 @@ def payment_transactions_enriched():
         F.col("a.account_status"),
         F.col("a.opened_date"),
         F.col("a.current_balance"),
-
         # -----------------------------------------------------------
         # Customer enrichment
         # -----------------------------------------------------------
@@ -123,7 +105,6 @@ def payment_transactions_enriched():
         F.col("c.risk_rating").alias("customer_risk_rating"),
         F.col("c.kyc_status"),
         F.col("c.customer_status"),
-
         # -----------------------------------------------------------
         # Merchant enrichment
         # -----------------------------------------------------------
@@ -133,7 +114,6 @@ def payment_transactions_enriched():
         F.col("m.merchant_country"),
         F.col("m.merchant_risk_rating"),
         F.col("m.merchant_status"),
-
         # -----------------------------------------------------------
         # Fraud-case enrichment
         # -----------------------------------------------------------
@@ -143,26 +123,13 @@ def payment_transactions_enriched():
         F.col("f.suspected_reason"),
         F.col("f.fraud_outcome"),
         F.col("f.closed_at").alias("fraud_case_closed_at"),
-
-        F.col("f.case_id")
-        .isNotNull()
-        .alias("has_fraud_case"),
-
+        F.col("f.case_id").isNotNull().alias("has_fraud_case"),
         # -----------------------------------------------------------
         # Dimension reconciliation flags
         # -----------------------------------------------------------
-        F.col("a.account_id")
-        .isNotNull()
-        .alias("account_dimension_match"),
-
-        F.col("c.customer_id")
-        .isNotNull()
-        .alias("customer_dimension_match"),
-
-        F.col("m.merchant_id")
-        .isNotNull()
-        .alias("merchant_dimension_match"),
-
+        F.col("a.account_id").isNotNull().alias("account_dimension_match"),
+        F.col("c.customer_id").isNotNull().alias("customer_dimension_match"),
+        F.col("m.merchant_id").isNotNull().alias("merchant_dimension_match"),
         # -----------------------------------------------------------
         # Transaction lineage
         # -----------------------------------------------------------

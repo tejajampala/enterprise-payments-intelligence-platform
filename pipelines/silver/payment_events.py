@@ -31,9 +31,7 @@ def payment_events_standardized():
 
     spark = _spark()
 
-    bronze = spark.readStream.table(
-        "payments_dev.bronze.payment_events"
-    )
+    bronze = spark.readStream.table("payments_dev.bronze.payment_events")
 
     return bronze.select(
         # -----------------------------------------------------------
@@ -43,7 +41,6 @@ def payment_events_standardized():
         F.col("transaction_id"),
         F.col("account_id"),
         F.col("merchant_id"),
-
         # -----------------------------------------------------------
         # Event lifecycle
         # -----------------------------------------------------------
@@ -55,7 +52,6 @@ def payment_events_standardized():
             "hour",
             F.col("event_timestamp"),
         ).alias("event_hour"),
-
         # -----------------------------------------------------------
         # Transaction
         # -----------------------------------------------------------
@@ -63,30 +59,20 @@ def payment_events_standardized():
         F.col("amount"),
         F.upper(F.trim(F.col("currency"))).alias("currency"),
         F.upper(F.trim(F.col("channel"))).alias("channel"),
-        F.upper(
-            F.trim(F.col("payment_method"))
-        ).alias("payment_method"),
-        F.upper(
-            F.trim(F.col("transaction_status"))
-        ).alias("transaction_status"),
+        F.upper(F.trim(F.col("payment_method"))).alias("payment_method"),
+        F.upper(F.trim(F.col("transaction_status"))).alias("transaction_status"),
         F.col("card_present"),
         F.col("device_id"),
         F.col("ip_address"),
         F.upper(F.trim(F.col("country"))).alias("country"),
-
         # -----------------------------------------------------------
         # Delivery semantics
         # -----------------------------------------------------------
-        F.upper(
-            F.trim(F.col("delivery_scenario"))
-        ).alias("delivery_scenario"),
+        F.upper(F.trim(F.col("delivery_scenario"))).alias("delivery_scenario"),
         F.col("simulated_arrival_at"),
-
-        (
-            F.unix_timestamp("simulated_arrival_at")
-            - F.unix_timestamp("event_timestamp")
-        ).alias("simulated_delivery_delay_seconds"),
-
+        (F.unix_timestamp("simulated_arrival_at") - F.unix_timestamp("event_timestamp")).alias(
+            "simulated_delivery_delay_seconds"
+        ),
         # -----------------------------------------------------------
         # Kafka physical lineage
         # -----------------------------------------------------------
@@ -96,12 +82,9 @@ def payment_events_standardized():
         F.col("kafka_offset"),
         F.col("kafka_timestamp"),
         F.col("kafka_timestamp_type"),
-
-        (
-            F.unix_timestamp("ingested_at")
-            - F.unix_timestamp("kafka_timestamp")
-        ).alias("ingestion_lag_seconds"),
-
+        (F.unix_timestamp("ingested_at") - F.unix_timestamp("kafka_timestamp")).alias(
+            "ingestion_lag_seconds"
+        ),
         # -----------------------------------------------------------
         # Bronze traceability
         # -----------------------------------------------------------
