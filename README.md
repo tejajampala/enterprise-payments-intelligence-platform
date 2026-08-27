@@ -3,7 +3,7 @@
 An enterprise-grade Databricks reference implementation for payments data engineering,
 machine learning, MLOps, Generative AI, agentic AI, analytics, governance, and platform engineering.
 
-> **Project Status:** Active Development — Milestone 1 Foundation
+> **Project Status:** Active Development — Milestone 5 Lakeflow Medallion Architecture Complete
 
 ---
 
@@ -97,20 +97,25 @@ can be implemented using the Databricks Data Intelligence Platform on AWS.
 
 ### Data Engineering
 
-Planned capabilities include:
+### Implemented Data Engineering Architecture
 
-- synthetic banking and payment data
-- Amazon S3 ingestion
-- PostgreSQL ingestion
-- Kafka / Amazon MSK streaming
-- Databricks Auto Loader
-- Lakeflow Spark Declarative Pipelines
-- Bronze / Silver / Gold architecture
-- expectations and data quality
-- AUTO CDC
-- SCD Type 2
-- materialized views
-- performance optimisation
+The current implementation includes:
+
+- governed AWS S3 batch ingestion
+- PostgreSQL-style reference snapshots
+- Amazon MSK streaming ingestion
+- Bronze Kafka event preservation
+- Silver streaming payment-event standardization
+- Silver incremental transaction processing
+- Silver current-state reference materialized views
+- Silver transaction enrichment
+- Gold payment, merchant, channel, and fraud-operation metrics
+- Delta Row Tracking for change-sensitive datasets
+- Delta Change Data Feed for downstream incremental processing
+- Silver-to-Gold reconciliation
+
+AUTO CDC, SCD Type 1, SCD Type 2, formal data-quality expectations, event
+deduplication, and late/out-of-order handling are implemented in Milestone 6.
 
 ### Machine Learning
 

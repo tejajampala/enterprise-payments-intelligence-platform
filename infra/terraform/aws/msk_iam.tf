@@ -1,19 +1,15 @@
 # -------------------------------------------------------------------
-# Databricks service credential IAM role for Amazon MSK
+# Optional Databricks service-credential IAM role for Amazon MSK
 # -------------------------------------------------------------------
 #
-# This role is used by the Unity Catalog service credential:
+# These resources exist only when:
 #
-#   payments_msk_dev
+#   enable_msk = true
 #
-# It grants Databricks read-only Kafka consumer access to:
+# The IAM role is used by the Databricks Unity Catalog service
+# credential for Kafka/MSK access.
 #
-#   cluster: epip-dev-payments-streaming
-#   topic:   payments.events.v1
-#
-# The role uses the Databricks Unity Catalog AWS master role as the
-# initial trusted principal. After Databricks generates the real
-# service-credential External ID, the role is updated to self-assume.
+# No MSK IAM role or policy remains provisioned while MSK is disabled.
 # -------------------------------------------------------------------
 
 
@@ -36,43 +32,16 @@ locals {
       local.unity_catalog_master_role_arn,
     ]
   )
-
-  # Convert:
-  #
-  # arn:aws:kafka:region:account:cluster/name/uuid
-  #
-  # into:
-  #
-  # arn:aws:kafka:region:account:topic/name/uuid/topic-name
-
-  msk_databricks_topic_arn = (
-    "${replace(
-      aws_msk_cluster.payments_streaming.arn,
-      ":cluster/",
-      ":topic/"
-    )}/${var.msk_topic_name}"
-  )
-
-  # Spark creates Kafka consumer groups for streaming queries.
-  #
-  # We restrict access to consumer groups belonging to this MSK
-  # cluster rather than granting account-wide group access.
-
-  msk_databricks_group_arn = (
-    "${replace(
-      aws_msk_cluster.payments_streaming.arn,
-      ":cluster/",
-      ":group/"
-    )}/*"
-  )
 }
 
 
 # -------------------------------------------------------------------
-# Trust policy
+# MSK Databricks role trust policy
 # -------------------------------------------------------------------
 
 data "aws_iam_policy_document" "msk_databricks_assume_role" {
+  count = var.enable_msk ? 1 : 0
+
   statement {
     sid    = "AllowDatabricksUnityCatalogAssumeRole"
     effect = "Allow"
@@ -101,7 +70,13 @@ data "aws_iam_policy_document" "msk_databricks_assume_role" {
 }
 
 
+# -------------------------------------------------------------------
+# Databricks MSK IAM role
+# -------------------------------------------------------------------
+
 resource "aws_iam_role" "msk_databricks" {
+  count = var.enable_msk ? 1 : 0
+
   name = local.msk_databricks_role_name
 
   description = (
@@ -109,7 +84,7 @@ resource "aws_iam_role" "msk_databricks" {
   )
 
   assume_role_policy = (
-    data.aws_iam_policy_document.msk_databricks_assume_role.json
+    data.aws_iam_policy_document.msk_databricks_assume_role[0].json
   )
 
   tags = merge(
@@ -127,6 +102,8 @@ resource "aws_iam_role" "msk_databricks" {
 # -------------------------------------------------------------------
 
 data "aws_iam_policy_document" "msk_databricks_access" {
+  count = var.enable_msk ? 1 : 0
+
 
   # ---------------------------------------------------------------
   # Cluster connection
@@ -142,7 +119,7 @@ data "aws_iam_policy_document" "msk_databricks_access" {
     ]
 
     resources = [
-      aws_msk_cluster.payments_streaming.arn,
+      aws_msk_cluster.payments_streaming[0].arn,
     ]
   }
 
@@ -161,7 +138,11 @@ data "aws_iam_policy_document" "msk_databricks_access" {
     ]
 
     resources = [
-      local.msk_databricks_topic_arn,
+      "${replace(
+        aws_msk_cluster.payments_streaming[0].arn,
+        ":cluster/",
+        ":topic/"
+      )}/${var.msk_topic_name}",
     ]
   }
 
@@ -180,7 +161,11 @@ data "aws_iam_policy_document" "msk_databricks_access" {
     ]
 
     resources = [
-      local.msk_databricks_group_arn,
+      "${replace(
+        aws_msk_cluster.payments_streaming[0].arn,
+        ":cluster/",
+        ":group/"
+      )}/*",
     ]
   }
 
@@ -204,7 +189,13 @@ data "aws_iam_policy_document" "msk_databricks_access" {
 }
 
 
+# -------------------------------------------------------------------
+# IAM policy
+# -------------------------------------------------------------------
+
 resource "aws_iam_policy" "msk_databricks_access" {
+  count = var.enable_msk ? 1 : 0
+
   name = "epip-${var.environment}-msk-databricks-access"
 
   description = (
@@ -212,15 +203,21 @@ resource "aws_iam_policy" "msk_databricks_access" {
   )
 
   policy = (
-    data.aws_iam_policy_document.msk_databricks_access.json
+    data.aws_iam_policy_document.msk_databricks_access[0].json
   )
 
   tags = local.common_tags
 }
 
 
-resource "aws_iam_role_policy_attachment" "msk_databricks_access" {
-  role = aws_iam_role.msk_databricks.name
+# -------------------------------------------------------------------
+# IAM role -> policy attachment
+# -------------------------------------------------------------------
 
-  policy_arn = aws_iam_policy.msk_databricks_access.arn
+resource "aws_iam_role_policy_attachment" "msk_databricks_access" {
+  count = var.enable_msk ? 1 : 0
+
+  role = aws_iam_role.msk_databricks[0].name
+
+  policy_arn = aws_iam_policy.msk_databricks_access[0].arn
 }

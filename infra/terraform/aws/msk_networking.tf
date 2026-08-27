@@ -1,33 +1,37 @@
 # -------------------------------------------------------------------
-# Amazon MSK networking
+# Optional Amazon MSK networking
 # -------------------------------------------------------------------
 #
-# This VPC is intentionally dedicated to the streaming demonstration.
+# This network exists only when:
 #
-# The MSK cluster is created in Step 4B.3.
+#   var.enable_msk = true
 #
-# Public subnets are required because the portfolio implementation
-# will later enable public MSK broker connectivity using:
+# It is intentionally dedicated to the streaming demonstration.
 #
-#   TLS + AWS IAM authentication on TCP 9198
+# When enable_msk = false:
 #
-# Public access is NOT enabled in this file.
+#   VPC                = absent
+#   Internet Gateway   = absent
+#   Public subnets     = absent
+#   Route table        = absent
+#   Security group     = absent
+#
+# This allows the portfolio environment to retain the persistent
+# S3/Unity Catalog infrastructure without paying for unused streaming
+# infrastructure.
 # -------------------------------------------------------------------
 
 
+# Availability Zones are required only when MSK is enabled.
 data "aws_availability_zones" "available" {
+  count = var.enable_msk ? 1 : 0
+
   state = "available"
 }
 
 
 locals {
   msk_name_prefix = "epip-${var.environment}-msk"
-
-  msk_availability_zones = slice(
-    data.aws_availability_zones.available.names,
-    0,
-    2
-  )
 }
 
 
@@ -36,6 +40,8 @@ locals {
 # -------------------------------------------------------------------
 
 resource "aws_vpc" "msk" {
+  count = var.enable_msk ? 1 : 0
+
   cidr_block = var.msk_vpc_cidr
 
   enable_dns_support   = true
@@ -52,11 +58,13 @@ resource "aws_vpc" "msk" {
 
 
 # -------------------------------------------------------------------
-# Internet gateway
+# Internet Gateway
 # -------------------------------------------------------------------
 
 resource "aws_internet_gateway" "msk" {
-  vpc_id = aws_vpc.msk.id
+  count = var.enable_msk ? 1 : 0
+
+  vpc_id = aws_vpc.msk[0].id
 
   tags = merge(
     local.common_tags,
@@ -72,20 +80,21 @@ resource "aws_internet_gateway" "msk" {
 # Public MSK subnets
 # -------------------------------------------------------------------
 #
-# Two subnets are created across two Availability Zones.
+# Two subnets are provisioned across two Availability Zones.
 #
-# map_public_ip_on_launch is enabled because these subnets are
-# intentionally public and will later support public MSK endpoints.
+# They are created only when enable_msk = true.
 # -------------------------------------------------------------------
 
 resource "aws_subnet" "msk_public" {
-  count = 2
+  count = var.enable_msk ? 2 : 0
 
-  vpc_id = aws_vpc.msk.id
+  vpc_id = aws_vpc.msk[0].id
 
   cidr_block = var.msk_public_subnet_cidrs[count.index]
 
-  availability_zone = local.msk_availability_zones[count.index]
+  availability_zone = (
+    data.aws_availability_zones.available[0].names[count.index]
+  )
 
   map_public_ip_on_launch = true
 
@@ -107,12 +116,14 @@ resource "aws_subnet" "msk_public" {
 # -------------------------------------------------------------------
 
 resource "aws_route_table" "msk_public" {
-  vpc_id = aws_vpc.msk.id
+  count = var.enable_msk ? 1 : 0
+
+  vpc_id = aws_vpc.msk[0].id
 
   route {
     cidr_block = "0.0.0.0/0"
 
-    gateway_id = aws_internet_gateway.msk.id
+    gateway_id = aws_internet_gateway.msk[0].id
   }
 
   tags = merge(
@@ -125,12 +136,16 @@ resource "aws_route_table" "msk_public" {
 }
 
 
+# -------------------------------------------------------------------
+# Route table associations
+# -------------------------------------------------------------------
+
 resource "aws_route_table_association" "msk_public" {
-  count = 2
+  count = var.enable_msk ? 2 : 0
 
   subnet_id = aws_subnet.msk_public[count.index].id
 
-  route_table_id = aws_route_table.msk_public.id
+  route_table_id = aws_route_table.msk_public[0].id
 }
 
 
@@ -138,35 +153,42 @@ resource "aws_route_table_association" "msk_public" {
 # MSK security group
 # -------------------------------------------------------------------
 #
-# TCP 9198 is the public Amazon MSK port for SASL/IAM.
+# TCP 9198 is used by the public Amazon MSK SASL/IAM endpoint.
 #
-# Access is intentionally restricted to CIDRs supplied through:
+# No ingress rule is created when:
 #
-#   var.msk_public_ingress_cidrs
+#   msk_public_ingress_cidrs = []
 #
-# Initially this contains the developer workstation's public /32.
-#
-# Before Databricks consumes the stream, the current Databricks
-# serverless outbound CIDRs will also be added.
+# This is intentional and provides a secure default.
 # -------------------------------------------------------------------
 
 resource "aws_security_group" "msk" {
+  count = var.enable_msk ? 1 : 0
+
   name_prefix = "${local.msk_name_prefix}-"
 
   description = (
     "Restricts access to the Enterprise Payments Amazon MSK cluster."
   )
 
-  vpc_id = aws_vpc.msk.id
+  vpc_id = aws_vpc.msk[0].id
 
-  ingress {
-    description = "IAM-authenticated public Kafka clients"
+  dynamic "ingress" {
+    for_each = (
+      length(var.msk_public_ingress_cidrs) > 0
+      ? [1]
+      : []
+    )
 
-    from_port = 9198
-    to_port   = 9198
-    protocol  = "tcp"
+    content {
+      description = "IAM-authenticated public Kafka clients"
 
-    cidr_blocks = var.msk_public_ingress_cidrs
+      from_port = 9198
+      to_port   = 9198
+      protocol  = "tcp"
+
+      cidr_blocks = var.msk_public_ingress_cidrs
+    }
   }
 
   egress {

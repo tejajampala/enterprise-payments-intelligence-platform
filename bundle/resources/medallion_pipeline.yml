@@ -1,0 +1,51 @@
+resources:
+  schemas:
+    silver_schema:
+      name: silver
+      catalog_name: ${var.catalog_name}
+      comment: >-
+        Silver layer containing standardized and enriched payments data.
+
+    gold_schema:
+      name: gold
+      catalog_name: ${var.catalog_name}
+      comment: >-
+        Gold layer containing business-ready payment metrics and analytical
+        data products.
+
+  pipelines:
+    silver_transformations:
+      name: epip-${bundle.target}-silver-transformations
+
+      catalog: ${var.catalog_name}
+      schema: ${resources.schemas.silver_schema.name}
+
+      serverless: true
+      continuous: false
+      development: true
+      channel: CURRENT
+
+      libraries:
+        - glob:
+            include: ../../pipelines/silver/**
+
+      configuration:
+        spark.sql.session.timeZone: UTC
+
+    gold_analytics:
+      name: epip-${bundle.target}-gold-analytics
+
+      catalog: ${var.catalog_name}
+      schema: ${resources.schemas.gold_schema.name}
+
+      serverless: true
+      continuous: false
+      development: true
+      channel: CURRENT
+
+      libraries:
+        - glob:
+            include: ../../pipelines/gold/**
+
+      configuration:
+        spark.sql.session.timeZone: UTC

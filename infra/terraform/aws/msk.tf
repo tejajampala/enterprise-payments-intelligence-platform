@@ -1,18 +1,25 @@
 # -------------------------------------------------------------------
-# Amazon MSK Provisioned cluster
+# Optional Amazon MSK Provisioned cluster
 # -------------------------------------------------------------------
 #
-# Milestone 4B streaming infrastructure.
+# Milestone 4 streaming infrastructure.
 #
-# Initial deployment:
+# The cluster is intentionally optional for development and portfolio
+# cost control.
 #
-#   Public access = DISABLED
-#   Authentication = AWS IAM
-#   Client traffic = TLS
-#   Broker-to-broker encryption = enabled
+# enable_msk = false
+#   -> no cluster
 #
-# Public broker connectivity is enabled only after the cluster
-# reaches ACTIVE state.
+# enable_msk = true
+#   -> provision the cluster
+#
+# Initial creation should use:
+#
+#   enable_msk               = true
+#   enable_msk_public_access = false
+#
+# After the cluster reaches ACTIVE state, public connectivity can be
+# enabled in a subsequent Terraform apply.
 # -------------------------------------------------------------------
 
 
@@ -22,11 +29,13 @@ locals {
 
 
 resource "aws_msk_cluster" "payments_streaming" {
+  count = var.enable_msk ? 1 : 0
+
   cluster_name = local.msk_cluster_name
 
   kafka_version = var.msk_kafka_version
 
-  # Two brokers across the two Availability Zones created in 4B.2.
+  # Two brokers across two Availability Zones.
   number_of_broker_nodes = 2
 
 
@@ -43,7 +52,7 @@ resource "aws_msk_cluster" "payments_streaming" {
     ]
 
     security_groups = [
-      aws_security_group.msk.id,
+      aws_security_group.msk[0].id,
     ]
 
 
@@ -60,11 +69,14 @@ resource "aws_msk_cluster" "payments_streaming" {
     # Broker network connectivity
     # ---------------------------------------------------------------
     #
-    # AWS does not permit public connectivity during initial cluster
-    # creation.
+    # AWS MSK public connectivity is intentionally disabled during
+    # initial cluster creation.
     #
-    # Step 4B.4 changes enable_msk_public_access to true after this
-    # cluster becomes ACTIVE.
+    # After the cluster reaches ACTIVE state:
+    #
+    #   enable_msk_public_access = true
+    #
+    # can be applied separately.
     # ---------------------------------------------------------------
 
     connectivity_info {
@@ -83,9 +95,7 @@ resource "aws_msk_cluster" "payments_streaming" {
   # Client authentication
   # -----------------------------------------------------------------
   #
-  # Only AWS IAM authenticated Kafka clients are allowed.
-  #
-  # No anonymous/unauthenticated Kafka access.
+  # Only AWS IAM-authenticated Kafka clients are allowed.
   # -----------------------------------------------------------------
 
   client_authentication {
@@ -99,13 +109,6 @@ resource "aws_msk_cluster" "payments_streaming" {
 
   # -----------------------------------------------------------------
   # Encryption
-  # -----------------------------------------------------------------
-  #
-  # client_broker = TLS
-  #     Kafka clients must use encrypted connections.
-  #
-  # in_cluster = true
-  #     Broker-to-broker traffic is also encrypted.
   # -----------------------------------------------------------------
 
   encryption_info {
@@ -121,6 +124,12 @@ resource "aws_msk_cluster" "payments_streaming" {
   # -----------------------------------------------------------------
 
   enhanced_monitoring = "DEFAULT"
+
+
+  # Ensure subnet routing is established before cluster provisioning.
+  depends_on = [
+    aws_route_table_association.msk_public,
+  ]
 
 
   tags = merge(
