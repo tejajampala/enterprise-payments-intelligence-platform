@@ -28,9 +28,12 @@ def _spark() -> SparkSession:
         "Current standardized customer snapshot used for Silver enrichment. "
         "Historical SCD Type 2 processing is intentionally deferred."
     ),
+    # customers_current
     table_properties={
         "quality": "silver",
         "domain": "customer",
+        "delta.enableRowTracking": "true",
+        "delta.enableChangeDataFeed": "true",
     },
 )
 def customers_current():
@@ -78,6 +81,8 @@ def customers_current():
     table_properties={
         "quality": "silver",
         "domain": "account",
+        "delta.enableRowTracking": "true",
+        "delta.enableChangeDataFeed": "true",
     },
 )
 def accounts_current():
@@ -118,6 +123,8 @@ def accounts_current():
     table_properties={
         "quality": "silver",
         "domain": "merchant",
+        "delta.enableRowTracking": "true",
+        "delta.enableChangeDataFeed": "true",
     },
 )
 def merchants_current():
@@ -155,6 +162,8 @@ def merchants_current():
     table_properties={
         "quality": "silver",
         "domain": "fraud",
+        "delta.enableRowTracking": "true",
+        "delta.enableChangeDataFeed": "true",
     },
 )
 def fraud_cases_current():

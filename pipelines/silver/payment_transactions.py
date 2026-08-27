@@ -16,21 +16,25 @@ def _spark() -> SparkSession:
     return session
 
 
-@dp.materialized_view(
+@dp.table(
     name="payment_transactions",
     comment=(
-        "Standardized historical payment transactions sourced from the governed S3 ingestion table."
+        "Incrementally standardized historical payment transactions sourced "
+        "from the governed append-only S3 ingestion table."
     ),
     table_properties={
         "quality": "silver",
+        "domain": "payments",
+        "delta.enableRowTracking": "true",
+        "delta.enableChangeDataFeed": "true",
     },
 )
 def payment_transactions():
-    """Standardize historical payment transactions."""
+    """Incrementally standardize newly ingested payment transactions."""
 
     spark = _spark()
 
-    transactions = spark.read.table("payments_dev.ingestion.payment_transactions_batch_s3")
+    transactions = spark.readStream.table("payments_dev.ingestion.payment_transactions_batch_s3")
 
     return transactions.select(
         F.col("transaction_id"),

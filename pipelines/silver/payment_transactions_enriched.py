@@ -25,6 +25,8 @@ def _spark() -> SparkSession:
     table_properties={
         "quality": "silver",
         "domain": "payments",
+        "delta.enableRowTracking": "true",
+        "delta.enableChangeDataFeed": "true",
     },
 )
 def payment_transactions_enriched():

@@ -1,60 +1,126 @@
-# IMPORTANT:
-# Set this to the actual AWS region shown for your Databricks workspace
-# in the Databricks Account Console.
+# ===================================================================
+# Enterprise Payments Intelligence Platform
+# Example Terraform variables
+#
+# DO NOT place secrets or real sensitive credentials in this file.
+# ===================================================================
+
+
+# -------------------------------------------------------------------
+# AWS
+# -------------------------------------------------------------------
+
+# Region containing the Databricks workspace and EPIP AWS resources.
 aws_region = "ap-southeast-2"
 
 environment = "dev"
 
+
+# -------------------------------------------------------------------
+# Unity Catalog -> S3 storage credential
+# -------------------------------------------------------------------
+
 # Initial bootstrap only.
 #
-# Databricks generates the real value after the storage credential
-# has been created.
+# Databricks generates the real External ID after the storage
+# credential has been created.
 databricks_storage_credential_external_id = "0000"
 
-# Initial bootstrap must be false.
+
+# Initial bootstrap:
 #
-# After the storage credential is created, change this to true and
-# replace the external ID above with the Databricks-generated value.
+#   false
+#
+# After Databricks generates the storage-credential External ID:
+#
+#   true
 enable_databricks_role_self_assume = false
+
+
+# -------------------------------------------------------------------
+# Standard resource tags
+# -------------------------------------------------------------------
 
 additional_tags = {
   Portfolio = "Enterprise Payments Intelligence Platform"
 }
 
-# Dedicated Amazon MSK networking.
+
+# ===================================================================
+# OPTIONAL AMAZON MSK STREAMING STACK
+# ===================================================================
+#
+# Cost-safe portfolio default:
+#
+#   false
+#
+# Change to true only when the streaming demonstration is required.
+# ===================================================================
+
+enable_msk = false
+
+
+# -------------------------------------------------------------------
+# MSK networking
+# -------------------------------------------------------------------
+
 msk_vpc_cidr = "10.40.0.0/16"
+
 
 msk_public_subnet_cidrs = [
   "10.40.10.0/24",
   "10.40.20.0/24",
 ]
 
-# Replace with your current public IP /32.
-#
-# Databricks serverless outbound CIDRs will also be added here locally
-# before testing Databricks-to-MSK connectivity.
-msk_public_ingress_cidrs = [
-  "203.0.113.10/32",
-]
 
-# Amazon MSK Provisioned cluster.
-msk_kafka_version         = "3.9.x"
-msk_broker_instance_type  = "kafka.t3.small"
+# Secure default.
+#
+# Leave empty while MSK is disabled.
+#
+# Before public MSK connectivity is enabled, add only the required
+# developer and Databricks outbound CIDRs.
+#
+# Example:
+#
+# msk_public_ingress_cidrs = [
+#   "203.0.113.10/32",
+# ]
+#
+msk_public_ingress_cidrs = []
+
+
+# -------------------------------------------------------------------
+# MSK Provisioned cluster
+# -------------------------------------------------------------------
+
+msk_kafka_version          = "3.9.x"
+msk_broker_instance_type   = "kafka.t3.small"
 msk_broker_volume_size_gib = 10
 
-# MUST be false during initial MSK cluster creation.
+
+# MUST remain false during initial cluster provisioning.
 #
-# After the cluster becomes ACTIVE, Step 4B.4 changes this to true
-# to enable the public IAM-authenticated Kafka endpoint.
+# Enable only after the cluster becomes ACTIVE.
 enable_msk_public_access = false
+
 
 # Kafka topic consumed by Databricks.
 msk_topic_name = "payments.events.v1"
 
-# Initial Databricks service-credential bootstrap values.
+
+# -------------------------------------------------------------------
+# Databricks -> MSK service credential
+# -------------------------------------------------------------------
+
+# Initial bootstrap only.
 #
-# After payments_msk_dev is created, replace 0000 locally with
-# the Databricks-generated External ID and set self-assume to true.
+# Replace with the Databricks-generated External ID once the
+# payments_msk_dev service credential is created.
 databricks_msk_service_credential_external_id = "0000"
 
+
+# Initial MSK IAM-role creation must use false.
+#
+# Change to true after the Databricks service credential exists
+# and the correct External ID has been configured.
 enable_databricks_msk_role_self_assume = false
