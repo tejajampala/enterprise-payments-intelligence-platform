@@ -74,8 +74,6 @@ Status: **COMPLETE**
 
 ## Milestone 6 — Data Quality, CDC, and SCD Type 2
 
-## Milestone 6 — Data Quality, CDC, and SCD Type 2
-
 Status: **COMPLETE**
 
 | Step | Description | Status |
@@ -91,7 +89,14 @@ Status: **COMPLETE**
 
 ## Milestone 7 — Feature Engineering and Feature Store
 
-Status: **NOT STARTED**
+Status: **COMPLETE**
+
+| Step | Description | Status |
+|---|---|---|
+| 7A | Governed Unity Catalog feature schema and Feature Store tables | COMPLETE |
+| 7B | Transaction, customer, and merchant feature engineering | COMPLETE |
+| 7C | Point-in-time feature lookup and leakage-safe training dataset | COMPLETE |
+| 7D | Validation, testing, and architecture documentation | COMPLETE |
 
 ---
 
