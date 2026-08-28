@@ -102,7 +102,14 @@ Status: **COMPLETE**
 
 ## Milestone 8 — Fraud Detection
 
-Status: **NOT STARTED**
+Status: **COMPLETE**
+
+| Step | Description | Status |
+|---|---|---|
+| 8A | Leakage-safe temporal train, validation, and test split | COMPLETE |
+| 8B | Logistic-regression baseline and gradient-boosted fraud model | COMPLETE |
+| 8C | Class-imbalance handling, threshold tuning, and fraud-focused evaluation | COMPLETE |
+| 8D | MLflow experiment tracking, model selection, and governed prediction outputs | COMPLETE |
 
 ---
 

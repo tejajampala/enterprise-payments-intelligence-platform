@@ -3,7 +3,7 @@
 An enterprise-grade Databricks reference implementation for payments data engineering,
 machine learning, MLOps, Generative AI, agentic AI, analytics, governance, and platform engineering.
 
-> **Project Status:** Active Development — Milestone 7 Feature Engineering and Feature Store Complete
+> **Project Status:** Active Development — Milestone 8 Fraud Detection ML Complete
 
 ---
 
