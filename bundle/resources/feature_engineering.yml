@@ -1,0 +1,36 @@
+resources:
+  schemas:
+    features_schema:
+      name: features
+      catalog_name: ${var.catalog_name}
+
+      comment: >-
+        Unity Catalog feature tables and reproducible ML training datasets
+        for fraud detection and forecasting use cases.
+
+  jobs:
+    feature_engineering:
+      name: epip-${bundle.target}-feature-engineering
+
+      queue:
+        enabled: true
+
+      environments:
+        - environment_key: feature_engineering_env
+
+          spec:
+            environment_version: "4"
+
+            dependencies:
+              - "databricks-feature-engineering>=0.8.0,<1"
+
+      tasks:
+        - task_key: build_fraud_features
+
+          environment_key: feature_engineering_env
+
+          notebook_task:
+            notebook_path: ../../notebooks/features/07_build_fraud_features.py
+
+            base_parameters:
+              catalog_name: ${var.catalog_name}

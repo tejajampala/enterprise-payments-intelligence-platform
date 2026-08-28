@@ -3,7 +3,7 @@
 An enterprise-grade Databricks reference implementation for payments data engineering,
 machine learning, MLOps, Generative AI, agentic AI, analytics, governance, and platform engineering.
 
-> **Project Status:** Active Development — Milestone 6 Enterprise Data Trust, CDC, and SCD Complete
+> **Project Status:** Active Development — Milestone 7 Feature Engineering and Feature Store Complete
 
 ---
 
@@ -126,6 +126,14 @@ The current implementation includes:
 
 Milestone 7 introduces feature engineering and Feature Store capabilities for
 fraud detection and forecasting use cases.
+
+- Unity Catalog governed Feature Store
+- transaction-level fraud features
+- point-in-time customer behaviour features
+- point-in-time merchant behaviour features
+- TIMESERIES feature-table primary keys
+- FeatureEngineeringClient training-set construction
+- leakage-safe fraud training datase
 
 ### Machine Learning
 
