@@ -6,6 +6,12 @@ They intentionally represent current snapshot state only.
 CDC processing and SCD Type 2 history are implemented in Milestone 6.
 """
 
+from dq_rules import (
+    ACCOUNT_RULES,
+    CUSTOMER_RULES,
+    FRAUD_CASE_RULES,
+    MERCHANT_RULES,
+)
 from pyspark import pipelines as dp
 from pyspark.sql import SparkSession
 from pyspark.sql import functions as F
@@ -28,7 +34,6 @@ def _spark() -> SparkSession:
         "Current standardized customer snapshot used for Silver enrichment. "
         "Historical SCD Type 2 processing is intentionally deferred."
     ),
-    # customers_current
     table_properties={
         "quality": "silver",
         "domain": "customer",
@@ -36,6 +41,7 @@ def _spark() -> SparkSession:
         "delta.enableChangeDataFeed": "true",
     },
 )
+@dp.expect_all(CUSTOMER_RULES)
 def customers_current():
     """Create the current customer reference dataset."""
 
@@ -85,6 +91,7 @@ def customers_current():
         "delta.enableChangeDataFeed": "true",
     },
 )
+@dp.expect_all(ACCOUNT_RULES)
 def accounts_current():
     """Create the current account reference dataset."""
 
@@ -127,6 +134,7 @@ def accounts_current():
         "delta.enableChangeDataFeed": "true",
     },
 )
+@dp.expect_all(MERCHANT_RULES)
 def merchants_current():
     """Create the current merchant reference dataset."""
 
@@ -166,6 +174,7 @@ def merchants_current():
         "delta.enableChangeDataFeed": "true",
     },
 )
+@dp.expect_all(FRAUD_CASE_RULES)
 def fraud_cases_current():
     """Create the current fraud-case reference dataset."""
 

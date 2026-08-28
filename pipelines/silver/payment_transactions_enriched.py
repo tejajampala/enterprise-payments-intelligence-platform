@@ -34,7 +34,7 @@ def payment_transactions_enriched():
 
     spark = _spark()
 
-    transactions = spark.read.table("payment_transactions").alias("t")
+    transactions = spark.read.table("payment_transactions_validated").alias("t")
 
     accounts = spark.read.table("accounts_current").alias("a")
 
