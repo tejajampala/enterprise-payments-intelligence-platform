@@ -95,14 +95,17 @@ def test_enrichment_reads_validated_transactions() -> None:
 
 
 def test_dimension_expectations_are_defined() -> None:
-    source = _read("pipelines/silver/reference_dimensions.py")
+    cdc_source = _read("pipelines/silver/master_data_cdc.py")
 
-    expected = [
-        "@dp.expect_all(CUSTOMER_RULES)",
-        "@dp.expect_all(ACCOUNT_RULES)",
-        "@dp.expect_all(MERCHANT_RULES)",
-        "@dp.expect_all(FRAUD_CASE_RULES)",
+    fraud_source = _read("pipelines/silver/reference_dimensions.py")
+
+    expected_cdc_rules = [
+        "CUSTOMER_RULES",
+        "ACCOUNT_RULES",
+        "MERCHANT_RULES",
     ]
 
-    for expectation in expected:
-        assert expectation in source
+    for rule in expected_cdc_rules:
+        assert rule in cdc_source
+
+    assert "FRAUD_CASE_RULES" in fraud_source

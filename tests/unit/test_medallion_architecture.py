@@ -65,28 +65,33 @@ def test_payment_transactions_enable_change_tracking() -> None:
     assert '"delta.enableChangeDataFeed": "true"' in source
 
 
-def test_current_dimensions_are_materialized_views() -> None:
-    source = _read("pipelines/silver/reference_dimensions.py")
+def test_mutable_dimensions_use_auto_cdc() -> None:
+    source = _read("pipelines/silver/master_data_cdc.py")
 
-    expected_datasets = [
+    expected_current_tables = [
         'name="customers_current"',
         'name="accounts_current"',
         'name="merchants_current"',
-        'name="fraud_cases_current"',
     ]
 
-    for dataset in expected_datasets:
+    expected_history_tables = [
+        'name="customer_history"',
+        'name="account_history"',
+        'name="merchant_history"',
+    ]
+
+    for dataset in expected_current_tables + expected_history_tables:
         assert dataset in source
 
-    assert source.count("@dp.materialized_view") == 4
+    assert source.count("dp.create_auto_cdc_flow(") == 12
 
 
-def test_current_dimensions_enable_change_tracking() -> None:
+def test_only_fraud_current_remains_materialized_view() -> None:
     source = _read("pipelines/silver/reference_dimensions.py")
 
-    assert source.count('"delta.enableRowTracking": "true"') == 4
+    assert 'name="fraud_cases_current"' in source
 
-    assert source.count('"delta.enableChangeDataFeed": "true"') == 4
+    assert source.count("@dp.materialized_view") == 1
 
 
 def test_enriched_transactions_are_materialized_view() -> None:
