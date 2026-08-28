@@ -3,7 +3,7 @@
 An enterprise-grade Databricks reference implementation for payments data engineering,
 machine learning, MLOps, Generative AI, agentic AI, analytics, governance, and platform engineering.
 
-> **Project Status:** Active Development — Milestone 5 Lakeflow Medallion Architecture Complete
+> **Project Status:** Active Development — Milestone 6 Enterprise Data Trust, CDC, and SCD Complete
 
 ---
 
@@ -102,20 +102,30 @@ can be implemented using the Databricks Data Intelligence Platform on AWS.
 The current implementation includes:
 
 - governed AWS S3 batch ingestion
-- PostgreSQL-style reference snapshots
+- PostgreSQL-style source snapshots and CDC extracts
 - Amazon MSK streaming ingestion
-- Bronze Kafka event preservation
+- Bronze Kafka physical-event preservation
 - Silver streaming payment-event standardization
 - Silver incremental transaction processing
-- Silver current-state reference materialized views
-- Silver transaction enrichment
+- reusable Lakeflow data-quality expectations
+- validated and quarantine payment datasets
+- watermark-aware streaming event deduplication
+- late-event classification and event-time policy
+- out-of-order event-delivery auditing
+- trusted payment-event streaming tables
+- Auto Loader master-data CDC ingestion
+- Lakeflow AUTO CDC using business keys and version sequencing
+- SCD Type 1 customer, account, and merchant current-state datasets
+- SCD Type 2 customer, account, and merchant history
+- delete and out-of-order CDC handling
+- current-state transaction enrichment
 - Gold payment, merchant, channel, and fraud-operation metrics
 - Delta Row Tracking for change-sensitive datasets
 - Delta Change Data Feed for downstream incremental processing
-- Silver-to-Gold reconciliation
+- end-to-end Silver-to-Gold reconciliation
 
-AUTO CDC, SCD Type 1, SCD Type 2, formal data-quality expectations, event
-deduplication, and late/out-of-order handling are implemented in Milestone 6.
+Milestone 7 introduces feature engineering and Feature Store capabilities for
+fraud detection and forecasting use cases.
 
 ### Machine Learning
 
