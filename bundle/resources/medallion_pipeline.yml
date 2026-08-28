@@ -31,6 +31,8 @@ resources:
 
       configuration:
         spark.sql.session.timeZone: UTC
+        payments.streaming.eventWatermark: "6 hours"
+        payments.streaming.lateThresholdSeconds: "7200"
 
     gold_analytics:
       name: epip-${bundle.target}-gold-analytics

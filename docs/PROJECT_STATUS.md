@@ -74,7 +74,18 @@ Status: **COMPLETE**
 
 ## Milestone 6 — Data Quality, CDC, and SCD Type 2
 
-Status: **NOT STARTED**
+## Milestone 6 — Data Quality, CDC, and SCD Type 2
+
+Status: **COMPLETE**
+
+| Step | Description | Status |
+|---|---|---|
+| 6A | Lakeflow data-quality expectations, validation, and quarantine | COMPLETE |
+| 6B | Streaming deduplication, late-event handling, and out-of-order auditing | COMPLETE |
+| 6C | Master-data CDC ingestion with Auto Loader | COMPLETE |
+| 6D | Lakeflow AUTO CDC with SCD Type 1, SCD Type 2, sequencing, and deletes | COMPLETE |
+| 6E | Trusted current-state dimension enrichment | COMPLETE |
+| 6F | Final reconciliation, tests, architecture documentation, and milestone closeout | COMPLETE |
 
 ---
 
