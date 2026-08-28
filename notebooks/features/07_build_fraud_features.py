@@ -642,10 +642,8 @@ training_set = feature_engineering_client.create_training_set(
     feature_lookups=feature_lookups,
     label="is_confirmed_fraud",
     exclude_columns=[
-        "transaction_id",
         "customer_id",
         "merchant_id",
-        "event_timestamp",
     ],
 )
 

@@ -1,0 +1,38 @@
+resources:
+  schemas:
+    ml_schema:
+      name: ml
+      catalog_name: ${var.catalog_name}
+
+      comment: >-
+        Machine-learning experiments, evaluation results, predictions,
+        and model-development artifacts for EPIP.
+
+  jobs:
+    fraud_model_training:
+      name: epip-${bundle.target}-fraud-model-training
+
+      queue:
+        enabled: true
+
+      environments:
+        - environment_key: fraud_ml_env
+
+          spec:
+            environment_version: "4"
+
+            dependencies:
+              - "mlflow==3.15.1"
+
+      tasks:
+        - task_key: train_fraud_model
+
+          environment_key: fraud_ml_env
+
+          notebook_task:
+            notebook_path: ../../notebooks/ml/08_train_fraud_model.py
+
+            base_parameters:
+              catalog_name: ${var.catalog_name}
+              experiment_name: /Shared/epip-${bundle.target}-fraud-detection
+              random_seed: "42"
