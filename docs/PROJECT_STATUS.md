@@ -115,7 +115,14 @@ Status: **COMPLETE**
 
 ## Milestone 9 — Forecasting
 
-Status: **NOT STARTED**
+Status: **COMPLETE**
+
+| Step | Description | Status |
+|---|---|---|
+| 9A | Enterprise daily payment-volume forecasting dataset | COMPLETE |
+| 9B | Leakage-safe lag and rolling time-series features | COMPLETE |
+| 9C | Seasonal baseline, Ridge, and gradient-boosted forecasting comparison | COMPLETE |
+| 9D | Temporal validation, recursive forecasting, MLflow tracking, and forecast outputs | COMPLETE |
 
 ---
 
