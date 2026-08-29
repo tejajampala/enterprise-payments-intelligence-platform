@@ -1,0 +1,30 @@
+resources:
+  jobs:
+    payment_volume_forecasting:
+      name: epip-${bundle.target}-payment-volume-forecasting
+
+      queue:
+        enabled: true
+
+      environments:
+        - environment_key: forecasting_env
+
+          spec:
+            environment_version: "4"
+
+            dependencies:
+              - "mlflow==3.15.1"
+
+      tasks:
+        - task_key: forecast_payment_volume
+
+          environment_key: forecasting_env
+
+          notebook_task:
+            notebook_path: ../../notebooks/ml/09_forecast_payment_volume.py
+
+            base_parameters:
+              catalog_name: ${var.catalog_name}
+              experiment_name: /Shared/epip-${bundle.target}-payment-volume-forecasting
+              forecast_horizon_days: "7"
+              random_seed: "42"
