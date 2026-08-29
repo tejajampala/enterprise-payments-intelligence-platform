@@ -1,0 +1,66 @@
+resources:
+  schemas:
+    model_registry_schema:
+      name: models
+      catalog_name: ${var.catalog_name}
+
+      comment: >-
+        Unity Catalog registered ML models for governed model lifecycle
+        management, promotion and deployment.
+
+  jobs:
+    mlops_model_lifecycle:
+      name: epip-${bundle.target}-mlops-model-lifecycle
+
+      queue:
+        enabled: true
+
+      environments:
+        - environment_key: mlops_env
+
+          spec:
+            environment_version: "4"
+
+            dependencies:
+              - "mlflow==3.15.1"
+              - "databricks-sdk>=0.102.0,<1"
+
+      tasks:
+        - task_key: register_and_promote_models
+
+          environment_key: mlops_env
+
+          notebook_task:
+            notebook_path: ../../notebooks/mlops/10_register_promote_models.py
+
+            base_parameters:
+              catalog_name: ${var.catalog_name}
+              fraud_min_recall: "0.50"
+              forecast_max_wape: "1.00"
+
+        - task_key: deploy_fraud_serving
+
+          depends_on:
+            - task_key: register_and_promote_models
+
+          environment_key: mlops_env
+
+          notebook_task:
+            notebook_path: ../../notebooks/mlops/10_deploy_fraud_serving.py
+
+            base_parameters:
+              catalog_name: ${var.catalog_name}
+              endpoint_name: epip-${bundle.target}-fraud-serving
+
+        - task_key: batch_score_fraud
+
+          depends_on:
+            - task_key: register_and_promote_models
+
+          environment_key: mlops_env
+
+          notebook_task:
+            notebook_path: ../../notebooks/mlops/10_batch_score_fraud.py
+
+            base_parameters:
+              catalog_name: ${var.catalog_name}

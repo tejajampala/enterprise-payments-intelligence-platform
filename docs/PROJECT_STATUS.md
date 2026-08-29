@@ -128,7 +128,14 @@ Status: **COMPLETE**
 
 ## Milestone 10 — MLOps
 
-Status: **NOT STARTED**
+Status: **COMPLETE**
+
+| Step | Description | Status |
+|---|---|---|
+| 10A | Unity Catalog model registration and lifecycle governance | COMPLETE |
+| 10B | Automated model validation gates and Candidate/Champion promotion | COMPLETE |
+| 10C | Production fraud serving package and serverless Model Serving endpoint | COMPLETE |
+| 10D | Champion-based batch inference, lifecycle audit, rollback strategy, and documentation | COMPLETE |
 
 ---
 
