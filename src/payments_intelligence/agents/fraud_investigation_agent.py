@@ -295,7 +295,7 @@ class FraudInvestigationAgentCore:
                 scope_violation = False
 
                 if tool_call_count > self.settings.max_tool_calls:
-                    result = ToolResult(
+                    tool_result = ToolResult(
                         tool_name=tool_name,
                         ok=False,
                         error=(
@@ -306,7 +306,7 @@ class FraudInvestigationAgentCore:
                     force_final_response = True
 
                 elif repeated_call:
-                    result = ToolResult(
+                    tool_result = ToolResult(
                         tool_name=tool_name,
                         ok=False,
                         error=(
@@ -317,19 +317,19 @@ class FraudInvestigationAgentCore:
 
                 else:
                     seen_tool_signatures.add(signature)
-                    result = self._execute_tool(
+                    tool_result = self._execute_tool(
                         tool_name=tool_name,
                         arguments=arguments,
                         investigation_transaction_id=transaction_id,
                     )
-                    scope_violation = str(result.get("error") or "").startswith("TRANSACTION_SCOPE_VIOLATION")
+                    scope_violation = str(tool_result.get("error") or "").startswith("TRANSACTION_SCOPE_VIOLATION")
 
                 tool_records.append(
                     ToolExecutionRecord(
                         tool_use_id=tool_use_id,
                         tool_name=tool_name,
                         arguments=arguments,
-                        result=result,
+                        result=tool_result,
                         repeated_call=repeated_call,
                         scope_violation=scope_violation,
                     )
@@ -338,7 +338,7 @@ class FraudInvestigationAgentCore:
                 tool_result_blocks.append(
                     self._tool_result_block(
                         tool_use_id=tool_use_id,
-                        result=result,
+                        result=tool_result,
                     )
                 )
 
@@ -372,7 +372,7 @@ class FraudInvestigationAgentCore:
 
         trace_id = mlflow.get_active_trace_id()
 
-        result = AgentRunResult(
+        agent_result = AgentRunResult(
             transaction_id=transaction_id,
             final_text=final_text,
             generation_model=self.generation_model,
@@ -383,13 +383,13 @@ class FraudInvestigationAgentCore:
         if root_span is not None:
             root_span.set_attributes(
                 {
-                    "epip.tool_call_count": result.tool_call_count,
-                    "epip.tools_used": json.dumps(result.tools_used),
+                    "epip.tool_call_count": agent_result.tool_call_count,
+                    "epip.tools_used": json.dumps(agent_result.tools_used),
                 }
             )
-            root_span.set_outputs(result.to_dict())
+            root_span.set_outputs(agent_result.to_dict())
 
-        return result
+        return agent_result
 
     @mlflow.trace(name="fraud_investigation_agent", span_type=SpanType.AGENT)
     def run_investigation_traced(

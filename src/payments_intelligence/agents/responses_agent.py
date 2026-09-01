@@ -7,7 +7,7 @@ import re
 from typing import Any
 from uuid import uuid4
 
-from mlflow.pyfunc import ResponsesAgent
+from mlflow.pyfunc.model import ResponsesAgent
 from mlflow.types.responses import ResponsesAgentRequest, ResponsesAgentResponse
 
 from payments_intelligence.agents.config import validate_transaction_id
@@ -99,12 +99,20 @@ class FraudInvestigationResponsesAgent(ResponsesAgent):
 
         return validate_transaction_id(next(iter(text_transaction_ids)))
 
-    def predict(self, request: ResponsesAgentRequest) -> ResponsesAgentResponse:
+    def predict(  # type: ignore[override]
+        self,
+        request: ResponsesAgentRequest,
+    ) -> ResponsesAgentResponse:
         """Run the core agent and return standard Responses API output items.
 
-        MLflow automatically traces ResponsesAgent.predict() as an AGENT span. The core therefore
-        uses its untraced run method here so CHAT_MODEL, TOOL, and RETRIEVER operations become
-        children of this single AGENT root.
+        MLflow's ResponsesAgent runtime contract is predict(request), but the
+        installed MLflow package exposes PythonModel's broader predict signature
+        to mypy through inheritance. The targeted override ignore keeps strict
+        typing everywhere else while preserving MLflow's documented runtime API.
+
+        MLflow automatically traces ResponsesAgent.predict() as an AGENT span.
+        The core therefore uses its untraced run method here so CHAT_MODEL, TOOL,
+        and RETRIEVER operations become children of this single AGENT root.
         """
 
         user_text = self._latest_user_text(request)

@@ -8,7 +8,7 @@ from decimal import Decimal
 from typing import Any
 
 from databricks import sql
-from databricks.ai_search.client import AISearchClient
+from databricks.ai_search.client import AISearchClient  # type: ignore[import-untyped]
 from databricks.sdk import WorkspaceClient
 from databricks.sdk.core import Config
 
@@ -32,9 +32,7 @@ class DatabricksAgentDataAccess:
         """Initialize Databricks SQL and AI Search clients."""
 
         self.settings = settings
-
         self.workspace = WorkspaceClient(profile=settings.profile)
-
         self.warehouse_id = self._choose_sql_warehouse(warehouse_id)
 
         self.config = Config(
@@ -43,11 +41,7 @@ class DatabricksAgentDataAccess:
         )
 
         headers = self.config.authenticate()
-
-        authorization = headers.get(
-            "Authorization",
-            "",
-        )
+        authorization = headers.get("Authorization", "")
 
         if not authorization.startswith("Bearer "):
             raise RuntimeError("Databricks profile did not provide a Bearer authentication token")
@@ -61,13 +55,13 @@ class DatabricksAgentDataAccess:
 
         self._search_client = AISearchClient(
             workspace_url=workspace_url,
-            personal_access_token=(self._access_token),
+            personal_access_token=self._access_token,
             disable_notice=True,
         )
 
         self._search_index = self._search_client.get_index(
-            endpoint_name=(settings.search_endpoint_name),
-            index_name=(settings.knowledge_index_name),
+            endpoint_name=settings.search_endpoint_name,
+            index_name=settings.knowledge_index_name,
         )
 
     def _choose_sql_warehouse(
@@ -84,64 +78,35 @@ class DatabricksAgentDataAccess:
         if not warehouses:
             raise RuntimeError("No Databricks SQL warehouse is available to the current user")
 
-        running = [
-            warehouse
-            for warehouse in warehouses
-            if "RUNNING"
-            in str(
-                getattr(
-                    warehouse,
-                    "state",
-                    "",
-                )
-            ).upper()
-        ]
+        running = [warehouse for warehouse in warehouses if "RUNNING" in str(getattr(warehouse, "state", "")).upper()]
 
         selected = running[0] if running else warehouses[0]
-
-        selected_id = getattr(
-            selected,
-            "id",
-            None,
-        )
+        selected_id = getattr(selected, "id", None)
 
         if not selected_id:
             raise RuntimeError("Unable to determine Databricks SQL warehouse ID")
 
         return str(selected_id)
 
-    def _sql_connection(
-        self,
-    ) -> Any:
+    def _sql_connection(self) -> Any:
         """Open a SQL Connector session using Databricks unified authentication."""
 
         return sql.connect(
-            server_hostname=(self.config.hostname),
-            http_path=(self.config.sql_http_path),
-            access_token=(self._access_token),
+            server_hostname=self.config.hostname,
+            http_path=self.config.sql_http_path,
+            access_token=self._access_token,
             use_cloud_fetch=False,
-            user_agent_entry=("epip-m12-fraud-investigation-agent"),
+            user_agent_entry="epip-m12-fraud-investigation-agent",
         )
 
     @staticmethod
-    def _json_safe(
-        value: Any,
-    ) -> Any:
+    def _json_safe(value: Any) -> Any:
         """Normalize SQL result values so tool payloads are JSON serializable."""
 
-        if isinstance(
-            value,
-            Decimal,
-        ):
+        if isinstance(value, Decimal):
             return float(value)
 
-        if isinstance(
-            value,
-            (
-                datetime,
-                date,
-            ),
-        ):
+        if isinstance(value, (datetime, date)):
             return value.isoformat()
 
         return value
@@ -182,37 +147,8 @@ class DatabricksAgentDataAccess:
         if not normalized:
             raise ValueError("SQL statement cannot be empty")
 
-        # ---------------------------------------------------------------
-        # Read-only SQL boundary
-        #
-        # Allow:
-        #
-        # SELECT ...
-        #
-        # WITH some_cte AS (...)
-        # SELECT ...
-        #
-        # The future Claude agent is NOT given direct access to this
-        # function. SQL statements are authored only by trusted EPIP
-        # application code.
-        # ---------------------------------------------------------------
-
-        if not normalized.startswith(
-            (
-                "SELECT ",
-                "WITH ",
-            )
-        ):
+        if not normalized.startswith(("SELECT ", "WITH ")):
             raise ValueError("M12 agent data access only permits read-only SELECT statements")
-
-        # ---------------------------------------------------------------
-        # Defence in depth
-        #
-        # A WITH statement can theoretically be associated with
-        # data-changing SQL in some SQL dialects.
-        #
-        # Explicitly reject DML, DDL, and permission-changing operations.
-        # ---------------------------------------------------------------
 
         forbidden_pattern = re.compile(
             r"\b("
@@ -247,22 +183,17 @@ class DatabricksAgentDataAccess:
 
             return self._rows_as_dicts(cursor)
 
-    def find_sample_transaction_id(
-        self,
-    ) -> str:
+    def find_sample_transaction_id(self) -> str:
         """Return one valid transaction ID for local agent smoke testing."""
 
         rows = self._query_rows(
             f"""
             SELECT
                 transaction_id
-
             FROM
                 {self.settings.transaction_context_view}
-
             ORDER BY
                 transaction_id
-
             LIMIT 1
             """
         )
@@ -283,7 +214,6 @@ class DatabricksAgentDataAccess:
         rows = self._query_rows(
             f"""
             SELECT *
-
             FROM
                 {self.settings.transaction_context_function}(?)
             """,
@@ -303,7 +233,6 @@ class DatabricksAgentDataAccess:
         rows = self._query_rows(
             f"""
             SELECT *
-
             FROM
                 {self.settings.fraud_evidence_function}(?)
             """,
@@ -318,26 +247,10 @@ class DatabricksAgentDataAccess:
     ) -> list[dict[str, Any]]:
         """Convert an AI Search response into ordered dictionaries."""
 
-        manifest_columns = response.get(
-            "manifest",
-            {},
-        ).get(
-            "columns",
-            [],
-        )
-
+        manifest_columns = response.get("manifest", {}).get("columns", [])
         column_names = [str(column["name"]) for column in manifest_columns]
 
-        result_rows = (
-            response.get(
-                "result",
-                {},
-            ).get(
-                "data_array",
-                [],
-            )
-            or []
-        )
+        result_rows = response.get("result", {}).get("data_array", []) or []
 
         return [
             {
@@ -371,7 +284,7 @@ class DatabricksAgentDataAccess:
             )
 
         response = self._search_index.similarity_search(
-            query_text=(normalized_question),
+            query_text=normalized_question,
             columns=[
                 "chunk_id",
                 "doc_id",
@@ -379,18 +292,14 @@ class DatabricksAgentDataAccess:
                 "category",
                 "chunk_text",
             ],
-            num_results=(self.settings.search_top_k),
+            num_results=self.settings.search_top_k,
             query_type="HYBRID",
         )
 
         records = self._parse_search_results(response)
-
         documents: list[KnowledgeDocument] = []
 
-        for rank, record in enumerate(
-            records,
-            start=1,
-        ):
+        for rank, record in enumerate(records, start=1):
             chunk_id = str(record.get("chunk_id") or "")
 
             if not chunk_id:
