@@ -24,6 +24,7 @@ dev = [
     "mlflow[databricks]==3.15.2",
     "databricks-sdk==0.133.0",
     "databricks-sql-connector==4.4.0",
+    "databricks-ai-search==0.78",
     "anthropic==0.121.0",
     "openai==3.6.0",
 ]

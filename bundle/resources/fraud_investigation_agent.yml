@@ -1,0 +1,29 @@
+resources:
+  jobs:
+    fraud_investigation_agent_setup:
+      name: epip-${bundle.target}-fraud-investigation-agent-setup
+
+      queue:
+        enabled: true
+
+      environments:
+        - environment_key: agent_setup_env
+          spec:
+            environment_version: "4"
+
+      tasks:
+        - task_key: build_agent_evidence
+          environment_key: agent_setup_env
+          notebook_task:
+            notebook_path: ../../notebooks/agents/12_build_agent_evidence.py
+            base_parameters:
+              catalog_name: ${var.catalog_name}
+
+        - task_key: create_agent_investigation_store
+          depends_on:
+            - task_key: build_agent_evidence
+          environment_key: agent_setup_env
+          notebook_task:
+            notebook_path: ../../notebooks/agents/12_create_agent_investigation_store.py
+            base_parameters:
+              catalog_name: ${var.catalog_name}
