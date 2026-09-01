@@ -1,0 +1,69 @@
+resources:
+  schemas:
+    ai_schema:
+      name: ai
+      catalog_name: ${var.catalog_name}
+      comment: >-
+        Governed fraud investigation knowledge, AI Search indexes,
+        RAG retrieval evaluation, and quality-monitoring assets.
+
+  vector_search_endpoints:
+    fraud_knowledge_search_endpoint:
+      name: epip-${bundle.target}-fraud-knowledge-search
+      endpoint_type: STANDARD
+
+  jobs:
+    rag_vector_search:
+      name: epip-${bundle.target}-rag-vector-search
+
+      queue:
+        enabled: true
+
+      # This workspace supports serverless compute only.
+      #
+      # External Anthropic/OpenAI generation and judging are intentionally
+      # NOT executed inside this Databricks job because:
+      #
+      # 1. direct outbound access to api.anthropic.com is blocked by the
+      #    workspace serverless network policy, and
+      # 2. Databricks-hosted premium model access has returned a workspace
+      #    rate-limit value of 0.
+      #
+      # The formal retrieval result is frozen in Delta by validate_retrieval.
+      # scripts/rag/11_evaluate_rag_quality_local.py then consumes that exact
+      # retrieval result from the local development machine.
+      environments:
+        - environment_key: rag_env
+          spec:
+            environment_version: "4"
+            dependencies:
+              - "databricks-ai-search==0.78"
+
+      tasks:
+        - task_key: build_fraud_knowledge_base
+          environment_key: rag_env
+          notebook_task:
+            notebook_path: ../../notebooks/rag/11_build_fraud_knowledge_base.py
+            base_parameters:
+              catalog_name: ${var.catalog_name}
+
+        - task_key: build_ai_search_index
+          depends_on:
+            - task_key: build_fraud_knowledge_base
+          environment_key: rag_env
+          notebook_task:
+            notebook_path: ../../notebooks/rag/11_build_ai_search_index.py
+            base_parameters:
+              catalog_name: ${var.catalog_name}
+              search_endpoint_name: ${resources.vector_search_endpoints.fraud_knowledge_search_endpoint.name}
+              embedding_model_endpoint: databricks-qwen3-embedding-0-6b
+
+        - task_key: validate_retrieval
+          depends_on:
+            - task_key: build_ai_search_index
+          environment_key: rag_env
+          notebook_task:
+            notebook_path: ../../notebooks/rag/11_validate_retrieval.py
+            base_parameters:
+              catalog_name: ${var.catalog_name}
+              search_endpoint_name: ${resources.vector_search_endpoints.fraud_knowledge_search_endpoint.name}

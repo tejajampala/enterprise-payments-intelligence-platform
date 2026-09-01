@@ -88,8 +88,7 @@ def _read_payment_events_from_kafka(spark: SparkSession):
 @dp.table(
     name="payment_events",
     comment=(
-        "Raw Amazon MSK payment events preserving business payload, "
-        "delivery metadata and Kafka operational metadata."
+        "Raw Amazon MSK payment events preserving business payload, delivery metadata and Kafka operational metadata."
     ),
     table_properties={
         "quality": "bronze",
@@ -132,9 +131,7 @@ def payment_events():
         F.col("parsed.payload.transaction.transaction_id").alias("transaction_id"),
         F.col("parsed.payload.transaction.account_id").alias("account_id"),
         F.col("parsed.payload.transaction.merchant_id").alias("merchant_id"),
-        F.to_timestamp(F.col("parsed.payload.transaction.event_timestamp")).alias(
-            "transaction_event_timestamp"
-        ),
+        F.to_timestamp(F.col("parsed.payload.transaction.event_timestamp")).alias("transaction_event_timestamp"),
         F.col("parsed.payload.transaction.amount").cast("decimal(18,2)").alias("amount"),
         F.col("parsed.payload.transaction.currency").alias("currency"),
         F.col("parsed.payload.transaction.channel").alias("channel"),

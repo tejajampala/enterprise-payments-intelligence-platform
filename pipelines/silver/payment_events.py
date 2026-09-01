@@ -18,10 +18,7 @@ def _spark() -> SparkSession:
 
 @dp.table(
     name="payment_events_standardized",
-    comment=(
-        "Standardized payment-event stream derived incrementally from the "
-        "raw Bronze Amazon MSK event table."
-    ),
+    comment=("Standardized payment-event stream derived incrementally from the raw Bronze Amazon MSK event table."),
     table_properties={
         "quality": "silver",
     },
@@ -82,9 +79,7 @@ def payment_events_standardized():
         F.col("kafka_offset"),
         F.col("kafka_timestamp"),
         F.col("kafka_timestamp_type"),
-        (F.unix_timestamp("ingested_at") - F.unix_timestamp("kafka_timestamp")).alias(
-            "ingestion_lag_seconds"
-        ),
+        (F.unix_timestamp("ingested_at") - F.unix_timestamp("kafka_timestamp")).alias("ingestion_lag_seconds"),
         # -----------------------------------------------------------
         # Bronze traceability
         # -----------------------------------------------------------

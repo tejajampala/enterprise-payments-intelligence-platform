@@ -189,9 +189,7 @@ class SyntheticScenarioBuilder:
         transaction_id: str,
     ) -> tuple[PaymentEvent, ...]:
         events = tuple(
-            event
-            for event in self.dataset.payment_events
-            if event.transaction.transaction_id == transaction_id
+            event for event in self.dataset.payment_events if event.transaction.transaction_id == transaction_id
         )
 
         if len(events) != 2:

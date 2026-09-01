@@ -97,19 +97,13 @@ def main() -> None:
 
     else:
         if not args.bootstrap_servers:
-            parser.error(
-                "--bootstrap-servers or KAFKA_BOOTSTRAP_SERVERS "
-                "is required unless --dry-run is used"
-            )
+            parser.error("--bootstrap-servers or KAFKA_BOOTSTRAP_SERVERS is required unless --dry-run is used")
 
         extra_config: dict[str, object] | None = None
 
         if args.aws_msk_iam:
             if not args.aws_region:
-                parser.error(
-                    "--aws-region, AWS_REGION, or AWS_DEFAULT_REGION "
-                    "is required when --aws-msk-iam is used"
-                )
+                parser.error("--aws-region, AWS_REGION, or AWS_DEFAULT_REGION is required when --aws-msk-iam is used")
 
             extra_config = build_msk_iam_kafka_config(args.aws_region)
 

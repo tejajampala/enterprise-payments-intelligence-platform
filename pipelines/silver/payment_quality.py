@@ -29,10 +29,7 @@ def _spark() -> SparkSession:
 @dp.table(
     name="payment_events_dq_classified",
     private=True,
-    comment=(
-        "Private streaming table that evaluates row-level data-quality "
-        "rules for standardized payment events."
-    ),
+    comment=("Private streaming table that evaluates row-level data-quality rules for standardized payment events."),
 )
 @dp.expect_all(PAYMENT_EVENT_RULES)
 def payment_events_dq_classified():
@@ -66,9 +63,7 @@ def payment_events_validated():
 
     spark = _spark()
 
-    return spark.readStream.table("payment_events_dq_classified").filter(
-        F.col("is_quarantined") == F.lit(False)
-    )
+    return spark.readStream.table("payment_events_dq_classified").filter(F.col("is_quarantined") == F.lit(False))
 
 
 @dp.table(
@@ -84,9 +79,7 @@ def payment_events_quarantine():
 
     spark = _spark()
 
-    return spark.readStream.table("payment_events_dq_classified").filter(
-        F.col("is_quarantined") == F.lit(True)
-    )
+    return spark.readStream.table("payment_events_dq_classified").filter(F.col("is_quarantined") == F.lit(True))
 
 
 # ============================================================================
@@ -118,9 +111,7 @@ def payment_transactions_dq_classified():
 
 @dp.table(
     name="payment_transactions_validated",
-    comment=(
-        "Validated historical payment transactions that passed Silver row-level data-quality rules."
-    ),
+    comment=("Validated historical payment transactions that passed Silver row-level data-quality rules."),
     table_properties={
         "quality": "silver",
         "domain": "payments",
@@ -134,17 +125,12 @@ def payment_transactions_validated():
 
     spark = _spark()
 
-    return spark.readStream.table("payment_transactions_dq_classified").filter(
-        F.col("is_quarantined") == F.lit(False)
-    )
+    return spark.readStream.table("payment_transactions_dq_classified").filter(F.col("is_quarantined") == F.lit(False))
 
 
 @dp.table(
     name="payment_transactions_quarantine",
-    comment=(
-        "Historical payment transactions that failed one or more "
-        "Silver row-level data-quality expectations."
-    ),
+    comment=("Historical payment transactions that failed one or more Silver row-level data-quality expectations."),
     table_properties={
         "quality": "quarantine",
         "domain": "payments",
@@ -155,6 +141,4 @@ def payment_transactions_quarantine():
 
     spark = _spark()
 
-    return spark.readStream.table("payment_transactions_dq_classified").filter(
-        F.col("is_quarantined") == F.lit(True)
-    )
+    return spark.readStream.table("payment_transactions_dq_classified").filter(F.col("is_quarantined") == F.lit(True))

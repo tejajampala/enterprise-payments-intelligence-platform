@@ -339,10 +339,7 @@ def _after_snapshot_version(
             F.col(f"c.{key_column}") == F.col("s._snapshot_key"),
             "left",
         )
-        .filter(
-            F.col("s._snapshot_key").isNull()
-            | (F.col("c.record_version") > F.col("s._snapshot_record_version"))
-        )
+        .filter(F.col("s._snapshot_key").isNull() | (F.col("c.record_version") > F.col("s._snapshot_record_version")))
         .select("c.*")
     )
 
@@ -439,10 +436,7 @@ def _standardize_merchants(
 
 @dp.temporary_view(
     name="customers_snapshot_seed",
-    comment=(
-        "Validated streaming view of the baseline customer snapshot "
-        "used to hydrate AUTO CDC targets."
-    ),
+    comment=("Validated streaming view of the baseline customer snapshot used to hydrate AUTO CDC targets."),
 )
 @dp.expect_all_or_fail(CUSTOMER_RULES)
 def customers_snapshot_seed():
@@ -462,9 +456,7 @@ def customers_snapshot_seed():
 
 @dp.temporary_view(
     name="customers_cdc_validated",
-    comment=(
-        "Validated incremental customer CDC records newer than the baseline snapshot version."
-    ),
+    comment=("Validated incremental customer CDC records newer than the baseline snapshot version."),
 )
 @dp.expect_all_or_drop(CUSTOMER_RULES)
 def customers_cdc_validated():
@@ -504,10 +496,7 @@ def customers_cdc_validated():
 
 @dp.temporary_view(
     name="accounts_snapshot_seed",
-    comment=(
-        "Validated streaming view of the baseline account snapshot "
-        "used to hydrate AUTO CDC targets."
-    ),
+    comment=("Validated streaming view of the baseline account snapshot used to hydrate AUTO CDC targets."),
 )
 @dp.expect_all_or_fail(ACCOUNT_RULES)
 def accounts_snapshot_seed():
@@ -560,10 +549,7 @@ def accounts_cdc_validated():
 
 @dp.temporary_view(
     name="merchants_snapshot_seed",
-    comment=(
-        "Validated streaming view of the baseline merchant snapshot "
-        "used to hydrate AUTO CDC targets."
-    ),
+    comment=("Validated streaming view of the baseline merchant snapshot used to hydrate AUTO CDC targets."),
 )
 @dp.expect_all_or_fail(MERCHANT_RULES)
 def merchants_snapshot_seed():
@@ -583,9 +569,7 @@ def merchants_snapshot_seed():
 
 @dp.temporary_view(
     name="merchants_cdc_validated",
-    comment=(
-        "Validated incremental merchant CDC records newer than the baseline snapshot version."
-    ),
+    comment=("Validated incremental merchant CDC records newer than the baseline snapshot version."),
 )
 @dp.expect_all_or_drop(MERCHANT_RULES)
 def merchants_cdc_validated():
@@ -618,9 +602,7 @@ def merchants_cdc_validated():
 
 dp.create_streaming_table(
     name="customers_current",
-    comment=(
-        "Current customer state maintained with Lakeflow AUTO CDC using SCD Type 1 semantics."
-    ),
+    comment=("Current customer state maintained with Lakeflow AUTO CDC using SCD Type 1 semantics."),
     table_properties={
         "quality": "silver",
         "domain": "customer",
@@ -672,9 +654,7 @@ dp.create_auto_cdc_flow(
 
 dp.create_streaming_table(
     name="customer_history",
-    comment=(
-        "Historical customer versions maintained with Lakeflow AUTO CDC using SCD Type 2 semantics."
-    ),
+    comment=("Historical customer versions maintained with Lakeflow AUTO CDC using SCD Type 2 semantics."),
     table_properties={
         "quality": "silver",
         "domain": "customer",
@@ -778,9 +758,7 @@ dp.create_auto_cdc_flow(
 
 dp.create_streaming_table(
     name="account_history",
-    comment=(
-        "Historical account versions maintained with Lakeflow AUTO CDC using SCD Type 2 semantics."
-    ),
+    comment=("Historical account versions maintained with Lakeflow AUTO CDC using SCD Type 2 semantics."),
     table_properties={
         "quality": "silver",
         "domain": "account",
@@ -832,9 +810,7 @@ dp.create_auto_cdc_flow(
 
 dp.create_streaming_table(
     name="merchants_current",
-    comment=(
-        "Current merchant state maintained with Lakeflow AUTO CDC using SCD Type 1 semantics."
-    ),
+    comment=("Current merchant state maintained with Lakeflow AUTO CDC using SCD Type 1 semantics."),
     table_properties={
         "quality": "silver",
         "domain": "merchant",
@@ -886,9 +862,7 @@ dp.create_auto_cdc_flow(
 
 dp.create_streaming_table(
     name="merchant_history",
-    comment=(
-        "Historical merchant versions maintained with Lakeflow AUTO CDC using SCD Type 2 semantics."
-    ),
+    comment=("Historical merchant versions maintained with Lakeflow AUTO CDC using SCD Type 2 semantics."),
     table_properties={
         "quality": "silver",
         "domain": "merchant",

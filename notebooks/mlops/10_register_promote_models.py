@@ -190,9 +190,7 @@ class FraudServingModel(mlflow.pyfunc.PythonModel):
         del context
         del params
 
-        missing_features = [
-            column for column in self.feature_columns if column not in model_input.columns
-        ]
+        missing_features = [column for column in self.feature_columns if column not in model_input.columns]
 
         if missing_features:
             raise ValueError(f"Fraud model input is missing required features: {missing_features}")
@@ -392,9 +390,7 @@ fraud_f2 = float(fraud["f2"])
 # Average Precision should beat the raw positive-class prevalence.
 
 fraud_base_rate_row = (
-    spark_session.table(FRAUD_TRAINING_TABLE)
-    .agg(F.avg("is_confirmed_fraud").alias("fraud_base_rate"))
-    .first()
+    spark_session.table(FRAUD_TRAINING_TABLE).agg(F.avg("is_confirmed_fraud").alias("fraud_base_rate")).first()
 )
 
 
@@ -484,9 +480,7 @@ else:
     )
 
     if input_example.empty:
-        raise ValueError(
-            "Unable to build fraud serving input example because the training table is empty"
-        )
+        raise ValueError("Unable to build fraud serving input example because the training table is empty")
 
     # Wrap the classifier with the business decision threshold.
 
@@ -624,9 +618,7 @@ forecast_result = (
 
 
 if not forecast_result:
-    raise ValueError(
-        f"No selected forecasting test result was found in {FORECAST_EVALUATION_TABLE}"
-    )
+    raise ValueError(f"No selected forecasting test result was found in {FORECAST_EVALUATION_TABLE}")
 
 
 forecast = forecast_result[0].asDict()
@@ -815,9 +807,7 @@ audit_rows = [
     {
         "lifecycle_run_id": (lifecycle_run_id),
         "use_case": ("payment_volume_forecasting"),
-        "registered_model_name": (
-            FORECAST_REGISTERED_MODEL if forecast_registered_version is not None else None
-        ),
+        "registered_model_name": (FORECAST_REGISTERED_MODEL if forecast_registered_version is not None else None),
         "model_version": (forecast_registered_version),
         "source_model_uri": (forecast_source_model_uri if forecast_source_model_uri else None),
         "selected_method": (forecast_method),
@@ -857,9 +847,7 @@ result_summary = {
     },
     "forecast": {
         "selected_method": (forecast_method),
-        "registered_model": (
-            FORECAST_REGISTERED_MODEL if forecast_registered_version is not None else None
-        ),
+        "registered_model": (FORECAST_REGISTERED_MODEL if forecast_registered_version is not None else None),
         "version": (forecast_registered_version),
         "lifecycle_status": (forecast_lifecycle_status),
         "test_wape": (forecast_wape),
@@ -879,8 +867,4 @@ print(
 # COMMAND ----------
 # Display latest lifecycle audit.
 
-display(
-    spark_session.table(AUDIT_TABLE)
-    .filter(F.col("lifecycle_run_id") == lifecycle_run_id)
-    .orderBy("use_case")
-)
+display(spark_session.table(AUDIT_TABLE).filter(F.col("lifecycle_run_id") == lifecycle_run_id).orderBy("use_case"))
