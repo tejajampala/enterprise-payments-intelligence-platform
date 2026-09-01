@@ -531,9 +531,7 @@ with mlflow.start_run(run_name="fraud-model-comparison") as parent_run:
                 model_name,
             )
 
-            mlflow.log_metrics(
-                {f"validation_{key}": value for key, value in validation_metrics.items()}
-            )
+            mlflow.log_metrics({f"validation_{key}": value for key, value in validation_metrics.items()})
 
             signature = infer_signature(
                 X_train,

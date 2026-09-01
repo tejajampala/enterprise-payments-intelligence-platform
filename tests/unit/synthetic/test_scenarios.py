@@ -51,9 +51,7 @@ def test_customer_cdc_is_delivered_out_of_order() -> None:
 def test_customer_delete_is_soft_delete() -> None:
     _, scenarios = build_scenarios()
 
-    version_three = next(
-        customer for customer in scenarios.customer_cdc_records if customer.record_version == 3
-    )
+    version_three = next(customer for customer in scenarios.customer_cdc_records if customer.record_version == 3)
 
     assert version_three.is_deleted is True
 
@@ -61,9 +59,7 @@ def test_customer_delete_is_soft_delete() -> None:
 def test_customer_update_changes_address() -> None:
     _, scenarios = build_scenarios()
 
-    version_two = next(
-        customer for customer in scenarios.customer_cdc_records if customer.record_version == 2
-    )
+    version_two = next(customer for customer in scenarios.customer_cdc_records if customer.record_version == 2)
 
     assert version_two.city == "Sydney"
     assert version_two.state == "NSW"
@@ -112,28 +108,21 @@ def test_out_of_order_event_arrives_sequence_two_before_one() -> None:
     _, scenarios = build_scenarios()
 
     deliveries = [
-        delivery
-        for delivery in scenarios.event_deliveries
-        if delivery.scenario is DeliveryScenario.OUT_OF_ORDER
+        delivery for delivery in scenarios.event_deliveries if delivery.scenario is DeliveryScenario.OUT_OF_ORDER
     ]
 
     assert len(deliveries) == 2
 
     assert [delivery.event.sequence_number for delivery in deliveries] == [2, 1]
 
-    assert (
-        deliveries[0].event.transaction.transaction_id
-        == deliveries[1].event.transaction.transaction_id
-    )
+    assert deliveries[0].event.transaction.transaction_id == deliveries[1].event.transaction.transaction_id
 
 
 def test_late_event_arrives_four_hours_after_event_time() -> None:
     _, scenarios = build_scenarios()
 
     late_delivery = next(
-        delivery
-        for delivery in scenarios.event_deliveries
-        if delivery.scenario is DeliveryScenario.LATE
+        delivery for delivery in scenarios.event_deliveries if delivery.scenario is DeliveryScenario.LATE
     )
 
     assert late_delivery.arrived_at - late_delivery.event.event_timestamp == timedelta(hours=4)
@@ -170,9 +159,7 @@ def test_orphan_account_reference_does_not_exist() -> None:
     valid_account_ids = {account.account_id for account in dataset.accounts}
 
     record = next(
-        record
-        for record in scenarios.invalid_transaction_records
-        if record.issue is DataQualityIssue.ORPHAN_ACCOUNT
+        record for record in scenarios.invalid_transaction_records if record.issue is DataQualityIssue.ORPHAN_ACCOUNT
     )
 
     assert record.payload["account_id"] not in valid_account_ids

@@ -24,10 +24,7 @@ def _enriched_transactions():
 
 @dp.materialized_view(
     name="daily_payment_metrics",
-    comment=(
-        "Daily payment KPIs by transaction date and currency for "
-        "business reporting and executive analytics."
-    ),
+    comment=("Daily payment KPIs by transaction date and currency for business reporting and executive analytics."),
     table_properties={
         "quality": "gold",
         "domain": "payments",
@@ -114,10 +111,7 @@ def daily_payment_metrics():
 
 @dp.materialized_view(
     name="merchant_payment_metrics",
-    comment=(
-        "Merchant-level payment performance and fraud metrics for "
-        "merchant monitoring and risk analytics."
-    ),
+    comment=("Merchant-level payment performance and fraud metrics for merchant monitoring and risk analytics."),
     table_properties={
         "quality": "gold",
         "domain": "merchant",
@@ -182,10 +176,7 @@ def merchant_payment_metrics():
 
 @dp.materialized_view(
     name="channel_payment_metrics",
-    comment=(
-        "Daily payment KPIs by channel, payment method and currency "
-        "for channel performance analytics."
-    ),
+    comment=("Daily payment KPIs by channel, payment method and currency for channel performance analytics."),
     table_properties={
         "quality": "gold",
         "domain": "payments",

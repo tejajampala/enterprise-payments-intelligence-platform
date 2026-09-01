@@ -11,9 +11,7 @@ from payments_intelligence.synthetic import (
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(
-        description=("Generate deterministic local payments source-system datasets.")
-    )
+    parser = argparse.ArgumentParser(description=("Generate deterministic local payments source-system datasets."))
 
     parser.add_argument(
         "--output-root",

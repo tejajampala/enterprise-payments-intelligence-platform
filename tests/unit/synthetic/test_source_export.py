@@ -30,9 +30,7 @@ def export_small_dataset(
 
 
 def read_jsonl(path: Path) -> list[dict[str, object]]:
-    return [
-        json.loads(line) for line in path.read_text(encoding="utf-8").splitlines() if line.strip()
-    ]
+    return [json.loads(line) for line in path.read_text(encoding="utf-8").splitlines() if line.strip()]
 
 
 def test_manifest_files_exist(tmp_path: Path) -> None:
@@ -97,14 +95,7 @@ def test_s3_duplicate_scenario_contains_same_transaction_twice(
 ) -> None:
     manifest = export_small_dataset(tmp_path)
 
-    path = (
-        manifest.root
-        / "s3"
-        / "historical_transactions"
-        / "scenarios"
-        / "duplicates"
-        / "transactions.jsonl"
-    )
+    path = manifest.root / "s3" / "historical_transactions" / "scenarios" / "duplicates" / "transactions.jsonl"
 
     records = read_jsonl(path)
 
@@ -118,14 +109,7 @@ def test_s3_invalid_scenarios_are_exported(
 ) -> None:
     manifest = export_small_dataset(tmp_path)
 
-    path = (
-        manifest.root
-        / "s3"
-        / "historical_transactions"
-        / "scenarios"
-        / "invalid"
-        / "transactions.jsonl"
-    )
+    path = manifest.root / "s3" / "historical_transactions" / "scenarios" / "invalid" / "transactions.jsonl"
 
     records = read_jsonl(path)
 

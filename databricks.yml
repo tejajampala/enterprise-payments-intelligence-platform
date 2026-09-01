@@ -28,6 +28,19 @@ variables:
     description: Unity Catalog service credential used by Databricks to access Amazon MSK.
     default: payments_msk_dev
 
+  rag_generation_provider_model:
+    default: claude-sonnet-4-6
+
+  rag_judge_provider_model:
+    default: gpt-4o
+
+  rag_secret_scope:
+    default: epip_llm_secrets
+  
+  rag_classic_job_policy_id:
+    description: Classic Databricks Job Compute policy used for BYOK RAG evaluation.
+    default: 000ECC4A882DCB1D
+
 experimental:
   skip_name_prefix_for_schema: true
 

@@ -688,9 +688,4 @@ print(
 )
 
 
-display(
-    spark_session.table(TRAINING_DATASET_TABLE)
-    .groupBy("is_confirmed_fraud")
-    .count()
-    .orderBy("is_confirmed_fraud")
-)
+display(spark_session.table(TRAINING_DATASET_TABLE).groupBy("is_confirmed_fraud").count().orderBy("is_confirmed_fraud"))

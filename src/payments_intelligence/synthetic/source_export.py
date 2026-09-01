@@ -470,14 +470,7 @@ class LocalSourceDatasetExporter:
 
         counts["s3_clean_partitions"] = len(transactions_by_date)
 
-        duplicate_path = (
-            run_root
-            / "s3"
-            / "historical_transactions"
-            / "scenarios"
-            / "duplicates"
-            / "transactions.jsonl"
-        )
+        duplicate_path = run_root / "s3" / "historical_transactions" / "scenarios" / "duplicates" / "transactions.jsonl"
 
         counts["s3_duplicate_transactions"] = _write_jsonl(
             duplicate_path,
@@ -486,14 +479,7 @@ class LocalSourceDatasetExporter:
 
         files.append(duplicate_path.relative_to(run_root).as_posix())
 
-        invalid_path = (
-            run_root
-            / "s3"
-            / "historical_transactions"
-            / "scenarios"
-            / "invalid"
-            / "transactions.jsonl"
-        )
+        invalid_path = run_root / "s3" / "historical_transactions" / "scenarios" / "invalid" / "transactions.jsonl"
 
         counts["s3_invalid_transactions"] = _write_jsonl(
             invalid_path,

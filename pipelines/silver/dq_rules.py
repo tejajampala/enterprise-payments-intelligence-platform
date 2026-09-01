@@ -18,21 +18,13 @@ PAYMENT_EVENT_RULES = {
     "sequence_number_positive": ("sequence_number IS NOT NULL AND sequence_number > 0"),
     "amount_positive": ("amount IS NOT NULL AND amount > 0"),
     "currency_code_valid": ("currency IS NOT NULL AND currency RLIKE '^[A-Z]{3}$'"),
-    "event_type_valid": (
-        "event_type IN ('AUTHORIZATION', 'DECLINE', 'SETTLEMENT', 'REVERSAL', 'REFUND')"
-    ),
+    "event_type_valid": ("event_type IN ('AUTHORIZATION', 'DECLINE', 'SETTLEMENT', 'REVERSAL', 'REFUND')"),
     "channel_valid": ("channel IN ('POS', 'ECOMMERCE', 'MOBILE', 'ATM')"),
-    "payment_method_valid": (
-        "payment_method IN ('DEBIT_CARD', 'CREDIT_CARD', 'DIGITAL_WALLET', 'BANK_TRANSFER')"
-    ),
-    "transaction_status_valid": (
-        "transaction_status IN ('AUTHORIZED', 'DECLINED', 'SETTLED', 'REVERSED', 'REFUNDED')"
-    ),
+    "payment_method_valid": ("payment_method IN ('DEBIT_CARD', 'CREDIT_CARD', 'DIGITAL_WALLET', 'BANK_TRANSFER')"),
+    "transaction_status_valid": ("transaction_status IN ('AUTHORIZED', 'DECLINED', 'SETTLED', 'REVERSED', 'REFUNDED')"),
     "country_code_valid": ("country IS NOT NULL AND country RLIKE '^[A-Z]{2}$'"),
     "payload_parsed": ("parse_status = 'PARSED'"),
-    "kafka_lineage_present": (
-        "kafka_topic IS NOT NULL AND kafka_partition IS NOT NULL AND kafka_offset IS NOT NULL"
-    ),
+    "kafka_lineage_present": ("kafka_topic IS NOT NULL AND kafka_partition IS NOT NULL AND kafka_offset IS NOT NULL"),
 }
 
 
@@ -44,12 +36,8 @@ PAYMENT_TRANSACTION_RULES = {
     "amount_positive": ("amount IS NOT NULL AND amount > 0"),
     "currency_code_valid": ("currency IS NOT NULL AND currency RLIKE '^[A-Z]{3}$'"),
     "channel_valid": ("channel IN ('POS', 'ECOMMERCE', 'MOBILE', 'ATM')"),
-    "payment_method_valid": (
-        "payment_method IN ('DEBIT_CARD', 'CREDIT_CARD', 'DIGITAL_WALLET', 'BANK_TRANSFER')"
-    ),
-    "transaction_status_valid": (
-        "transaction_status IN ('AUTHORIZED', 'DECLINED', 'SETTLED', 'REVERSED', 'REFUNDED')"
-    ),
+    "payment_method_valid": ("payment_method IN ('DEBIT_CARD', 'CREDIT_CARD', 'DIGITAL_WALLET', 'BANK_TRANSFER')"),
+    "transaction_status_valid": ("transaction_status IN ('AUTHORIZED', 'DECLINED', 'SETTLED', 'REVERSED', 'REFUNDED')"),
     "country_code_valid": ("country IS NOT NULL AND country RLIKE '^[A-Z]{2}$'"),
 }
 
@@ -69,9 +57,7 @@ ACCOUNT_RULES = {
     "account_id_present": ("account_id IS NOT NULL AND trim(account_id) <> ''"),
     "customer_id_present": ("customer_id IS NOT NULL AND trim(customer_id) <> ''"),
     "account_type_valid": ("account_type IN ('CHECKING', 'SAVINGS', 'CREDIT_CARD')"),
-    "account_currency_valid": (
-        "account_currency IS NOT NULL AND account_currency RLIKE '^[A-Z]{3}$'"
-    ),
+    "account_currency_valid": ("account_currency IS NOT NULL AND account_currency RLIKE '^[A-Z]{3}$'"),
     "account_status_valid": ("account_status IN ('ACTIVE', 'BLOCKED', 'CLOSED')"),
     "opened_date_present": ("opened_date IS NOT NULL"),
     "record_version_valid": ("record_version IS NOT NULL AND record_version >= 1"),
@@ -83,9 +69,7 @@ MERCHANT_RULES = {
     "merchant_id_present": ("merchant_id IS NOT NULL AND trim(merchant_id) <> ''"),
     "merchant_name_present": ("merchant_name IS NOT NULL AND trim(merchant_name) <> ''"),
     "merchant_category_code_valid": ("merchant_category_code RLIKE '^[0-9]{4}$'"),
-    "merchant_country_valid": (
-        "merchant_country IS NOT NULL AND merchant_country RLIKE '^[A-Z]{2}$'"
-    ),
+    "merchant_country_valid": ("merchant_country IS NOT NULL AND merchant_country RLIKE '^[A-Z]{2}$'"),
     "merchant_risk_rating_valid": ("merchant_risk_rating IN ('LOW', 'MEDIUM', 'HIGH')"),
     "merchant_status_valid": ("merchant_status IN ('ACTIVE', 'SUSPENDED', 'CLOSED')"),
     "record_version_valid": ("record_version IS NOT NULL AND record_version >= 1"),
@@ -99,9 +83,7 @@ FRAUD_CASE_RULES = {
     "opened_at_present": ("opened_at IS NOT NULL"),
     "fraud_case_status_valid": ("fraud_case_status IN ('OPEN', 'INVESTIGATING', 'CLOSED')"),
     "fraud_outcome_valid": (
-        "fraud_outcome IS NULL "
-        "OR fraud_outcome IN "
-        "('CONFIRMED_FRAUD', 'LEGITIMATE', 'UNDETERMINED')"
+        "fraud_outcome IS NULL OR fraud_outcome IN ('CONFIRMED_FRAUD', 'LEGITIMATE', 'UNDETERMINED')"
     ),
     "closed_case_has_closed_at": ("fraud_case_status <> 'CLOSED' OR closed_at IS NOT NULL"),
 }

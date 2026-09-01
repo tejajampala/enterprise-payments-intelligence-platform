@@ -35,10 +35,7 @@ class SyntheticDataConfig:
             raise ValueError("accounts_per_customer_min must be greater than zero")
 
         if self.accounts_per_customer_max < self.accounts_per_customer_min:
-            raise ValueError(
-                "accounts_per_customer_max must be greater than or equal to "
-                "accounts_per_customer_min"
-            )
+            raise ValueError("accounts_per_customer_max must be greater than or equal to accounts_per_customer_min")
 
         if self.merchant_count < 1:
             raise ValueError("merchant_count must be greater than zero")

@@ -197,9 +197,7 @@ class SyntheticDataGenerator:
                 kyc_status=KycStatus.VERIFIED,
                 status=CustomerStatus.ACTIVE,
                 record_version=1,
-                source_updated_at=(
-                    self.config.reference_time - timedelta(days=rng.randint(0, 365))
-                ),
+                source_updated_at=(self.config.reference_time - timedelta(days=rng.randint(0, 365))),
             )
 
             customers.append(customer)
@@ -239,9 +237,7 @@ class SyntheticDataGenerator:
                     ),
                     current_balance=Decimal(f"{rng.uniform(0, 20000):.2f}"),
                     record_version=1,
-                    source_updated_at=(
-                        self.config.reference_time - timedelta(days=rng.randint(0, 180))
-                    ),
+                    source_updated_at=(self.config.reference_time - timedelta(days=rng.randint(0, 180))),
                 )
 
                 accounts.append(account)
@@ -278,9 +274,7 @@ class SyntheticDataGenerator:
                 risk_rating=risk_rating,
                 status=MerchantStatus.ACTIVE,
                 record_version=1,
-                source_updated_at=(
-                    self.config.reference_time - timedelta(days=rng.randint(0, 365))
-                ),
+                source_updated_at=(self.config.reference_time - timedelta(days=rng.randint(0, 365))),
             )
 
             merchants.append(merchant)
@@ -318,9 +312,7 @@ class SyntheticDataGenerator:
 
             declined = rng.random() < 0.08
 
-            transaction_status = (
-                TransactionStatus.DECLINED if declined else TransactionStatus.SETTLED
-            )
+            transaction_status = TransactionStatus.DECLINED if declined else TransactionStatus.SETTLED
 
             raw_amount = min(
                 rng.expovariate(1 / 120) + 5,
@@ -361,9 +353,7 @@ class SyntheticDataGenerator:
                 payment_method=payment_method,
                 status=transaction_status,
                 card_present=channel is PaymentChannel.POS,
-                device_id=(
-                    None if channel is PaymentChannel.ATM else f"device-{rng.randint(1, 250):04d}"
-                ),
+                device_id=(None if channel is PaymentChannel.ATM else f"device-{rng.randint(1, 250):04d}"),
                 ip_address=(
                     None
                     if channel in (PaymentChannel.POS, PaymentChannel.ATM)
@@ -393,9 +383,7 @@ class SyntheticDataGenerator:
             lifecycle_event = PaymentEvent(
                 event_id=f"event-{event_index:09d}",
                 event_type=lifecycle_event_type,
-                event_timestamp=(
-                    transaction.event_timestamp + timedelta(seconds=rng.randint(1, 120))
-                ),
+                event_timestamp=(transaction.event_timestamp + timedelta(seconds=rng.randint(1, 120))),
                 sequence_number=2,
                 transaction=transaction,
             )
@@ -442,11 +430,7 @@ class SyntheticDataGenerator:
             status = FraudCaseStatus.INVESTIGATING
             analyst_notes = "Investigation remains open pending customer verification."
 
-        closed_at = (
-            opened_at + timedelta(minutes=rng.randint(15, 240))
-            if status is FraudCaseStatus.CLOSED
-            else None
-        )
+        closed_at = opened_at + timedelta(minutes=rng.randint(15, 240)) if status is FraudCaseStatus.CLOSED else None
 
         return FraudCase(
             case_id=f"case-{case_index:06d}",
