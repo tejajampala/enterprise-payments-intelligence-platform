@@ -3,7 +3,7 @@
 An enterprise-grade Databricks reference implementation for payments data engineering,
 machine learning, MLOps, Generative AI, agentic AI, analytics, governance, and platform engineering.
 
-> **Project Status:** Active Development — Milestone 10 Enterprise MLOps Complete
+> **Project Status:** Active Development — Milestone 12 Governed Fraud Investigation Agent Complete
 
 ---
 
@@ -25,7 +25,7 @@ A modern payments intelligence platform needs to:
 - monitor data, ML models, and AI agents
 - maintain strong security and governance controls
 
-The **Enterprise Payments Intelligence Platform** demonstrates how these requirements
+The **Enterprise Payments Intelligence Platform (EPIP)** demonstrates how these requirements
 can be implemented using the Databricks Data Intelligence Platform on AWS.
 
 ---
@@ -76,13 +76,13 @@ can be implemented using the Databricks Data Intelligence Platform on AWS.
           ┌─────────────────────┼─────────────────────┐
           │                     │                     │
           ▼                     ▼                     ▼
-       AI / BI            Feature Store          Vector Search
+       AI / BI            Feature Store          AI Search / RAG
           │                     │                     │
           │                     ▼                     ▼
-          │               ML Models                  RAG
+          │               ML Models          Fraud Knowledge Base
           │                     │                     │
           │                     ▼                     ▼
-          │              Model Serving       Fraud Investigation
+          │              Batch / Serving      Fraud Investigation
           │                                           Agent
           │                                             │
           └─────────────────────┬───────────────────────┘
@@ -97,9 +97,7 @@ can be implemented using the Databricks Data Intelligence Platform on AWS.
 
 ### Data Engineering
 
-### Implemented Data Engineering Architecture
-
-The current implementation includes:
+The implemented data-engineering architecture includes:
 
 - governed AWS S3 batch ingestion
 - PostgreSQL-style source snapshots and CDC extracts
@@ -124,44 +122,66 @@ The current implementation includes:
 - Delta Change Data Feed for downstream incremental processing
 - end-to-end Silver-to-Gold reconciliation
 
-Milestone 7 introduces feature engineering and Feature Store capabilities for
-fraud detection and forecasting use cases.
+### Feature Engineering
 
-- Unity Catalog governed Feature Store
+Milestone 7 adds governed feature engineering and Feature Store capabilities:
+
+- Unity Catalog governed feature tables
 - transaction-level fraud features
-- point-in-time customer behaviour features
-- point-in-time merchant behaviour features
+- point-in-time customer behavior features
+- point-in-time merchant behavior features
 - TIMESERIES feature-table primary keys
+- leakage-safe feature windows
 - FeatureEngineeringClient training-set construction
-- leakage-safe fraud training datase
+- point-in-time feature lookups
 
-### Machine Learning
+### Machine Learning and MLOps
 
-Planned capabilities include:
+Implemented capabilities include:
 
-- feature engineering
-- Databricks Feature Store
-- fraud detection
+- leakage-safe temporal train, validation, and test splits
+- logistic-regression fraud baseline
+- gradient-boosted fraud model
+- class-imbalance handling
+- fraud-threshold optimization
+- fraud-focused evaluation metrics
 - payment-volume forecasting
-- MLflow 3
-- experiment tracking
-- model evaluation
+- lag and rolling time-series features
+- seasonal, Ridge, and gradient-boosted forecast comparison
+- recursive forecasting
+- MLflow experiment tracking
 - Unity Catalog Model Registry
-- Model Serving
-- model monitoring
+- Candidate / Champion lifecycle governance
+- automated model-validation gates
+- Champion model promotion
+- production serving package
+- batch fraud inference
+- model lifecycle auditability
+- rollback strategy
 
 ### Generative AI and Agents
 
-Planned capabilities include:
+Implemented capabilities include:
 
+- governed fraud-investigation knowledge base
 - Retrieval-Augmented Generation (RAG)
-- Databricks Vector Search
-- foundation models
-- Claude / Anthropic
-- fraud-investigation agent
-- MLflow tracing
-- golden evaluation datasets
-- agent evaluation
+- Databricks AI Search
+- HYBRID retrieval
+- bounded Top-K retrieval
+- governed RAG evaluation datasets
+- local Claude generation with Databricks-governed retrieval
+- OpenAI-based judge evaluation for RAG quality
+- MLflow GenAI tracing
+- governed fraud-investigation agent
+- approved read-only business tools
+- transaction-scope guardrails
+- duplicate tool-call protection
+- maximum tool-call enforcement
+- MLflow ResponsesAgent integration
+- durable investigation history
+- human-in-the-loop fraud investigation controls
+
+Milestone 13 will add formal agent evaluation and regression gates.
 
 ### Analytics
 
@@ -172,17 +192,244 @@ Planned capabilities include:
 
 ### Platform Engineering
 
-Planned capabilities include:
+The project includes or is planned to include:
 
-- Databricks Declarative Automation Bundles
+- Databricks Asset Bundles
 - GitHub Actions
 - Terraform
 - AWS infrastructure
-- RBAC / ABAC
 - Unity Catalog governance
+- RBAC / ABAC
 - monitoring and observability
 - cost optimisation
 - Azure portability
+
+---
+
+## Governed RAG Architecture
+
+Milestone 11 introduces a governed Retrieval-Augmented Generation layer for fraud investigations.
+
+```text
+Fraud Investigation Question
+            │
+            ▼
+ Databricks AI Search
+ HYBRID retrieval / Top K = 3
+            │
+            ▼
+payments_dev.ai.
+fraud_investigation_knowledge_index
+            │
+            ▼
+Governed knowledge chunks
+            │
+            ▼
+Claude generation
+            │
+            ▼
+MLflow trace + RAG evaluation
+```
+
+Key M11 assets include:
+
+```text
+payments_dev.ai.fraud_investigation_knowledge_chunks
+payments_dev.ai.rag_evaluation_dataset
+payments_dev.ai.rag_retrieval_evaluation
+payments_dev.ai.rag_quality_metrics
+payments_dev.ai.rag_demo_responses
+payments_dev.ai.fraud_investigation_knowledge_index
+```
+
+AI Search endpoint:
+
+```text
+epip-dev-fraud-knowledge-search
+```
+
+MLflow experiment:
+
+```text
+/Shared/epip-dev-fraud-rag
+```
+
+---
+
+## Governed Fraud Investigation Agent
+
+Milestone 12 introduces a governed agentic-AI fraud investigation capability.
+
+The agent combines trusted Databricks evidence, Champion fraud-model evidence,
+governed fraud knowledge, Claude tool calling, MLflow tracing, and investigation persistence.
+
+```text
+Human Investigator
+        │
+        ▼
+Fraud Investigation Agent
+        │
+        ├── get_transaction_context
+        ├── get_fraud_evidence
+        └── search_fraud_knowledge
+        │
+        ▼
+Structured Investigation Assessment
+        │
+        ├── MLflow GenAI Trace
+        └── Delta Investigation History
+```
+
+### Governed evidence
+
+```text
+payments_dev.ai.agent_transaction_context
+payments_dev.ai.agent_fraud_evidence
+payments_dev.ai.get_transaction_context(transaction_id)
+payments_dev.ai.get_fraud_evidence(transaction_id)
+```
+
+Outcome-derived fields such as final fraud labels, analyst outcomes, and closed-case
+information are deliberately excluded from agent evidence.
+
+### Approved agent tools
+
+Claude receives only three approved tools:
+
+```text
+get_transaction_context
+get_fraud_evidence
+search_fraud_knowledge
+```
+
+The agent does **not** receive arbitrary SQL or state-changing tools.
+
+It cannot:
+
+- decline a payment
+- block a card
+- freeze an account
+- update a fraud case
+- confirm fraud
+
+Human review remains mandatory.
+
+### Agent guardrails
+
+M12 includes:
+
+- canonical transaction-ID validation
+- transaction-scope enforcement
+- three-tool allowlist
+- unknown-tool rejection
+- repeated-call detection
+- maximum six tool calls
+- bounded knowledge retrieval
+- no arbitrary SQL tool
+- no state-changing tools
+- explicit limitations and uncertainty
+- human-review requirement
+
+### MLflow GenAI tracing
+
+Agent executions are traced in:
+
+```text
+/Shared/epip-dev-fraud-agent
+```
+
+Traces can include:
+
+```text
+AGENT
+CHAT_MODEL
+TOOL
+RETRIEVER
+```
+
+### Investigation persistence
+
+Successful investigations are stored in:
+
+```text
+payments_dev.ai.fraud_agent_investigations
+```
+
+The table retains:
+
+- investigation ID
+- transaction ID
+- agent and model metadata
+- tools used
+- tool-call count
+- risk indicators
+- counter-indicators
+- model signal
+- evidence reviewed
+- knowledge sources
+- limitations
+- recommended next steps
+- complete final response
+- tool execution trajectory
+- MLflow trace ID
+- execution duration
+
+Delta Change Data Feed and Row Tracking are enabled.
+
+### Portfolio demo scenarios
+
+M12 includes four live-data investigation scenarios:
+
+1. strong fraud-risk evidence
+2. cross-border counterexample
+3. duplicate Kafka delivery semantics
+4. insufficient evidence
+
+The duplicate-delivery scenario demonstrates an important payments principle:
+
+> Multiple physical Kafka deliveries for one event do not necessarily represent multiple financial transactions.
+
+Detailed architecture:
+
+```text
+docs/architecture/fraud-investigation-agent.md
+```
+
+Demo runbook:
+
+```text
+docs/demo/M12-runbook.md
+```
+
+---
+
+## Development Runtime for GenAI
+
+The current development workspace is effectively serverless-only and restricts
+direct outbound access from Databricks serverless compute to external Anthropic APIs.
+
+The M11/M12 development implementation therefore uses a hybrid architecture:
+
+```text
+Local Python
+    │
+    ├── Claude API
+    └── agent orchestration
+    │
+    ▼
+Databricks
+    ├── Unity Catalog
+    ├── SQL Warehouse
+    ├── Feature Store
+    ├── fraud predictions
+    ├── AI Search
+    ├── MLflow
+    └── Delta investigation history
+```
+
+This is a development-environment constraint rather than a core architecture requirement.
+A production environment could move model orchestration into approved Databricks-managed
+compute or Model Serving while retaining the same governed evidence and tool contracts.
 
 ---
 
@@ -198,10 +445,13 @@ This project follows production-oriented engineering practices:
 - least-privilege security
 - data and ML observability
 - model evaluation before deployment
-- agent evaluation before deployment
+- agent evaluation before production promotion
 - synthetic data only
 - cost-aware development
 - documented architecture decisions
+- human oversight for consequential AI-assisted decisions
+- point-in-time correctness and leakage prevention
+- traceability of ML and agent executions
 
 ---
 
@@ -231,6 +481,9 @@ enterprise-payments-intelligence-platform/
 │       └── azure/
 │
 ├── notebooks/
+│   ├── agents/
+│   ├── features/
+│   └── ml/
 │
 ├── pipelines/
 │   ├── bronze/
@@ -238,6 +491,9 @@ enterprise-payments-intelligence-platform/
 │   └── gold/
 │
 ├── scripts/
+│   ├── agents/
+│   └── rag/
+│
 ├── sql/
 │
 ├── src/
@@ -315,6 +571,7 @@ Validate the Databricks bundle:
 ```powershell
 databricks bundle validate -t dev -p PAYMENTS_DEV
 ```
+
 ### Generate Local Source-System Data
 
 Generate deterministic PostgreSQL-style, S3-style, and Kafka-style source datasets:
@@ -323,7 +580,7 @@ Generate deterministic PostgreSQL-style, S3-style, and Kafka-style source datase
 uv run python scripts/generate_local_source_data.py
 ```
 
-The generated files are written under:
+Generated files are written under:
 
 ```text
 data/generated/source_systems/seed-42/
@@ -332,8 +589,6 @@ data/generated/source_systems/seed-42/
 Generated datasets are intentionally excluded from Git.
 
 ### Run the Real-Time Streaming Demo
-
-The project includes a complete reproducible streaming path:
 
 ```text
 Synthetic Events
@@ -363,11 +618,26 @@ The streaming implementation demonstrates:
 - streaming reconciliation
 - cost-conscious MSK lifecycle management
 
-For complete setup, execution, validation, troubleshooting, and teardown steps,
-see:
+For complete setup and validation steps:
 
 ```text
 docs/demo/streaming-demo-runbook.md
+```
+
+### Run the Fraud Investigation Agent Demo
+
+Run all four M12 portfolio scenarios:
+
+```powershell
+uv run python scripts/agents/12_run_agent_demo_scenarios.py `
+  --profile PAYMENTS_DEV `
+  --catalog payments_dev
+```
+
+Expected completion marker:
+
+```text
+EPIP_M12C_DEMO_SCENARIOS_COMPLETE
 ```
 
 ---
@@ -378,17 +648,17 @@ docs/demo/streaming-demo-runbook.md
 |---|---|---|
 | 1 | Platform and repository foundation | Complete |
 | 2 | Synthetic payments domain | Complete |
-| 3 | Batch ingestion | Not Started |
-| 4 | Streaming ingestion | Not Started |
-| 5 | Lakeflow and Medallion architecture | Not Started |
-| 6 | Data quality, CDC, and SCD Type 2 | Not Started |
-| 7 | Feature engineering and Feature Store | Not Started |
-| 8 | Fraud detection ML | Not Started |
-| 9 | Forecasting ML | Not Started |
-| 10 | MLOps | Not Started |
-| 11 | RAG and Vector Search | Not Started |
-| 12 | Fraud Investigation Agent | Not Started |
-| 13 | Agent evaluation | Not Started |
+| 3 | Batch ingestion | Complete |
+| 4 | Streaming ingestion | Complete |
+| 5 | Lakeflow and Medallion architecture | Complete |
+| 6 | Data quality, CDC, and SCD Type 2 | Complete |
+| 7 | Feature engineering and Feature Store | Complete |
+| 8 | Fraud detection ML | Complete |
+| 9 | Forecasting ML | Complete |
+| 10 | MLOps | Complete |
+| 11 | RAG and AI Search | Complete |
+| 12 | Governed Fraud Investigation Agent | Complete |
+| 13 | Agent evaluation and regression gates | Next |
 | 14 | AI/BI and Genie | Not Started |
 | 15 | Enterprise CI/CD | Not Started |
 | 16 | Security and governance | Not Started |
@@ -403,18 +673,43 @@ docs/PROJECT_STATUS.md
 
 ---
 
+## Next Milestone — M13 Agent Evaluation
+
+Milestone 13 will introduce formal evaluation of the fraud-investigation agent.
+
+Planned capabilities include:
+
+- golden investigation datasets
+- tool-selection correctness
+- tool-argument correctness
+- transaction-scope compliance
+- trajectory correctness
+- unnecessary tool-call detection
+- evidence completeness
+- groundedness
+- hallucination detection
+- citation correctness
+- risk/counter-indicator balance
+- human-review compliance
+- latency measurement
+- model usage and cost measurement
+- regression gates before agent promotion
+
+---
+
 ## Data Safety
 
 No real banking or customer data is used by this project.
 
 All customers, accounts, merchants, transactions, fraud cases, and other business
-entities will be generated synthetically.
+entities are generated synthetically.
 
 The repository must never contain:
 
 - Databricks access tokens
 - AWS access keys
-- API keys
+- Anthropic API keys
+- OpenAI API keys
 - passwords
 - production data
 - Terraform state containing sensitive values
