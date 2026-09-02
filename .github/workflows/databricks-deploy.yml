@@ -1,7 +1,7 @@
-name: Databricks Bundle CI
+name: Databricks Controlled Deployment
 
 on:
-  pull_request:
+  push:
     branches:
       - main
 
@@ -12,16 +12,16 @@ permissions:
   id-token: write
 
 concurrency:
-  group: databricks-bundle-ci-${{ github.ref }}
-  cancel-in-progress: true
+  group: epip-databricks-ci-deployment
+  cancel-in-progress: false
 
 jobs:
-  bundle-validation:
-    name: Databricks Bundle Validation
+  deploy:
+    name: Deploy Databricks CI Bundle
 
     runs-on: ubuntu-latest
 
-    timeout-minutes: 15
+    timeout-minutes: 30
 
     environment: ci
 
@@ -39,31 +39,31 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v7
 
-      - name: Validate required GitHub environment variables
+      - name: Validate deployment environment
         shell: bash
         run: |
           test -n "${DATABRICKS_HOST}" || {
-            echo "GitHub environment variable DATABRICKS_HOST is required."
+            echo "DATABRICKS_HOST is required."
             exit 1
           }
 
           test -n "${DATABRICKS_CLIENT_ID}" || {
-            echo "GitHub environment variable DATABRICKS_CLIENT_ID is required."
+            echo "DATABRICKS_CLIENT_ID is required."
             exit 1
           }
 
           test -n "${DATABRICKS_TOKEN_AUDIENCE}" || {
-            echo "GitHub environment variable DATABRICKS_ACCOUNT_ID is required."
+            echo "DATABRICKS_ACCOUNT_ID is required."
             exit 1
           }
 
           test -n "${BUNDLE_VAR_msk_bootstrap_servers}" || {
-            echo "GitHub environment secret MSK_BOOTSTRAP_SERVERS is required."
+            echo "MSK_BOOTSTRAP_SERVERS is required."
             exit 1
           }
 
           test -n "${BUNDLE_VAR_s3_landing_url}" || {
-            echo "GitHub environment secret S3_LANDING_URL is required."
+            echo "S3_LANDING_URL is required."
             exit 1
           }
 
@@ -72,14 +72,17 @@ jobs:
         with:
           version: "1.10.0"
 
-      - name: Verify Databricks CLI version
-        run: databricks version
-
-      - name: Verify federated Databricks identity
+      - name: Verify deployment identity
         run: databricks current-user me
 
-      - name: Validate CI bundle target
+      - name: Validate CI bundle
         run: databricks bundle validate -t ci
 
-      - name: Preview controlled CI deployment
+      - name: Preview controlled deployment
         run: databricks bundle plan -t ci --select pipelines.payment_events_streaming,pipelines.silver_transformations,pipelines.gold_analytics
+
+      - name: Deploy controlled CI resources
+        run: databricks bundle deploy -t ci --auto-approve --fail-on-active-runs --select pipelines.payment_events_streaming,pipelines.silver_transformations,pipelines.gold_analytics
+
+      - name: Show deployed bundle resources
+        run: databricks bundle summary -t ci

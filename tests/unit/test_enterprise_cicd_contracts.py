@@ -9,6 +9,7 @@ ROOT = Path(__file__).resolve().parents[2]
 CI_WORKFLOW = ROOT / ".github" / "workflows" / "ci.yml"
 DATABRICKS_WORKFLOW = ROOT / ".github" / "workflows" / "databricks-ci.yml"
 BUNDLE_TARGETS = ROOT / "bundle.targets.yml"
+DATABRICKS_DEPLOY_WORKFLOW = ROOT / ".github" / "workflows" / "databricks-deploy.yml"
 
 
 def test_python_ci_retains_core_quality_gates() -> None:
@@ -58,6 +59,12 @@ def test_databricks_pr_gate_is_validate_and_plan_only() -> None:
 
     assert "databricks bundle validate -t ci" in source
     assert "databricks bundle plan -t ci" in source
+
+    assert "--select" in source
+    assert "pipelines.payment_events_streaming" in source
+    assert "pipelines.silver_transformations" in source
+    assert "pipelines.gold_analytics" in source
+
     assert "databricks bundle deploy" not in source
 
 
@@ -69,3 +76,49 @@ def test_ci_bundle_target_is_isolated_and_safe() -> None:
     assert "trigger_pause_status: PAUSED" in source
     assert "pipelines_development: true" in source
     assert "jobs_max_concurrent_runs: 1" in source
+
+
+def test_pr_databricks_workflow_never_deploys() -> None:
+    source = DATABRICKS_WORKFLOW.read_text(encoding="utf-8")
+
+    assert "pull_request:" in source
+    assert "databricks bundle validate -t ci" in source
+    assert "databricks bundle plan -t ci" in source
+
+    assert "databricks bundle deploy" not in source
+
+
+def test_databricks_deployment_runs_only_after_main_merge() -> None:
+    source = DATABRICKS_DEPLOY_WORKFLOW.read_text(encoding="utf-8")
+
+    assert "push:" in source
+    assert "- main" in source
+
+    assert "pull_request:" not in source
+
+    assert "environment: ci" in source
+    assert "id-token: write" in source
+
+    assert "DATABRICKS_AUTH_TYPE: github-oidc" in source
+    assert "DATABRICKS_CLIENT_ID: ${{ vars.DATABRICKS_CLIENT_ID }}" in source
+    assert "DATABRICKS_TOKEN_AUDIENCE: ${{ vars.DATABRICKS_ACCOUNT_ID }}" in source
+
+    assert "databricks bundle validate -t ci" in source
+    assert "databricks bundle plan -t ci" in source
+    assert "databricks bundle deploy -t ci" in source
+    assert "databricks bundle summary -t ci" in source
+
+    assert "--select" in source
+    assert "pipelines.payment_events_streaming" in source
+    assert "pipelines.silver_transformations" in source
+    assert "pipelines.gold_analytics" in source
+
+    assert "DATABRICKS_TOKEN:" not in source
+    assert "DATABRICKS_CLIENT_SECRET:" not in source
+
+
+def test_ci_uses_isolated_catalog() -> None:
+    source = BUNDLE_TARGETS.read_text(encoding="utf-8")
+
+    assert "ci:" in source
+    assert "catalog_name: payments_ci" in source
