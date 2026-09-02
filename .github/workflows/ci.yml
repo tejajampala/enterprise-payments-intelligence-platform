@@ -19,12 +19,12 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  quality:
+  python-quality:
     name: Python Quality Gates
 
     runs-on: ubuntu-latest
 
-    timeout-minutes: 10
+    timeout-minutes: 15
 
     steps:
       - name: Checkout repository
@@ -55,3 +55,36 @@ jobs:
 
       - name: Run mypy type checking
         run: uv run mypy src
+
+      - name: Build Python package
+        run: uv build
+
+  terraform-quality:
+    name: Terraform Quality Gates
+
+    runs-on: ubuntu-latest
+
+    timeout-minutes: 15
+
+    defaults:
+      run:
+        working-directory: infra/terraform/aws
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
+      - name: Set up Terraform
+        uses: hashicorp/setup-terraform@v4.0.1
+        with:
+          terraform_version: "1.10.5"
+          terraform_wrapper: false
+
+      - name: Verify Terraform formatting
+        run: terraform fmt -check -recursive
+
+      - name: Initialize Terraform without backend
+        run: terraform init -backend=false -input=false
+
+      - name: Validate Terraform configuration
+        run: terraform validate

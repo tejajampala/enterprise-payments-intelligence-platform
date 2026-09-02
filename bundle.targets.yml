@@ -5,3 +5,18 @@ targets:
 
     workspace:
       root_path: /Workspace/Users/${workspace.current_user.userName}/.bundle/${bundle.name}/${bundle.target}
+
+  ci:
+    mode: development
+
+    workspace:
+      root_path: /Workspace/Users/${workspace.current_user.userName}/.bundle/${bundle.name}/${bundle.target}
+
+    presets:
+      name_prefix: "[ci ${workspace.current_user.short_name}] "
+      trigger_pause_status: PAUSED
+      pipelines_development: true
+      jobs_max_concurrent_runs: 1
+      tags:
+        deployment_environment: ci
+        deployment_owner: github-actions

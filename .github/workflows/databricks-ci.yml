@@ -1,0 +1,89 @@
+name: Databricks Bundle CI
+
+on:
+  pull_request:
+    branches:
+      - main
+
+  push:
+    branches:
+      - main
+
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  id-token: write
+
+concurrency:
+  group: databricks-bundle-ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  bundle-validation:
+    name: Databricks Bundle Validation
+
+    runs-on: ubuntu-latest
+
+    timeout-minutes: 15
+
+    environment: ci
+
+    env:
+      DATABRICKS_AUTH_TYPE: github-oidc
+
+      DATABRICKS_HOST: ${{ vars.DATABRICKS_HOST }}
+      DATABRICKS_CLIENT_ID: ${{ vars.DATABRICKS_CLIENT_ID }}
+      DATABRICKS_TOKEN_AUDIENCE: ${{ vars.DATABRICKS_ACCOUNT_ID }}
+
+      BUNDLE_VAR_msk_bootstrap_servers: ${{ secrets.MSK_BOOTSTRAP_SERVERS }}
+      BUNDLE_VAR_s3_landing_url: ${{ secrets.S3_LANDING_URL }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
+      - name: Validate required GitHub environment variables
+        shell: bash
+        run: |
+          test -n "${DATABRICKS_HOST}" || {
+            echo "GitHub environment variable DATABRICKS_HOST is required."
+            exit 1
+          }
+
+          test -n "${DATABRICKS_CLIENT_ID}" || {
+            echo "GitHub environment variable DATABRICKS_CLIENT_ID is required."
+            exit 1
+          }
+
+          test -n "${DATABRICKS_TOKEN_AUDIENCE}" || {
+            echo "GitHub environment variable DATABRICKS_ACCOUNT_ID is required."
+            exit 1
+          }
+
+          test -n "${BUNDLE_VAR_msk_bootstrap_servers}" || {
+            echo "GitHub environment secret MSK_BOOTSTRAP_SERVERS is required."
+            exit 1
+          }
+
+          test -n "${BUNDLE_VAR_s3_landing_url}" || {
+            echo "GitHub environment secret S3_LANDING_URL is required."
+            exit 1
+          }
+
+      - name: Install Databricks CLI
+        uses: databricks/setup-cli@main
+        with:
+          version: "1.10.0"
+
+      - name: Verify Databricks CLI version
+        run: databricks version
+
+      - name: Verify federated Databricks identity
+        run: databricks current-user me
+
+      - name: Validate CI bundle target
+        run: databricks bundle validate -t ci
+
+      - name: Preview CI bundle deployment
+        run: databricks bundle plan -t ci
