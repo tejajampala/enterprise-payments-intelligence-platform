@@ -1,0 +1,64 @@
+name: EPIP Promotion Gates
+
+on:
+  workflow_run:
+    workflows:
+      - Databricks Controlled Deployment
+    types:
+      - completed
+    branches:
+      - main
+
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  id-token: write
+
+concurrency:
+  group: epip-promotion-gates
+  cancel-in-progress: false
+
+jobs:
+  promotion-gates:
+    name: ML and Agent Promotion Gates
+
+    if: >
+      github.event_name == 'workflow_dispatch' ||
+      github.event.workflow_run.conclusion == 'success'
+
+    runs-on: ubuntu-latest
+
+    timeout-minutes: 30
+
+    environment: ci
+
+    env:
+      DATABRICKS_AUTH_TYPE: github-oidc
+
+      DATABRICKS_HOST: ${{ vars.DATABRICKS_HOST }}
+      DATABRICKS_CLIENT_ID: ${{ vars.DATABRICKS_CLIENT_ID }}
+      DATABRICKS_TOKEN_AUDIENCE: ${{ vars.DATABRICKS_ACCOUNT_ID }}
+
+      BUNDLE_VAR_msk_bootstrap_servers: ${{ secrets.MSK_BOOTSTRAP_SERVERS }}
+      BUNDLE_VAR_s3_landing_url: ${{ secrets.S3_LANDING_URL }}
+
+    steps:
+      - name: Checkout deployed revision
+        uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event_name == 'workflow_run' && github.event.workflow_run.head_sha || github.sha }}
+
+      - name: Install Databricks CLI
+        uses: databricks/setup-cli@main
+        with:
+          version: "1.10.0"
+
+      - name: Verify promotion identity
+        run: databricks current-user me
+
+      - name: Validate promotion bundle
+        run: databricks bundle validate -t ci
+
+      - name: Run ML and agent promotion gates
+        run: databricks bundle run -t ci promotion_quality_gates

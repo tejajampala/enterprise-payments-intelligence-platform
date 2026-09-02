@@ -79,10 +79,10 @@ jobs:
         run: databricks bundle validate -t ci
 
       - name: Preview controlled deployment
-        run: databricks bundle plan -t ci --select pipelines.payment_events_streaming,pipelines.silver_transformations,pipelines.gold_analytics
+        run: databricks bundle plan -t ci --select pipelines.payment_events_streaming,pipelines.silver_transformations,pipelines.gold_analytics,jobs.promotion_quality_gates
 
       - name: Deploy controlled CI resources
-        run: databricks bundle deploy -t ci --auto-approve --fail-on-active-runs --select pipelines.payment_events_streaming,pipelines.silver_transformations,pipelines.gold_analytics
+        run: databricks bundle deploy -t ci --auto-approve --fail-on-active-runs --select pipelines.payment_events_streaming,pipelines.silver_transformations,pipelines.gold_analytics,jobs.promotion_quality_gates
 
       - name: Show deployed bundle resources
         run: databricks bundle summary -t ci
