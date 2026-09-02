@@ -41,6 +41,10 @@ def test_databricks_ci_uses_github_oidc() -> None:
     assert "DATABRICKS_CLIENT_ID: ${{ vars.DATABRICKS_CLIENT_ID }}" in source
     assert "DATABRICKS_TOKEN_AUDIENCE: ${{ vars.DATABRICKS_ACCOUNT_ID }}" in source
 
+    assert "BUNDLE_VAR_msk_bootstrap_servers: ${{ secrets.MSK_BOOTSTRAP_SERVERS }}" in source
+
+    assert "BUNDLE_VAR_s3_landing_url: ${{ secrets.S3_LANDING_URL }}" in source
+
     # CI must use GitHub OIDC, not stored Databricks credentials.
     assert "DATABRICKS_TOKEN:" not in source
     assert "secrets.DATABRICKS_TOKEN" not in source
