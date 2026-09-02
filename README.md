@@ -3,7 +3,7 @@
 An enterprise-grade Databricks reference implementation for payments data engineering,
 machine learning, MLOps, Generative AI, agentic AI, analytics, governance, and platform engineering.
 
-> **Project Status:** Active Development — Milestone 12 Governed Fraud Investigation Agent Complete
+> **Project Status:** Active Development — Milestone 14 Governed AI/BI Analytics Complete
 
 ---
 
@@ -23,72 +23,82 @@ A modern payments intelligence platform needs to:
 - deploy machine learning models safely
 - deploy and evaluate Generative AI applications and agents
 - monitor data, ML models, and AI agents
+- expose governed business metrics through analytics
 - maintain strong security and governance controls
+- support repeatable CI/CD and platform automation
 
-The **Enterprise Payments Intelligence Platform (EPIP)** demonstrates how these requirements
-can be implemented using the Databricks Data Intelligence Platform on AWS.
+The **Enterprise Payments Intelligence Platform (EPIP)** demonstrates how these
+requirements can be implemented using the Databricks Data Intelligence Platform on AWS.
 
 ---
 
 ## Target Architecture
 
 ```text
-                             PAYMENT DATA SOURCES
+                               PAYMENT DATA SOURCES
 
-                  ┌─────────────┬─────────────┬─────────────┐
-                  │             │             │
-                  ▼             ▼             ▼
-             S3 / Files     PostgreSQL     Kafka / MSK
-                  │             │             │
-                  └─────────────┼─────────────┘
-                                │
-                                ▼
-                         AWS Databricks
-                                │
-                          Unity Catalog
-                                │
-                                ▼
-                       Ingestion Framework
-                                │
-              ┌─────────────────┼─────────────────┐
-              │                 │                 │
-              ▼                 ▼                 ▼
-         Auto Loader           JDBC       Structured Streaming
-              │                 │                 │
-              └─────────────────┼─────────────────┘
-                                │
-                                ▼
-                              Bronze
-                                │
-                                ▼
-                              Silver
-                                │
-                  ┌─────────────┼─────────────┐
-                  │             │             │
-                  ▼             ▼             ▼
-             Data Quality     AUTO CDC     SCD Type 2
-                  │             │             │
-                  └─────────────┼─────────────┘
-                                │
-                                ▼
-                               Gold
-                                │
-          ┌─────────────────────┼─────────────────────┐
-          │                     │                     │
-          ▼                     ▼                     ▼
-       AI / BI            Feature Store          AI Search / RAG
-          │                     │                     │
-          │                     ▼                     ▼
-          │               ML Models          Fraud Knowledge Base
-          │                     │                     │
-          │                     ▼                     ▼
-          │              Batch / Serving      Fraud Investigation
-          │                                           Agent
-          │                                             │
-          └─────────────────────┬───────────────────────┘
-                                │
-                                ▼
-                       Business Consumers
+                    ┌─────────────┬─────────────┬─────────────┐
+                    │             │             │
+                    ▼             ▼             ▼
+               S3 / Files     PostgreSQL     Kafka / MSK
+                    │             │             │
+                    └─────────────┼─────────────┘
+                                  │
+                                  ▼
+                           AWS Databricks
+                                  │
+                            Unity Catalog
+                                  │
+                                  ▼
+                         Ingestion Framework
+                                  │
+                ┌─────────────────┼─────────────────┐
+                │                 │                 │
+                ▼                 ▼                 ▼
+           Auto Loader           JDBC       Structured Streaming
+                │                 │                 │
+                └─────────────────┼─────────────────┘
+                                  │
+                                  ▼
+                                Bronze
+                                  │
+                                  ▼
+                                Silver
+                                  │
+                    ┌─────────────┼─────────────┐
+                    │             │             │
+                    ▼             ▼             ▼
+               Data Quality     AUTO CDC     SCD Type 2
+                    │             │             │
+                    └─────────────┼─────────────┘
+                                  │
+                                  ▼
+                                 Gold
+                                  │
+          ┌───────────────────────┼────────────────────────┐
+          │                       │                        │
+          ▼                       ▼                        ▼
+     Feature Store          Governed Analytics       AI Search / RAG
+          │                 Semantic Layer                  │
+          ▼                       │                         ▼
+      ML Models                    ▼                 Fraud Knowledge Base
+          │                 UC Metric Views                  │
+          ▼                       │                         ▼
+ Batch / Serving                  ▼                 Fraud Investigation
+                                  │                        Agent
+                                  │                         │
+                                  │                         ▼
+                                  │                  Agent Evaluation
+                                  │                 + Regression Gates
+                                  │                         │
+                                  └───────────┬─────────────┘
+                                              │
+                                              ▼
+                                  EPIP Payments Intelligence
+                                      AI/BI Dashboard
+                                              │
+                                              ▼
+                                      Business Consumers
 ```
 
 ---
@@ -135,6 +145,14 @@ Milestone 7 adds governed feature engineering and Feature Store capabilities:
 - FeatureEngineeringClient training-set construction
 - point-in-time feature lookups
 
+Key feature assets:
+
+```text
+payments_dev.features.transaction_fraud_features
+payments_dev.features.customer_behavior_features
+payments_dev.features.merchant_behavior_features
+```
+
 ### Machine Learning and MLOps
 
 Implemented capabilities include:
@@ -155,9 +173,16 @@ Implemented capabilities include:
 - automated model-validation gates
 - Champion model promotion
 - production serving package
-- batch fraud inference
+- Champion-based batch fraud inference
 - model lifecycle auditability
 - rollback strategy
+
+Key model assets:
+
+```text
+payments_dev.models.fraud_detection_model
+payments_dev.ml.fraud_batch_predictions
+```
 
 ### Generative AI and Agents
 
@@ -180,21 +205,44 @@ Implemented capabilities include:
 - MLflow ResponsesAgent integration
 - durable investigation history
 - human-in-the-loop fraud investigation controls
-
-Milestone 13 will add formal agent evaluation and regression gates.
+- governed golden agent-evaluation cases
+- deterministic tool and trajectory evaluation
+- transaction-scope, safety, structure, citation, and human-review scoring
+- structured LLM-as-a-judge evaluation
+- groundedness and evidence-completeness scoring
+- persistent per-case agent evaluation history
+- aggregate regression-gate summaries
+- MLflow-linked agent evaluation results
 
 ### Analytics
 
-Planned capabilities include:
+Implemented capabilities include:
 
-- AI/BI dashboards
-- Genie
+- Unity Catalog `analytics` semantic schema
+- reusable payment-operations semantic base view
+- reusable fraud-model semantic base view
+- reusable fraud-agent-quality semantic base view
+- Unity Catalog metric views
+- governed `MEASURE(...)` KPI definitions
+- reusable payment operations metrics
+- reusable fraud-model metrics
+- reusable fraud-agent quality metrics
+- three-page `EPIP Payments Intelligence` AI/BI dashboard
+- Executive Payments analytics
+- Fraud Intelligence model analytics
+- Fraud Agent Quality and regression analytics
+- dashboard serialization and bundle management
+- dashboard deployment through Databricks Declarative Automation Bundles
+
+Databricks Genie Agent is intentionally deferred as an optional future
+conversational-analytics enhancement. The semantic layer is already designed so
+a future Genie Agent can consume the same governed metric views.
 
 ### Platform Engineering
 
 The project includes or is planned to include:
 
-- Databricks Asset Bundles
+- Databricks Declarative Automation Bundles
 - GitHub Actions
 - Terraform
 - AWS infrastructure
@@ -222,16 +270,16 @@ payments_dev.ai.
 fraud_investigation_knowledge_index
             │
             ▼
-Governed knowledge chunks
+Governed Knowledge Chunks
             │
             ▼
-Claude generation
+Claude Generation
             │
             ▼
-MLflow trace + RAG evaluation
+MLflow Trace + RAG Evaluation
 ```
 
-Key M11 assets include:
+Key M11 assets:
 
 ```text
 payments_dev.ai.fraud_investigation_knowledge_chunks
@@ -246,6 +294,12 @@ AI Search endpoint:
 
 ```text
 epip-dev-fraud-knowledge-search
+```
+
+Embedding endpoint:
+
+```text
+databricks-qwen3-embedding-0-6b
 ```
 
 MLflow experiment:
@@ -403,33 +457,263 @@ docs/demo/M12-runbook.md
 
 ---
 
+## Fraud Agent Evaluation and Regression Gates
+
+Milestone 13 adds formal evaluation of the fraud-investigation agent.
+
+```text
+Golden Evaluation Cases
+          │
+          ▼
+M12 Fraud Investigation Agent
+          │
+          ├── MLflow Trace
+          └── Tool Trajectory
+          │
+          ▼
+Deterministic Scorers
+          +
+Structured LLM Judge
+          │
+          ▼
+Per-Case Evaluation Result
+          │
+          ▼
+Aggregate Regression Gates
+          │
+        PASS / FAIL
+```
+
+### Governed evaluation assets
+
+```text
+payments_dev.ai.agent_evaluation_dataset
+payments_dev.ai.agent_evaluation_results
+payments_dev.ai.agent_evaluation_summary
+```
+
+### Evaluation dimensions
+
+Deterministic evaluation includes:
+
+- required-tool selection
+- tool-argument correctness
+- tool efficiency
+- transaction-scope compliance
+- response-structure compliance
+- source-citation correctness
+- human-review compliance
+- autonomous-action safety
+
+Structured judge evaluation includes:
+
+- groundedness
+- evidence completeness
+- investigation quality
+- risk/counter-indicator balance
+- calibrated uncertainty
+
+### Critical regression gates
+
+The platform treats the following as critical controls:
+
+```text
+transaction scope
+safety
+human review
+response structure
+```
+
+Evaluation results retain the M12 MLflow trace ID so failed evaluations can be
+traced back to the actual model, tool, and retrieval trajectory.
+
+Architecture documentation:
+
+```text
+docs/architecture/agent-evaluation.md
+```
+
+Demo runbook:
+
+```text
+docs/demo/M13-runbook.md
+```
+
+---
+
+## Governed AI/BI Analytics
+
+Milestone 14 adds a governed semantic analytics layer and portfolio-ready AI/BI dashboard.
+
+### Semantic architecture
+
+```text
+Silver / Gold / ML / Agent Evaluation
+                │
+                ▼
+      payments_dev.analytics
+                │
+      ┌─────────┼─────────┐
+      │         │         │
+      ▼         ▼         ▼
+   Payments    Fraud     Agent
+   Semantic    Model     Quality
+   Layer       Layer     Layer
+      │         │         │
+      └─────────┼─────────┘
+                ▼
+       Unity Catalog Metric Views
+                │
+                ▼
+      EPIP Payments Intelligence
+          AI/BI Dashboard
+```
+
+### Semantic base views
+
+```text
+payments_dev.analytics.payment_operations_base
+payments_dev.analytics.fraud_model_operations_base
+payments_dev.analytics.agent_quality_base
+```
+
+### Metric views
+
+```text
+payments_dev.analytics.payment_operations_metrics
+payments_dev.analytics.fraud_model_metrics
+payments_dev.analytics.agent_quality_metrics
+```
+
+Metric views centralize business KPI definitions and are queried using:
+
+```sql
+MEASURE(<measure_name>)
+```
+
+### Payment metrics
+
+Examples include:
+
+- Transaction Count
+- Total Payment Value
+- Average Transaction Value
+- Authorization Rate
+- Decline Rate
+- Card Not Present Rate
+- Unique Customers
+- Unique Merchants
+
+### Fraud-model metrics
+
+Examples include:
+
+- Transactions Scored
+- Predicted Fraud Count
+- Predicted Fraud Rate
+- Average Fraud Probability
+- High Risk Transactions
+- Cross-Border High Risk
+- Card-Not-Present High Risk
+
+Important semantic rule:
+
+```text
+predicted_fraud != confirmed fraud
+fraud_probability != proof of fraud
+```
+
+The HIGH / MEDIUM / LOW risk bands are model-analytics groupings rather than
+confirmed-fraud classifications.
+
+### Agent-quality metrics
+
+Examples include:
+
+- Evaluated Cases
+- Case Pass Rate
+- Average Overall Score
+- Average Groundedness
+- Average Evidence Completeness
+- Average Investigation Quality
+- Average Tool Selection
+- Average Tool Argument Score
+- Average Tool Efficiency
+- Average Citation Score
+- Scope Compliance Rate
+- Safety Compliance Rate
+- Human Review Compliance
+- Average Agent Duration
+
+### AI/BI dashboard
+
+Dashboard:
+
+```text
+EPIP Payments Intelligence
+```
+
+Pages:
+
+1. **Executive Payments**
+2. **Fraud Intelligence**
+3. **Fraud Agent Quality**
+
+The dashboard is serialized as a `.lvdash.json` asset and bound to the
+Databricks bundle so it can be version controlled and deployed reproducibly.
+
+Detailed architecture:
+
+```text
+docs/architecture/ai-bi-dashboard.md
+```
+
+Demo runbook:
+
+```text
+docs/demo/M14-runbook.md
+```
+
+### Genie
+
+Genie Agent integration is deferred as an optional future enhancement.
+
+The architecture remains Genie-ready because the same governed metric views can
+later support natural-language analytics without redefining KPI logic.
+
+---
+
 ## Development Runtime for GenAI
 
 The current development workspace is effectively serverless-only and restricts
 direct outbound access from Databricks serverless compute to external Anthropic APIs.
 
-The M11/M12 development implementation therefore uses a hybrid architecture:
+The M11–M13 development implementation therefore uses a hybrid architecture:
 
 ```text
 Local Python
     │
     ├── Claude API
-    └── agent orchestration
+    ├── OpenAI Judge
+    └── Agent / Evaluation Orchestration
     │
     ▼
 Databricks
     ├── Unity Catalog
     ├── SQL Warehouse
     ├── Feature Store
-    ├── fraud predictions
+    ├── Fraud Predictions
     ├── AI Search
     ├── MLflow
-    └── Delta investigation history
+    ├── Evaluation History
+    └── Delta Investigation History
 ```
 
 This is a development-environment constraint rather than a core architecture requirement.
-A production environment could move model orchestration into approved Databricks-managed
-compute or Model Serving while retaining the same governed evidence and tool contracts.
+
+A production environment could move model orchestration into approved
+Databricks-managed compute or Model Serving while retaining the same governed
+evidence, evaluation, and tool contracts.
 
 ---
 
@@ -446,12 +730,14 @@ This project follows production-oriented engineering practices:
 - data and ML observability
 - model evaluation before deployment
 - agent evaluation before production promotion
+- centralized semantic KPI definitions
 - synthetic data only
 - cost-aware development
 - documented architecture decisions
 - human oversight for consequential AI-assisted decisions
 - point-in-time correctness and leakage prevention
 - traceability of ML and agent executions
+- version-controlled analytics assets
 
 ---
 
@@ -466,14 +752,10 @@ enterprise-payments-intelligence-platform/
 ├── bundle/
 │   └── resources/
 │
-├── dashboards/
-│
 ├── docs/
 │   ├── adr/
 │   ├── architecture/
 │   └── demo/
-│
-├── genie/
 │
 ├── infra/
 │   └── terraform/
@@ -482,25 +764,34 @@ enterprise-payments-intelligence-platform/
 │
 ├── notebooks/
 │   ├── agents/
+│   ├── analytics/
 │   ├── features/
-│   └── ml/
+│   ├── ml/
+│   ├── mlops/
+│   └── rag/
 │
 ├── pipelines/
 │   ├── bronze/
 │   ├── silver/
-│   └── gold/
+│   ├── gold/
+│   └── streaming/
 │
 ├── scripts/
 │   ├── agents/
 │   └── rag/
 │
 ├── sql/
+│   └── analytics/
 │
 ├── src/
+│   ├── analytics/
+│   │   └── *.lvdash.json
+│   │
 │   └── payments_intelligence/
 │       ├── agents/
 │       ├── common/
 │       ├── data_engineering/
+│       ├── evaluation/
 │       └── ml/
 │
 ├── tests/
@@ -572,6 +863,12 @@ Validate the Databricks bundle:
 databricks bundle validate -t dev -p PAYMENTS_DEV
 ```
 
+Preview a deployment:
+
+```powershell
+databricks bundle plan -t dev -p PAYMENTS_DEV
+```
+
 ### Generate Local Source-System Data
 
 Generate deterministic PostgreSQL-style, S3-style, and Kafka-style source datasets:
@@ -640,6 +937,44 @@ Expected completion marker:
 EPIP_M12C_DEMO_SCENARIOS_COMPLETE
 ```
 
+### Run the Fraud Agent Evaluation
+
+```powershell
+uv run python scripts/agents/13_evaluate_fraud_investigation_agent.py `
+  --profile PAYMENTS_DEV `
+  --catalog payments_dev
+```
+
+Expected completion markers:
+
+```text
+EPIP_M13_AGENT_EVALUATION_COMPLETE
+REGRESSION_GATE=PASS
+```
+
+### Validate the AI/BI Semantic Layer
+
+```sql
+SELECT
+    MEASURE(transaction_count) AS transaction_count,
+    MEASURE(total_payment_value) AS total_payment_value
+FROM payments_dev.analytics.payment_operations_metrics;
+```
+
+Dashboard:
+
+```text
+EPIP Payments Intelligence
+```
+
+Use:
+
+```text
+docs/demo/M14-runbook.md
+```
+
+for the full semantic-layer and dashboard validation flow.
+
 ---
 
 ## Implementation Roadmap
@@ -658,9 +993,9 @@ EPIP_M12C_DEMO_SCENARIOS_COMPLETE
 | 10 | MLOps | Complete |
 | 11 | RAG and AI Search | Complete |
 | 12 | Governed Fraud Investigation Agent | Complete |
-| 13 | Agent evaluation and regression gates | Next |
-| 14 | AI/BI and Genie | Not Started |
-| 15 | Enterprise CI/CD | Not Started |
+| 13 | Agent evaluation and regression gates | Complete |
+| 14 | Governed AI/BI semantic layer and dashboard | Complete |
+| 15 | Enterprise CI/CD | Next |
 | 16 | Security and governance | Not Started |
 | 17 | Monitoring and cost optimisation | Not Started |
 | 18 | Azure portability | Not Started |
@@ -673,27 +1008,29 @@ docs/PROJECT_STATUS.md
 
 ---
 
-## Next Milestone — M13 Agent Evaluation
+## Next Milestone — M15 Enterprise CI/CD
 
-Milestone 13 will introduce formal evaluation of the fraud-investigation agent.
+Milestone 15 will industrialize validation, deployment, and controlled promotion
+across the EPIP platform.
 
 Planned capabilities include:
 
-- golden investigation datasets
-- tool-selection correctness
-- tool-argument correctness
-- transaction-scope compliance
-- trajectory correctness
-- unnecessary tool-call detection
-- evidence completeness
-- groundedness
-- hallucination detection
-- citation correctness
-- risk/counter-indicator balance
-- human-review compliance
-- latency measurement
-- model usage and cost measurement
-- regression gates before agent promotion
+- pull-request quality gates
+- automated Ruff validation
+- automated mypy validation
+- automated pytest execution
+- Databricks bundle validation in CI
+- deployment environment separation
+- controlled dev-to-higher-environment promotion
+- Lakeflow/data-pipeline CI/CD
+- ML lifecycle CI/CD
+- model validation as a promotion gate
+- M13 agent evaluation as an AI promotion gate
+- analytics/dashboard deployment validation
+- infrastructure validation
+- release traceability
+- rollback practices
+- branch and environment governance
 
 ---
 

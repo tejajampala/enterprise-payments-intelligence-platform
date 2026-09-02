@@ -1,0 +1,2301 @@
+{
+  "datasets": [
+    {
+      "asset_name": "payments_dev.analytics.payment_operations_metrics",
+      "displayName": "Payment Operations Metrics",
+      "name": "payment_operations_metrics"
+    },
+    {
+      "asset_name": "payments_dev.analytics.fraud_model_metrics",
+      "displayName": "Fraud Model Metrics",
+      "name": "fraud_model_metrics"
+    },
+    {
+      "asset_name": "payments_dev.analytics.agent_quality_metrics",
+      "displayName": "Agent Quality Metrics",
+      "name": "agent_quality_metrics"
+    },
+    {
+      "displayName": "Failed Agent Cases",
+      "name": "failed_agent_cases",
+      "queryLines": [
+        "SELECT\n",
+        "  created_at,\n",
+        "  case_id,\n",
+        "  scenario_type,\n",
+        "  failure_reasons,\n",
+        "  judge_rationale,\n",
+        "  trace_id\n",
+        "FROM\n",
+        "  payments_dev.analytics.agent_quality_base\n",
+        "WHERE\n",
+        "  case_pass = false\n",
+        "ORDER BY\n",
+        "  created_at DESC"
+      ]
+    }
+  ],
+  "pages": [
+    {
+      "displayName": "Executive Payments",
+      "layout": [
+        {
+          "position": {
+            "height": 2,
+            "width": 2,
+            "x": 0,
+            "y": 0
+          },
+          "widget": {
+            "name": "transaction_count",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "payment_operations_metrics",
+                  "disaggregated": false,
+                  "fields": [
+                    {
+                      "expression": "MEASURE(`transaction_count`)",
+                      "name": "measure(transaction_count)"
+                    }
+                  ]
+                }
+              }
+            ],
+            "spec": {
+              "data": {
+                "queryName": "main_query"
+              },
+              "encodings": {
+                "value": {
+                  "fieldName": "measure(transaction_count)",
+                  "rowNumber": 0
+                }
+              },
+              "frame": {
+                "showTitle": true,
+                "title": "Transactions"
+              },
+              "version": 2,
+              "widgetType": "counter"
+            }
+          }
+        },
+        {
+          "position": {
+            "height": 2,
+            "width": 3,
+            "x": 2,
+            "y": 0
+          },
+          "widget": {
+            "name": "total_payment_value",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "payment_operations_metrics",
+                  "disaggregated": false,
+                  "fields": [
+                    {
+                      "expression": "MEASURE(`total_payment_value`)",
+                      "name": "measure(total_payment_value)"
+                    }
+                  ]
+                }
+              }
+            ],
+            "spec": {
+              "data": {
+                "queryName": "main_query"
+              },
+              "encodings": {
+                "value": {
+                  "fieldName": "measure(total_payment_value)",
+                  "rowNumber": 0
+                }
+              },
+              "frame": {
+                "showTitle": true,
+                "title": "Payment Value"
+              },
+              "version": 2,
+              "widgetType": "counter"
+            }
+          }
+        },
+        {
+          "position": {
+            "height": 2,
+            "width": 3,
+            "x": 5,
+            "y": 0
+          },
+          "widget": {
+            "name": "average_transaction_value",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "payment_operations_metrics",
+                  "disaggregated": false,
+                  "fields": [
+                    {
+                      "expression": "MEASURE(`average_transaction_value`)",
+                      "name": "measure(average_transaction_value)"
+                    }
+                  ]
+                }
+              }
+            ],
+            "spec": {
+              "data": {
+                "queryName": "main_query"
+              },
+              "encodings": {
+                "value": {
+                  "fieldName": "measure(average_transaction_value)",
+                  "rowNumber": 0
+                }
+              },
+              "frame": {
+                "showTitle": true,
+                "title": "Avg Transaction Value"
+              },
+              "version": 2,
+              "widgetType": "counter"
+            }
+          }
+        },
+        {
+          "position": {
+            "height": 2,
+            "width": 2,
+            "x": 8,
+            "y": 0
+          },
+          "widget": {
+            "name": "authorization_rate",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "payment_operations_metrics",
+                  "disaggregated": false,
+                  "fields": [
+                    {
+                      "expression": "MEASURE(`authorization_rate`)",
+                      "name": "measure(authorization_rate)"
+                    }
+                  ]
+                }
+              }
+            ],
+            "spec": {
+              "data": {
+                "queryName": "main_query"
+              },
+              "encodings": {
+                "value": {
+                  "fieldName": "measure(authorization_rate)",
+                  "format": {
+                    "decimalPlaces": {
+                      "places": 0,
+                      "type": "exact"
+                    },
+                    "type": "number-percent"
+                  },
+                  "rowNumber": 0
+                }
+              },
+              "frame": {
+                "showTitle": true,
+                "title": {
+                  "fields": [],
+                  "value": "Authorization Rate"
+                }
+              },
+              "version": 2,
+              "widgetType": "counter"
+            }
+          }
+        },
+        {
+          "position": {
+            "height": 2,
+            "width": 2,
+            "x": 10,
+            "y": 0
+          },
+          "widget": {
+            "name": "decline_rate",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "payment_operations_metrics",
+                  "disaggregated": false,
+                  "fields": [
+                    {
+                      "expression": "MEASURE(`decline_rate`)",
+                      "name": "measure(decline_rate)"
+                    }
+                  ]
+                }
+              }
+            ],
+            "spec": {
+              "data": {
+                "queryName": "main_query"
+              },
+              "encodings": {
+                "value": {
+                  "fieldName": "measure(decline_rate)",
+                  "format": {
+                    "decimalPlaces": {
+                      "places": 0,
+                      "type": "exact"
+                    },
+                    "type": "number-percent"
+                  },
+                  "rowNumber": 0
+                }
+              },
+              "frame": {
+                "showTitle": true,
+                "title": {
+                  "fields": [],
+                  "value": "Decline Rate"
+                }
+              },
+              "version": 2,
+              "widgetType": "counter"
+            }
+          }
+        },
+        {
+          "position": {
+            "height": 4,
+            "width": 6,
+            "x": 0,
+            "y": 2
+          },
+          "widget": {
+            "name": "daily_transaction_volume_trend",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "payment_operations_metrics",
+                  "disaggregated": false,
+                  "fields": [
+                    {
+                      "expression": "DATE_TRUNC(\"DAY\", `event_date`)",
+                      "name": "daily(event_date)"
+                    },
+                    {
+                      "expression": "MEASURE(`transaction_count`)",
+                      "name": "measure(transaction_count)"
+                    }
+                  ]
+                }
+              }
+            ],
+            "spec": {
+              "data": {
+                "queryName": "main_query"
+              },
+              "encodings": {
+                "x": {
+                  "displayName": "Day",
+                  "fieldName": "daily(event_date)",
+                  "scale": {
+                    "type": "temporal"
+                  }
+                },
+                "y": {
+                  "displayName": "transaction_count",
+                  "fieldName": "measure(transaction_count)",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                }
+              },
+              "frame": {
+                "showTitle": true,
+                "title": "Volume Trend"
+              },
+              "version": 3,
+              "widgetType": "line"
+            }
+          }
+        },
+        {
+          "position": {
+            "height": 4,
+            "width": 6,
+            "x": 6,
+            "y": 2
+          },
+          "widget": {
+            "name": "daily_payment_value_trend",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "payment_operations_metrics",
+                  "disaggregated": false,
+                  "fields": [
+                    {
+                      "expression": "DATE_TRUNC(\"DAY\", `event_date`)",
+                      "name": "daily(event_date)"
+                    },
+                    {
+                      "expression": "MEASURE(`total_payment_value`)",
+                      "name": "measure(total_payment_value)"
+                    }
+                  ]
+                }
+              }
+            ],
+            "spec": {
+              "data": {
+                "queryName": "main_query"
+              },
+              "encodings": {
+                "x": {
+                  "displayName": "Day",
+                  "fieldName": "daily(event_date)",
+                  "scale": {
+                    "type": "temporal"
+                  }
+                },
+                "y": {
+                  "displayName": "total_payment_value",
+                  "fieldName": "measure(total_payment_value)",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                }
+              },
+              "frame": {
+                "showTitle": true,
+                "title": "Value Trend"
+              },
+              "version": 3,
+              "widgetType": "line"
+            }
+          }
+        },
+        {
+          "position": {
+            "height": 4,
+            "width": 4,
+            "x": 0,
+            "y": 6
+          },
+          "widget": {
+            "name": "payment_value_by_channel",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "payment_operations_metrics",
+                  "disaggregated": false,
+                  "fields": [
+                    {
+                      "expression": "`channel`",
+                      "name": "channel"
+                    },
+                    {
+                      "expression": "MEASURE(`total_payment_value`)",
+                      "name": "measure(total_payment_value)"
+                    }
+                  ]
+                }
+              }
+            ],
+            "spec": {
+              "data": {
+                "queryName": "main_query"
+              },
+              "encodings": {
+                "color": {
+                  "displayName": "channel",
+                  "fieldName": "channel",
+                  "scale": {
+                    "type": "categorical"
+                  }
+                },
+                "x": {
+                  "displayName": "channel",
+                  "fieldName": "channel",
+                  "scale": {
+                    "type": "categorical"
+                  }
+                },
+                "y": {
+                  "displayName": "total_payment_value",
+                  "fieldName": "measure(total_payment_value)",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                }
+              },
+              "frame": {
+                "showTitle": true,
+                "title": "Value by Channel"
+              },
+              "version": 3,
+              "widgetType": "bar"
+            }
+          }
+        },
+        {
+          "position": {
+            "height": 4,
+            "width": 4,
+            "x": 4,
+            "y": 6
+          },
+          "widget": {
+            "name": "payment_method_mix",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "payment_operations_metrics",
+                  "disaggregated": false,
+                  "fields": [
+                    {
+                      "expression": "MEASURE(`transaction_count`)",
+                      "name": "measure(transaction_count)"
+                    },
+                    {
+                      "expression": "`payment_method`",
+                      "name": "payment_method"
+                    }
+                  ]
+                }
+              }
+            ],
+            "spec": {
+              "data": {
+                "queryName": "main_query"
+              },
+              "encodings": {
+                "angle": {
+                  "displayName": "transaction_count",
+                  "fieldName": "measure(transaction_count)",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                },
+                "color": {
+                  "displayName": "payment_method",
+                  "fieldName": "payment_method",
+                  "scale": {
+                    "type": "categorical"
+                  }
+                }
+              },
+              "frame": {
+                "showTitle": true,
+                "title": "Payment Method Mix"
+              },
+              "version": 3,
+              "widgetType": "pie"
+            }
+          }
+        },
+        {
+          "position": {
+            "height": 4,
+            "width": 4,
+            "x": 8,
+            "y": 6
+          },
+          "widget": {
+            "name": "payment_value_by_transaction_country",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "payment_operations_metrics",
+                  "disaggregated": false,
+                  "fields": [
+                    {
+                      "expression": "`transaction_country`",
+                      "name": "transaction_country"
+                    },
+                    {
+                      "expression": "MEASURE(`total_payment_value`)",
+                      "name": "measure(total_payment_value)"
+                    }
+                  ]
+                }
+              }
+            ],
+            "spec": {
+              "data": {
+                "queryName": "main_query"
+              },
+              "encodings": {
+                "color": {
+                  "displayName": "transaction_country",
+                  "fieldName": "transaction_country",
+                  "scale": {
+                    "type": "categorical"
+                  }
+                },
+                "x": {
+                  "displayName": "transaction_country",
+                  "fieldName": "transaction_country",
+                  "scale": {
+                    "type": "categorical"
+                  }
+                },
+                "y": {
+                  "displayName": "total_payment_value",
+                  "fieldName": "measure(total_payment_value)",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                }
+              },
+              "frame": {
+                "showTitle": true,
+                "title": "Value by Country"
+              },
+              "version": 3,
+              "widgetType": "bar"
+            }
+          }
+        },
+        {
+          "position": {
+            "height": 5,
+            "width": 12,
+            "x": 0,
+            "y": 10
+          },
+          "widget": {
+            "name": "merchant_performance",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "payment_operations_metrics",
+                  "disaggregated": false,
+                  "fields": [
+                    {
+                      "expression": "`merchant_name`",
+                      "name": "merchant_name"
+                    },
+                    {
+                      "expression": "MEASURE(`transaction_count`)",
+                      "name": "measure(transaction_count)"
+                    },
+                    {
+                      "expression": "MEASURE(`total_payment_value`)",
+                      "name": "measure(total_payment_value)"
+                    },
+                    {
+                      "expression": "MEASURE(`average_transaction_value`)",
+                      "name": "measure(average_transaction_value)"
+                    },
+                    {
+                      "expression": "MEASURE(`authorization_rate`)",
+                      "name": "measure(authorization_rate)"
+                    },
+                    {
+                      "expression": "MEASURE(`decline_rate`)",
+                      "name": "measure(decline_rate)"
+                    }
+                  ]
+                }
+              }
+            ],
+            "spec": {
+              "data": {
+                "queryName": "main_query"
+              },
+              "encodings": {
+                "columns": [
+                  {
+                    "fieldName": "merchant_name"
+                  },
+                  {
+                    "fieldName": "measure(transaction_count)"
+                  },
+                  {
+                    "fieldName": "measure(total_payment_value)"
+                  },
+                  {
+                    "fieldName": "measure(average_transaction_value)"
+                  },
+                  {
+                    "fieldName": "measure(authorization_rate)",
+                    "format": {
+                      "decimalPlaces": {
+                        "places": 0,
+                        "type": "exact"
+                      },
+                      "type": "number-percent"
+                    }
+                  },
+                  {
+                    "fieldName": "measure(decline_rate)",
+                    "format": {
+                      "decimalPlaces": {
+                        "places": 0,
+                        "type": "exact"
+                      },
+                      "type": "number-percent"
+                    }
+                  }
+                ]
+              },
+              "frame": {
+                "showTitle": true,
+                "title": {
+                  "fields": [],
+                  "value": "Merchant Performance"
+                }
+              },
+              "version": 2,
+              "widgetType": "table"
+            }
+          }
+        }
+      ],
+      "layoutVersion": "GRID_V1",
+      "name": "0c312439",
+      "pageType": "PAGE_TYPE_CANVAS"
+    },
+    {
+      "displayName": "Fraud Intelligence",
+      "layout": [
+        {
+          "position": {
+            "height": 2,
+            "width": 12,
+            "x": 0,
+            "y": 0
+          },
+          "widget": {
+            "multilineTextboxSpec": {
+              "lines": [
+                "Fraud probability and predicted fraud are model signals used for prioritization and investigation. They are not confirmed fraud outcomes."
+              ]
+            },
+            "name": "fraud_note"
+          }
+        },
+        {
+          "position": {
+            "height": 2,
+            "width": 2,
+            "x": 0,
+            "y": 2
+          },
+          "widget": {
+            "name": "transactions_scored",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "fraud_model_metrics",
+                  "disaggregated": false,
+                  "fields": [
+                    {
+                      "expression": "MEASURE(`transactions_scored`)",
+                      "name": "measure(transactions_scored)"
+                    }
+                  ]
+                }
+              }
+            ],
+            "spec": {
+              "data": {
+                "queryName": "main_query"
+              },
+              "encodings": {
+                "value": {
+                  "fieldName": "measure(transactions_scored)",
+                  "rowNumber": 0
+                }
+              },
+              "frame": {
+                "showTitle": true,
+                "title": "Transactions Scored"
+              },
+              "version": 2,
+              "widgetType": "counter"
+            }
+          }
+        },
+        {
+          "position": {
+            "height": 2,
+            "width": 2,
+            "x": 2,
+            "y": 2
+          },
+          "widget": {
+            "name": "predicted_fraud_count",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "fraud_model_metrics",
+                  "disaggregated": false,
+                  "fields": [
+                    {
+                      "expression": "MEASURE(`predicted_fraud_count`)",
+                      "name": "measure(predicted_fraud_count)"
+                    }
+                  ]
+                }
+              }
+            ],
+            "spec": {
+              "data": {
+                "queryName": "main_query"
+              },
+              "encodings": {
+                "value": {
+                  "fieldName": "measure(predicted_fraud_count)",
+                  "rowNumber": 0
+                }
+              },
+              "frame": {
+                "showTitle": true,
+                "title": "Predicted Fraud Count"
+              },
+              "version": 2,
+              "widgetType": "counter"
+            }
+          }
+        },
+        {
+          "position": {
+            "height": 2,
+            "width": 2,
+            "x": 4,
+            "y": 2
+          },
+          "widget": {
+            "name": "predicted_fraud_rate",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "fraud_model_metrics",
+                  "disaggregated": false,
+                  "fields": [
+                    {
+                      "expression": "MEASURE(`predicted_fraud_rate`)",
+                      "name": "measure(predicted_fraud_rate)"
+                    }
+                  ]
+                }
+              }
+            ],
+            "spec": {
+              "data": {
+                "queryName": "main_query"
+              },
+              "encodings": {
+                "value": {
+                  "fieldName": "measure(predicted_fraud_rate)",
+                  "format": {
+                    "decimalPlaces": {
+                      "places": 0,
+                      "type": "exact"
+                    },
+                    "type": "number-percent"
+                  },
+                  "rowNumber": 0
+                }
+              },
+              "frame": {
+                "showTitle": true,
+                "title": {
+                  "fields": [],
+                  "value": "Predicted Fraud Rate"
+                }
+              },
+              "version": 2,
+              "widgetType": "counter"
+            }
+          }
+        },
+        {
+          "position": {
+            "height": 2,
+            "width": 2,
+            "x": 6,
+            "y": 2
+          },
+          "widget": {
+            "name": "average_fraud_probability",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "fraud_model_metrics",
+                  "disaggregated": false,
+                  "fields": [
+                    {
+                      "expression": "MEASURE(`average_fraud_probability`)",
+                      "name": "measure(average_fraud_probability)"
+                    }
+                  ]
+                }
+              }
+            ],
+            "spec": {
+              "data": {
+                "queryName": "main_query"
+              },
+              "encodings": {
+                "value": {
+                  "fieldName": "measure(average_fraud_probability)",
+                  "format": {
+                    "decimalPlaces": {
+                      "places": 0,
+                      "type": "exact"
+                    },
+                    "type": "number-percent"
+                  },
+                  "rowNumber": 0
+                }
+              },
+              "frame": {
+                "showTitle": true,
+                "title": {
+                  "fields": [],
+                  "value": "Average Fraud Probability"
+                }
+              },
+              "version": 2,
+              "widgetType": "counter"
+            }
+          }
+        },
+        {
+          "position": {
+            "height": 2,
+            "width": 4,
+            "x": 8,
+            "y": 2
+          },
+          "widget": {
+            "name": "high_risk_transactions",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "fraud_model_metrics",
+                  "disaggregated": false,
+                  "fields": [
+                    {
+                      "expression": "MEASURE(`high_risk_transaction_count`)",
+                      "name": "measure(high_risk_transaction_count)"
+                    }
+                  ]
+                }
+              }
+            ],
+            "spec": {
+              "data": {
+                "queryName": "main_query"
+              },
+              "encodings": {
+                "value": {
+                  "fieldName": "measure(high_risk_transaction_count)",
+                  "rowNumber": 0
+                }
+              },
+              "frame": {
+                "showTitle": true,
+                "title": "High-Risk Transactions"
+              },
+              "version": 2,
+              "widgetType": "counter"
+            }
+          }
+        },
+        {
+          "position": {
+            "height": 4,
+            "width": 6,
+            "x": 0,
+            "y": 4
+          },
+          "widget": {
+            "name": "predicted_fraud_trend",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "fraud_model_metrics",
+                  "disaggregated": false,
+                  "fields": [
+                    {
+                      "expression": "DATE_TRUNC(\"DAY\", `event_date`)",
+                      "name": "daily(event_date)"
+                    },
+                    {
+                      "expression": "MEASURE(`predicted_fraud_count`)",
+                      "name": "measure(predicted_fraud_count)"
+                    }
+                  ]
+                }
+              }
+            ],
+            "spec": {
+              "data": {
+                "queryName": "main_query"
+              },
+              "encodings": {
+                "x": {
+                  "displayName": "Day",
+                  "fieldName": "daily(event_date)",
+                  "scale": {
+                    "type": "temporal"
+                  }
+                },
+                "y": {
+                  "displayName": "predicted_fraud_count",
+                  "fieldName": "measure(predicted_fraud_count)",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                }
+              },
+              "frame": {
+                "showTitle": true,
+                "title": "Predicted Fraud Trend"
+              },
+              "version": 3,
+              "widgetType": "line"
+            }
+          }
+        },
+        {
+          "position": {
+            "height": 4,
+            "width": 6,
+            "x": 6,
+            "y": 4
+          },
+          "widget": {
+            "name": "average_fraud_probability_trend",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "fraud_model_metrics",
+                  "disaggregated": false,
+                  "fields": [
+                    {
+                      "expression": "DATE_TRUNC(\"DAY\", `event_date`)",
+                      "name": "daily(event_date)"
+                    },
+                    {
+                      "expression": "MEASURE(`average_fraud_probability`)",
+                      "name": "measure(average_fraud_probability)"
+                    }
+                  ]
+                }
+              }
+            ],
+            "spec": {
+              "data": {
+                "queryName": "main_query"
+              },
+              "encodings": {
+                "x": {
+                  "displayName": "Day",
+                  "fieldName": "daily(event_date)",
+                  "scale": {
+                    "type": "temporal"
+                  }
+                },
+                "y": {
+                  "displayName": "average_fraud_probability",
+                  "fieldName": "measure(average_fraud_probability)",
+                  "format": {
+                    "decimalPlaces": {
+                      "places": 0,
+                      "type": "exact"
+                    },
+                    "type": "number-percent"
+                  },
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                }
+              },
+              "frame": {
+                "showTitle": true,
+                "title": {
+                  "fields": [],
+                  "value": "Fraud Probability Trend"
+                }
+              },
+              "version": 3,
+              "widgetType": "line"
+            }
+          }
+        },
+        {
+          "position": {
+            "height": 4,
+            "width": 4,
+            "x": 0,
+            "y": 8
+          },
+          "widget": {
+            "name": "risk_band_analysis",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "fraud_model_metrics",
+                  "disaggregated": false,
+                  "fields": [
+                    {
+                      "expression": "`risk_band`",
+                      "name": "risk_band"
+                    },
+                    {
+                      "expression": "MEASURE(`predicted_fraud_count`)",
+                      "name": "measure(predicted_fraud_count)"
+                    }
+                  ]
+                }
+              }
+            ],
+            "spec": {
+              "data": {
+                "queryName": "main_query"
+              },
+              "encodings": {
+                "color": {
+                  "displayName": "risk_band",
+                  "fieldName": "risk_band",
+                  "scale": {
+                    "type": "categorical"
+                  }
+                },
+                "x": {
+                  "displayName": "risk_band",
+                  "fieldName": "risk_band",
+                  "scale": {
+                    "type": "categorical"
+                  }
+                },
+                "y": {
+                  "displayName": "predicted_fraud_count",
+                  "fieldName": "measure(predicted_fraud_count)",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                }
+              },
+              "frame": {
+                "showTitle": true,
+                "title": "Risk Band Analysis"
+              },
+              "version": 3,
+              "widgetType": "bar"
+            }
+          }
+        },
+        {
+          "position": {
+            "height": 4,
+            "width": 4,
+            "x": 4,
+            "y": 8
+          },
+          "widget": {
+            "name": "channel_risk_analysis",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "fraud_model_metrics",
+                  "disaggregated": false,
+                  "fields": [
+                    {
+                      "expression": "`channel`",
+                      "name": "channel"
+                    },
+                    {
+                      "expression": "MEASURE(`average_fraud_probability`)",
+                      "name": "measure(average_fraud_probability)"
+                    }
+                  ]
+                }
+              }
+            ],
+            "spec": {
+              "data": {
+                "queryName": "main_query"
+              },
+              "encodings": {
+                "color": {
+                  "displayName": "channel",
+                  "fieldName": "channel",
+                  "scale": {
+                    "type": "categorical"
+                  }
+                },
+                "x": {
+                  "displayName": "channel",
+                  "fieldName": "channel",
+                  "scale": {
+                    "type": "categorical"
+                  }
+                },
+                "y": {
+                  "displayName": "average_fraud_probability",
+                  "fieldName": "measure(average_fraud_probability)",
+                  "format": {
+                    "decimalPlaces": {
+                      "places": 0,
+                      "type": "exact"
+                    },
+                    "type": "number-percent"
+                  },
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                }
+              },
+              "frame": {
+                "showTitle": true,
+                "title": {
+                  "fields": [],
+                  "value": "Risk by Channel"
+                }
+              },
+              "version": 3,
+              "widgetType": "bar"
+            }
+          }
+        },
+        {
+          "position": {
+            "height": 4,
+            "width": 4,
+            "x": 8,
+            "y": 8
+          },
+          "widget": {
+            "name": "cross_border_high_risk_analysis",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "fraud_model_metrics",
+                  "disaggregated": false,
+                  "fields": [
+                    {
+                      "expression": "`is_cross_border`",
+                      "name": "is_cross_border"
+                    },
+                    {
+                      "expression": "MEASURE(`cross_border_high_risk_count`)",
+                      "name": "measure(cross_border_high_risk_count)"
+                    }
+                  ]
+                }
+              }
+            ],
+            "spec": {
+              "data": {
+                "queryName": "main_query"
+              },
+              "encodings": {
+                "color": {
+                  "displayName": "is_cross_border",
+                  "fieldName": "is_cross_border",
+                  "scale": {
+                    "type": "categorical"
+                  }
+                },
+                "x": {
+                  "displayName": "is_cross_border",
+                  "fieldName": "is_cross_border",
+                  "scale": {
+                    "type": "categorical"
+                  }
+                },
+                "y": {
+                  "displayName": "cross_border_high_risk_count",
+                  "fieldName": "measure(cross_border_high_risk_count)",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                }
+              },
+              "frame": {
+                "showTitle": true,
+                "title": "Cross-Border High Risk"
+              },
+              "version": 3,
+              "widgetType": "bar"
+            }
+          }
+        },
+        {
+          "position": {
+            "height": 5,
+            "width": 12,
+            "x": 0,
+            "y": 12
+          },
+          "widget": {
+            "name": "merchant_model_risk",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "fraud_model_metrics",
+                  "disaggregated": false,
+                  "fields": [
+                    {
+                      "expression": "`merchant_name`",
+                      "name": "merchant_name"
+                    },
+                    {
+                      "expression": "MEASURE(`transactions_scored`)",
+                      "name": "measure(transactions_scored)"
+                    },
+                    {
+                      "expression": "MEASURE(`predicted_fraud_count`)",
+                      "name": "measure(predicted_fraud_count)"
+                    },
+                    {
+                      "expression": "MEASURE(`predicted_fraud_rate`)",
+                      "name": "measure(predicted_fraud_rate)"
+                    },
+                    {
+                      "expression": "MEASURE(`average_fraud_probability`)",
+                      "name": "measure(average_fraud_probability)"
+                    },
+                    {
+                      "expression": "MEASURE(`high_risk_transaction_count`)",
+                      "name": "measure(high_risk_transaction_count)"
+                    }
+                  ]
+                }
+              }
+            ],
+            "spec": {
+              "data": {
+                "queryName": "main_query"
+              },
+              "encodings": {
+                "columns": [
+                  {
+                    "fieldName": "merchant_name"
+                  },
+                  {
+                    "fieldName": "measure(transactions_scored)"
+                  },
+                  {
+                    "fieldName": "measure(predicted_fraud_count)"
+                  },
+                  {
+                    "fieldName": "measure(predicted_fraud_rate)",
+                    "format": {
+                      "decimalPlaces": {
+                        "places": 0,
+                        "type": "exact"
+                      },
+                      "type": "number-percent"
+                    }
+                  },
+                  {
+                    "fieldName": "measure(average_fraud_probability)",
+                    "format": {
+                      "decimalPlaces": {
+                        "places": 0,
+                        "type": "exact"
+                      },
+                      "type": "number-percent"
+                    }
+                  },
+                  {
+                    "fieldName": "measure(high_risk_transaction_count)"
+                  }
+                ]
+              },
+              "frame": {
+                "showTitle": true,
+                "title": {
+                  "fields": [],
+                  "value": "Merchant Model Risk"
+                }
+              },
+              "version": 2,
+              "widgetType": "table"
+            }
+          }
+        }
+      ],
+      "layoutVersion": "GRID_V1",
+      "name": "fraud_intelligence",
+      "pageType": "PAGE_TYPE_CANVAS"
+    },
+    {
+      "displayName": "Fraud Agent Quality",
+      "layout": [
+        {
+          "position": {
+            "height": 2,
+            "width": 3,
+            "x": 0,
+            "y": 0
+          },
+          "widget": {
+            "name": "case_pass_rate",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "agent_quality_metrics",
+                  "disaggregated": false,
+                  "fields": [
+                    {
+                      "expression": "MEASURE(`case_pass_rate`)",
+                      "name": "measure(case_pass_rate)"
+                    }
+                  ]
+                }
+              }
+            ],
+            "spec": {
+              "data": {
+                "queryName": "main_query"
+              },
+              "encodings": {
+                "value": {
+                  "fieldName": "measure(case_pass_rate)",
+                  "format": {
+                    "decimalPlaces": {
+                      "places": 0,
+                      "type": "exact"
+                    },
+                    "type": "number-percent"
+                  },
+                  "rowNumber": 0
+                }
+              },
+              "frame": {
+                "showTitle": true,
+                "title": {
+                  "fields": [],
+                  "value": "Case Pass Rate"
+                }
+              },
+              "version": 2,
+              "widgetType": "counter"
+            }
+          }
+        },
+        {
+          "position": {
+            "height": 2,
+            "width": 3,
+            "x": 3,
+            "y": 0
+          },
+          "widget": {
+            "name": "average_overall_score",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "agent_quality_metrics",
+                  "disaggregated": false,
+                  "fields": [
+                    {
+                      "expression": "MEASURE(`average_overall_score`)",
+                      "name": "measure(average_overall_score)"
+                    }
+                  ]
+                }
+              }
+            ],
+            "spec": {
+              "data": {
+                "queryName": "main_query"
+              },
+              "encodings": {
+                "value": {
+                  "fieldName": "measure(average_overall_score)",
+                  "format": {
+                    "decimalPlaces": {
+                      "places": 0,
+                      "type": "exact"
+                    },
+                    "type": "number-percent"
+                  },
+                  "rowNumber": 0
+                }
+              },
+              "frame": {
+                "showTitle": true,
+                "title": {
+                  "fields": [],
+                  "value": "Average Overall Score"
+                }
+              },
+              "version": 2,
+              "widgetType": "counter"
+            }
+          }
+        },
+        {
+          "position": {
+            "height": 2,
+            "width": 3,
+            "x": 6,
+            "y": 0
+          },
+          "widget": {
+            "name": "average_groundedness",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "agent_quality_metrics",
+                  "disaggregated": false,
+                  "fields": [
+                    {
+                      "expression": "MEASURE(`average_groundedness`)",
+                      "name": "measure(average_groundedness)"
+                    }
+                  ]
+                }
+              }
+            ],
+            "spec": {
+              "data": {
+                "queryName": "main_query"
+              },
+              "encodings": {
+                "value": {
+                  "fieldName": "measure(average_groundedness)",
+                  "format": {
+                    "decimalPlaces": {
+                      "places": 0,
+                      "type": "exact"
+                    },
+                    "type": "number-percent"
+                  },
+                  "rowNumber": 0
+                }
+              },
+              "frame": {
+                "showTitle": true,
+                "title": {
+                  "fields": [],
+                  "value": "Average Groundedness"
+                }
+              },
+              "version": 2,
+              "widgetType": "counter"
+            }
+          }
+        },
+        {
+          "position": {
+            "height": 2,
+            "width": 3,
+            "x": 9,
+            "y": 0
+          },
+          "widget": {
+            "name": "average_evidence_completeness",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "agent_quality_metrics",
+                  "disaggregated": false,
+                  "fields": [
+                    {
+                      "expression": "MEASURE(`average_evidence_completeness`)",
+                      "name": "measure(average_evidence_completeness)"
+                    }
+                  ]
+                }
+              }
+            ],
+            "spec": {
+              "data": {
+                "queryName": "main_query"
+              },
+              "encodings": {
+                "value": {
+                  "fieldName": "measure(average_evidence_completeness)",
+                  "format": {
+                    "decimalPlaces": {
+                      "places": 0,
+                      "type": "exact"
+                    },
+                    "type": "number-percent"
+                  },
+                  "rowNumber": 0
+                }
+              },
+              "frame": {
+                "showTitle": true,
+                "title": {
+                  "fields": [],
+                  "value": "Avg Evidence Completeness"
+                }
+              },
+              "version": 2,
+              "widgetType": "counter"
+            }
+          }
+        },
+        {
+          "position": {
+            "height": 2,
+            "width": 3,
+            "x": 0,
+            "y": 2
+          },
+          "widget": {
+            "name": "scope_compliance_rate",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "agent_quality_metrics",
+                  "disaggregated": false,
+                  "fields": [
+                    {
+                      "expression": "MEASURE(`scope_compliance_rate`)",
+                      "name": "measure(scope_compliance_rate)"
+                    }
+                  ]
+                }
+              }
+            ],
+            "spec": {
+              "data": {
+                "queryName": "main_query"
+              },
+              "encodings": {
+                "value": {
+                  "fieldName": "measure(scope_compliance_rate)",
+                  "format": {
+                    "decimalPlaces": {
+                      "places": 0,
+                      "type": "exact"
+                    },
+                    "type": "number-percent"
+                  },
+                  "rowNumber": 0
+                }
+              },
+              "frame": {
+                "showTitle": true,
+                "title": {
+                  "fields": [],
+                  "value": "Scope Compliance Rate"
+                }
+              },
+              "version": 2,
+              "widgetType": "counter"
+            }
+          }
+        },
+        {
+          "position": {
+            "height": 2,
+            "width": 3,
+            "x": 3,
+            "y": 2
+          },
+          "widget": {
+            "name": "safety_compliance_rate",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "agent_quality_metrics",
+                  "disaggregated": false,
+                  "fields": [
+                    {
+                      "expression": "MEASURE(`safety_compliance_rate`)",
+                      "name": "measure(safety_compliance_rate)"
+                    }
+                  ]
+                }
+              }
+            ],
+            "spec": {
+              "data": {
+                "queryName": "main_query"
+              },
+              "encodings": {
+                "value": {
+                  "fieldName": "measure(safety_compliance_rate)",
+                  "format": {
+                    "decimalPlaces": {
+                      "places": 0,
+                      "type": "exact"
+                    },
+                    "type": "number-percent"
+                  },
+                  "rowNumber": 0
+                }
+              },
+              "frame": {
+                "showTitle": true,
+                "title": {
+                  "fields": [],
+                  "value": "Safety Compliance Rate"
+                }
+              },
+              "version": 2,
+              "widgetType": "counter"
+            }
+          }
+        },
+        {
+          "position": {
+            "height": 2,
+            "width": 3,
+            "x": 6,
+            "y": 2
+          },
+          "widget": {
+            "name": "human_review_compliance_rate",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "agent_quality_metrics",
+                  "disaggregated": false,
+                  "fields": [
+                    {
+                      "expression": "MEASURE(`human_review_compliance_rate`)",
+                      "name": "measure(human_review_compliance_rate)"
+                    }
+                  ]
+                }
+              }
+            ],
+            "spec": {
+              "data": {
+                "queryName": "main_query"
+              },
+              "encodings": {
+                "value": {
+                  "fieldName": "measure(human_review_compliance_rate)",
+                  "format": {
+                    "decimalPlaces": {
+                      "places": 0,
+                      "type": "exact"
+                    },
+                    "type": "number-percent"
+                  },
+                  "rowNumber": 0
+                }
+              },
+              "frame": {
+                "showTitle": true,
+                "title": {
+                  "fields": [],
+                  "value": "Human Review Compliance"
+                }
+              },
+              "version": 2,
+              "widgetType": "counter"
+            }
+          }
+        },
+        {
+          "position": {
+            "height": 2,
+            "width": 3,
+            "x": 9,
+            "y": 2
+          },
+          "widget": {
+            "name": "average_agent_duration",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "agent_quality_metrics",
+                  "disaggregated": false,
+                  "fields": [
+                    {
+                      "expression": "MEASURE(`average_duration_seconds`)",
+                      "name": "measure(average_duration_seconds)"
+                    }
+                  ]
+                }
+              }
+            ],
+            "spec": {
+              "data": {
+                "queryName": "main_query"
+              },
+              "encodings": {
+                "value": {
+                  "fieldName": "measure(average_duration_seconds)",
+                  "rowNumber": 0
+                }
+              },
+              "frame": {
+                "showTitle": true,
+                "title": "Avg Agent Duration"
+              },
+              "version": 2,
+              "widgetType": "counter"
+            }
+          }
+        },
+        {
+          "position": {
+            "height": 4,
+            "width": 6,
+            "x": 0,
+            "y": 4
+          },
+          "widget": {
+            "name": "quality_by_scenario",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "agent_quality_metrics",
+                  "disaggregated": false,
+                  "fields": [
+                    {
+                      "expression": "`scenario_type`",
+                      "name": "scenario_type"
+                    },
+                    {
+                      "expression": "MEASURE(`average_overall_score`)",
+                      "name": "measure(average_overall_score)"
+                    }
+                  ]
+                }
+              }
+            ],
+            "spec": {
+              "data": {
+                "queryName": "main_query"
+              },
+              "encodings": {
+                "color": {
+                  "displayName": "scenario_type",
+                  "fieldName": "scenario_type",
+                  "scale": {
+                    "type": "categorical"
+                  }
+                },
+                "x": {
+                  "displayName": "scenario_type",
+                  "fieldName": "scenario_type",
+                  "scale": {
+                    "type": "categorical"
+                  }
+                },
+                "y": {
+                  "displayName": "average_overall_score",
+                  "fieldName": "measure(average_overall_score)",
+                  "format": {
+                    "decimalPlaces": {
+                      "places": 0,
+                      "type": "exact"
+                    },
+                    "type": "number-percent"
+                  },
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                }
+              },
+              "frame": {
+                "showTitle": true,
+                "title": {
+                  "fields": [],
+                  "value": "Quality by Scenario"
+                }
+              },
+              "version": 3,
+              "widgetType": "bar"
+            }
+          }
+        },
+        {
+          "position": {
+            "height": 4,
+            "width": 6,
+            "x": 6,
+            "y": 4
+          },
+          "widget": {
+            "name": "pass_rate_by_scenario",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "agent_quality_metrics",
+                  "disaggregated": false,
+                  "fields": [
+                    {
+                      "expression": "`scenario_type`",
+                      "name": "scenario_type"
+                    },
+                    {
+                      "expression": "MEASURE(`case_pass_rate`)",
+                      "name": "measure(case_pass_rate)"
+                    }
+                  ]
+                }
+              }
+            ],
+            "spec": {
+              "data": {
+                "queryName": "main_query"
+              },
+              "encodings": {
+                "color": {
+                  "displayName": "scenario_type",
+                  "fieldName": "scenario_type",
+                  "scale": {
+                    "type": "categorical"
+                  }
+                },
+                "x": {
+                  "displayName": "scenario_type",
+                  "fieldName": "scenario_type",
+                  "scale": {
+                    "type": "categorical"
+                  }
+                },
+                "y": {
+                  "displayName": "case_pass_rate",
+                  "fieldName": "measure(case_pass_rate)",
+                  "format": {
+                    "decimalPlaces": {
+                      "places": 0,
+                      "type": "exact"
+                    },
+                    "type": "number-percent"
+                  },
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                }
+              },
+              "frame": {
+                "showTitle": true,
+                "title": {
+                  "fields": [],
+                  "value": "Case Pass Rate by Scenario"
+                }
+              },
+              "version": 3,
+              "widgetType": "bar"
+            }
+          }
+        },
+        {
+          "position": {
+            "height": 4,
+            "width": 6,
+            "x": 0,
+            "y": 8
+          },
+          "widget": {
+            "name": "tool_quality_by_scenario",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "agent_quality_metrics",
+                  "disaggregated": false,
+                  "fields": [
+                    {
+                      "expression": "`scenario_type`",
+                      "name": "scenario_type"
+                    },
+                    {
+                      "expression": "MEASURE(`average_tool_selection`)",
+                      "name": "measure(average_tool_selection)"
+                    },
+                    {
+                      "expression": "MEASURE(`average_tool_argument_score`)",
+                      "name": "measure(average_tool_argument_score)"
+                    },
+                    {
+                      "expression": "MEASURE(`average_tool_efficiency`)",
+                      "name": "measure(average_tool_efficiency)"
+                    },
+                    {
+                      "expression": "MEASURE(`average_citation_score`)",
+                      "name": "measure(average_citation_score)"
+                    }
+                  ]
+                }
+              }
+            ],
+            "spec": {
+              "data": {
+                "queryName": "main_query"
+              },
+              "encodings": {
+                "columns": [
+                  {
+                    "fieldName": "scenario_type"
+                  },
+                  {
+                    "fieldName": "measure(average_tool_selection)",
+                    "format": {
+                      "decimalPlaces": {
+                        "places": 0,
+                        "type": "exact"
+                      },
+                      "type": "number-percent"
+                    }
+                  },
+                  {
+                    "fieldName": "measure(average_tool_argument_score)",
+                    "format": {
+                      "decimalPlaces": {
+                        "places": 0,
+                        "type": "exact"
+                      },
+                      "type": "number-percent"
+                    }
+                  },
+                  {
+                    "fieldName": "measure(average_tool_efficiency)",
+                    "format": {
+                      "decimalPlaces": {
+                        "places": 0,
+                        "type": "exact"
+                      },
+                      "type": "number-percent"
+                    }
+                  },
+                  {
+                    "fieldName": "measure(average_citation_score)",
+                    "format": {
+                      "decimalPlaces": {
+                        "places": 0,
+                        "type": "exact"
+                      },
+                      "type": "number-percent"
+                    }
+                  }
+                ]
+              },
+              "frame": {
+                "showTitle": true,
+                "title": {
+                  "fields": [],
+                  "value": "Tool Quality by Scenario"
+                }
+              },
+              "version": 2,
+              "widgetType": "table"
+            }
+          }
+        },
+        {
+          "position": {
+            "height": 4,
+            "width": 6,
+            "x": 6,
+            "y": 8
+          },
+          "widget": {
+            "name": "compliance_by_scenario",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "agent_quality_metrics",
+                  "disaggregated": false,
+                  "fields": [
+                    {
+                      "expression": "`scenario_type`",
+                      "name": "scenario_type"
+                    },
+                    {
+                      "expression": "MEASURE(`scope_compliance_rate`)",
+                      "name": "measure(scope_compliance_rate)"
+                    },
+                    {
+                      "expression": "MEASURE(`safety_compliance_rate`)",
+                      "name": "measure(safety_compliance_rate)"
+                    },
+                    {
+                      "expression": "MEASURE(`human_review_compliance_rate`)",
+                      "name": "measure(human_review_compliance_rate)"
+                    }
+                  ]
+                }
+              }
+            ],
+            "spec": {
+              "data": {
+                "queryName": "main_query"
+              },
+              "encodings": {
+                "columns": [
+                  {
+                    "fieldName": "scenario_type"
+                  },
+                  {
+                    "fieldName": "measure(scope_compliance_rate)",
+                    "format": {
+                      "decimalPlaces": {
+                        "places": 0,
+                        "type": "exact"
+                      },
+                      "type": "number-percent"
+                    }
+                  },
+                  {
+                    "fieldName": "measure(safety_compliance_rate)",
+                    "format": {
+                      "decimalPlaces": {
+                        "places": 0,
+                        "type": "exact"
+                      },
+                      "type": "number-percent"
+                    }
+                  },
+                  {
+                    "fieldName": "measure(human_review_compliance_rate)",
+                    "format": {
+                      "decimalPlaces": {
+                        "places": 0,
+                        "type": "exact"
+                      },
+                      "type": "number-percent"
+                    }
+                  }
+                ]
+              },
+              "frame": {
+                "showTitle": true,
+                "title": {
+                  "fields": [],
+                  "value": "Compliance by Scenario"
+                }
+              },
+              "version": 2,
+              "widgetType": "table"
+            }
+          }
+        },
+        {
+          "position": {
+            "height": 5,
+            "width": 12,
+            "x": 0,
+            "y": 12
+          },
+          "widget": {
+            "name": "failed_evaluation_cases",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "failed_agent_cases",
+                  "disaggregated": true,
+                  "fields": [
+                    {
+                      "expression": "`case_id`",
+                      "name": "case_id"
+                    },
+                    {
+                      "expression": "`scenario_type`",
+                      "name": "scenario_type"
+                    },
+                    {
+                      "expression": "`failure_reasons`",
+                      "name": "failure_reasons"
+                    },
+                    {
+                      "expression": "`judge_rationale`",
+                      "name": "judge_rationale"
+                    },
+                    {
+                      "expression": "`trace_id`",
+                      "name": "trace_id"
+                    }
+                  ]
+                }
+              }
+            ],
+            "spec": {
+              "data": {
+                "queryName": "main_query"
+              },
+              "encodings": {
+                "columns": [
+                  {
+                    "fieldName": "case_id"
+                  },
+                  {
+                    "fieldName": "scenario_type"
+                  },
+                  {
+                    "fieldName": "failure_reasons"
+                  },
+                  {
+                    "fieldName": "judge_rationale"
+                  },
+                  {
+                    "fieldName": "trace_id"
+                  }
+                ]
+              },
+              "frame": {
+                "showTitle": true,
+                "title": "Failed Evaluation Cases"
+              },
+              "version": 2,
+              "widgetType": "table"
+            }
+          }
+        }
+      ],
+      "layoutVersion": "GRID_V1",
+      "name": "fraud_agent_quality",
+      "pageType": "PAGE_TYPE_CANVAS"
+    },
+    {
+      "displayName": "Global Filters",
+      "layoutVersion": "GRID_V1",
+      "name": "4f254df8",
+      "pageType": "PAGE_TYPE_GLOBAL_FILTERS"
+    }
+  ],
+  "uiSettings": {
+    "applyModeEnabled": false,
+    "theme": {
+      "axisLineColor": {
+        "dark": "#45586D",
+        "light": "#B6C2CF"
+      },
+      "canvasBackgroundColor": {
+        "dark": "#0F1720",
+        "light": "#EEF2F6"
+      },
+      "continuousGradient": {
+        "darkMode": {
+          "fromCategoricalIndex": 1
+        },
+        "lightMode": {
+          "fromCategoricalIndex": 0
+        }
+      },
+      "fontColor": {
+        "dark": "#E8EDF3",
+        "light": "#0F1B2A"
+      },
+      "fontFamily": "Inter",
+      "fontSettings": {
+        "base": {
+          "fontColor": {
+            "dark": "#E8EDF3",
+            "light": "#0F1B2A"
+          },
+          "fontFamily": "Inter",
+          "fontSize": 13
+        },
+        "fieldTitle": {
+          "fontColor": {
+            "dark": "#AEB8C4",
+            "light": "#52606D"
+          },
+          "fontFamily": "Inter",
+          "fontSize": 12,
+          "fontWeight": 500
+        },
+        "fieldValue": {
+          "fontColor": {
+            "dark": "#F3F6FA",
+            "light": "#102033"
+          },
+          "fontFamily": "Inter",
+          "fontSize": 14,
+          "fontWeight": 600
+        },
+        "widgetDescription": {
+          "fontColor": {
+            "dark": "#AEB8C4",
+            "light": "#52606D"
+          },
+          "fontFamily": "Inter",
+          "fontSize": 12
+        },
+        "widgetTitle": {
+          "fontColor": {
+            "dark": "#F3F6FA",
+            "light": "#102033"
+          },
+          "fontFamily": "Inter",
+          "fontSize": 15,
+          "fontWeight": 700,
+          "textCase": "TEXT_CASE_UNSPECIFIED"
+        }
+      },
+      "gridLineColor": {
+        "dark": "#304254",
+        "light": "#D8E0EA"
+      },
+      "selectionColor": {
+        "dark": "#4EA1E0",
+        "light": "#2272B4"
+      },
+      "textBoxVerticalAlign": "VERTICAL_ALIGN_CENTER",
+      "visualizationColors": [
+        "#2272B4",
+        "#15AFDD",
+        "#52A870",
+        "#C89930",
+        "#C85070",
+        "#6C63FF"
+      ],
+      "widgetBackgroundColor": {
+        "dark": "#16202A",
+        "light": "#FCFCFD"
+      },
+      "widgetBorderColor": {
+        "dark": "#16202A",
+        "light": "#FCFCFD"
+      },
+      "widgetCornerRadius": 12,
+      "widgetHeaderAlignment": "LEFT",
+      "widgetMargin": 8,
+      "widgetPadding": 16,
+      "widgetShadow": 10
+    }
+  }
+}

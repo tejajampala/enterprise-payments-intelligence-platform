@@ -4,7 +4,7 @@ This document tracks the actual implementation state of the project.
 
 Future milestones must build on the implementation completed in previous milestones.
 
-> **Current status:** Milestones 1–12 complete. Milestone 13 is next.
+> **Current status:** Milestones 1–14 complete. Milestone 15 is next.
 
 ---
 
@@ -100,13 +100,22 @@ Status: **COMPLETE**
 | 7C | Point-in-time feature lookup and leakage-safe training dataset | COMPLETE |
 | 7D | Validation, testing, and architecture documentation | COMPLETE |
 
-Key assets include:
+Key assets:
 
 ```text
 payments_dev.features.transaction_fraud_features
 payments_dev.features.customer_behavior_features
 payments_dev.features.merchant_behavior_features
 ```
+
+Important design characteristics:
+
+- transaction-grain fraud features
+- point-in-time customer behavior features
+- point-in-time merchant behavior features
+- TIMESERIES primary keys
+- windows ending before the current transaction
+- leakage-safe feature lookup
 
 ---
 
@@ -121,6 +130,16 @@ Status: **COMPLETE**
 | 8C | Class-imbalance handling, threshold tuning, and fraud-focused evaluation | COMPLETE |
 | 8D | MLflow experiment tracking, model selection, and governed prediction outputs | COMPLETE |
 
+Implemented:
+
+- baseline logistic regression
+- gradient-boosted model
+- temporal splits
+- class-imbalance handling
+- fraud-specific evaluation metrics
+- threshold tuning
+- MLflow tracking
+
 ---
 
 ## Milestone 9 — Forecasting
@@ -133,6 +152,17 @@ Status: **COMPLETE**
 | 9B | Leakage-safe lag and rolling time-series features | COMPLETE |
 | 9C | Seasonal baseline, Ridge, and gradient-boosted forecasting comparison | COMPLETE |
 | 9D | Temporal validation, recursive forecasting, MLflow tracking, and forecast outputs | COMPLETE |
+
+Implemented:
+
+- daily payment-volume forecasting
+- lag and rolling features
+- seasonal baseline
+- Ridge forecast model
+- gradient-boosted forecast model
+- recursive forecasting
+- temporal validation
+- MLflow tracking
 
 ---
 
@@ -147,14 +177,14 @@ Status: **COMPLETE**
 | 10C | Production fraud serving package and serverless Model Serving endpoint | COMPLETE |
 | 10D | Champion-based batch inference, lifecycle audit, rollback strategy, and documentation | COMPLETE |
 
-Key model assets include:
+Key model assets:
 
 ```text
 payments_dev.models.fraud_detection_model
 payments_dev.ml.fraud_batch_predictions
 ```
 
-The batch prediction contract includes:
+Batch prediction contract:
 
 ```text
 fraud_probability
@@ -165,6 +195,15 @@ model_alias
 scored_at
 ```
 
+Implemented lifecycle controls:
+
+- Candidate / Champion aliases
+- model validation before promotion
+- batch scoring through Champion
+- serving package
+- rollback strategy
+- MLflow / Unity Catalog lineage
+
 ---
 
 ## Milestone 11 — Governed RAG and AI Search
@@ -173,9 +212,9 @@ Status: **COMPLETE**
 
 ### Objective
 
-Build a governed fraud-investigation Retrieval-Augmented Generation capability that
-grounds generated answers in curated enterprise knowledge and measures retrieval and
-response quality.
+Build a governed fraud-investigation Retrieval-Augmented Generation capability
+that grounds generated answers in curated enterprise knowledge and measures
+retrieval and response quality.
 
 | Step | Description | Status |
 |---|---|---|
@@ -219,7 +258,7 @@ Query type: HYBRID
 Top K: 3
 ```
 
-Generation model used in the local hybrid runtime:
+Generation model used in the hybrid development runtime:
 
 ```text
 claude-sonnet-4-6
@@ -252,13 +291,12 @@ Status: **COMPLETE**
 
 ### Objective
 
-Build a governed fraud-investigation assistant that combines trusted transaction evidence,
-point-in-time behavioral features, Champion fraud-model evidence, governed fraud knowledge,
-Claude tool calling, MLflow tracing, and durable investigation history.
+Build a governed fraud-investigation assistant that combines trusted transaction
+evidence, point-in-time behavioral features, Champion fraud-model evidence,
+governed fraud knowledge, Claude tool calling, MLflow tracing, and durable
+investigation history.
 
 The agent assists human investigators and is not an autonomous fraud-decision system.
-
----
 
 ### M12A — Governed Evidence and Tools
 
@@ -291,8 +329,6 @@ Controls implemented:
 - bounded HYBRID AI Search
 - no arbitrary SQL tool exposed to the model
 - no state-changing tools
-
----
 
 ### M12B — Tool-Calling Agent and MLflow Tracing
 
@@ -336,10 +372,8 @@ Limitations
 Recommended Next Steps
 ```
 
-The system prompt requires human review and treats the fraud-model score as evidence
-rather than proof.
-
----
+The system prompt requires human review and treats the fraud-model score as
+evidence rather than proof.
 
 ### M12C — Investigation Persistence and Portfolio Demo
 
@@ -380,7 +414,7 @@ Change Data Feed
 Row Tracking
 ```
 
-The table intentionally excludes autonomous-action and final-decision columns such as:
+The table intentionally excludes autonomous-action and final-decision columns:
 
 ```text
 fraud_decision
@@ -399,8 +433,6 @@ Implemented:
 2. Cross-border counterexample
 3. Duplicate Kafka delivery semantics
 4. Insufficient evidence
-
-The scenarios execute against actual EPIP development data.
 
 The duplicate-delivery scenario explicitly distinguishes:
 
@@ -437,28 +469,25 @@ Implemented controls:
 
 ### M12 hybrid development runtime
 
-Because the current development Databricks workspace restricts direct outbound Anthropic
-access, M12 uses a hybrid runtime:
+Because the current development Databricks workspace restricts direct outbound
+Anthropic access, M12 uses a hybrid runtime:
 
 ```text
 Local Python
     │
     ├── Claude API
-    └── agent orchestration
+    └── Agent Orchestration
     │
     ▼
 Databricks
     ├── Unity Catalog
     ├── SQL Warehouse
     ├── Feature Store
-    ├── fraud predictions
+    ├── Fraud Predictions
     ├── AI Search
     ├── MLflow
-    └── Delta investigation history
+    └── Delta Investigation History
 ```
-
-This is a development-environment constraint rather than a core enterprise architecture
-requirement.
 
 Architecture documentation:
 
@@ -476,78 +505,306 @@ docs/demo/M12-runbook.md
 
 ## Milestone 13 — Agent Evaluation and Regression Gates
 
-Status: **NEXT**
+Status: **COMPLETE**
 
-### Planned scope
+### Objective
 
-#### Golden investigation dataset
+Systematically evaluate the M12 fraud-investigation agent so prompt, model,
+retrieval, and tool changes cannot silently degrade investigation quality,
+safety, scope, or groundedness.
 
-Representative cases will cover:
+| Step | Description | Status |
+|---|---|---|
+| 13A | Governed golden evaluation dataset | COMPLETE |
+| 13B | Deterministic tool, scope, structure, citation, and safety scorers | COMPLETE |
+| 13C | Structured LLM-as-a-judge quality scoring | COMPLETE |
+| 13D | Persisted per-case evaluation history | COMPLETE |
+| 13E | Aggregate regression gates and MLflow trace linkage | COMPLETE |
 
-- strong fraud indicators
-- legitimate counterexamples
-- cross-border transactions
-- duplicate delivery
-- incomplete evidence
-- conflicting evidence
-- low-risk transactions
-- knowledge-retrieval scenarios
-
-#### Tool and trajectory evaluation
-
-Planned metrics:
+### Governed evaluation assets
 
 ```text
-tool-selection correctness
-tool-argument correctness
-transaction-scope compliance
-missing tool calls
-unnecessary tool calls
-trajectory efficiency
+payments_dev.ai.agent_evaluation_dataset
+payments_dev.ai.agent_evaluation_results
+payments_dev.ai.agent_evaluation_summary
 ```
 
-#### Response evaluation
+### Golden evaluation scenarios
 
-Planned metrics:
+Implemented scenarios include:
+
+- strong fraud-risk evidence
+- low-risk counterexample
+- cross-border counterexample
+- duplicate Kafka delivery semantics
+- calibrated uncertainty
+- conflicting model/context evidence
+- knowledge-required investigation
+- transaction-scope guard
+
+### Deterministic evaluation
+
+Implemented scores include:
+
+```text
+tool selection
+tool arguments
+tool efficiency
+transaction scope
+response structure
+citation correctness
+human review
+safety
+```
+
+### Structured judge evaluation
+
+Implemented scores include:
 
 ```text
 groundedness
 evidence completeness
-hallucination
-citation correctness
+investigation quality
 risk/counter-indicator balance
-limitation awareness
-human-review compliance
+calibrated uncertainty
 ```
 
-#### Operational evaluation
+### Regression gates
 
-Planned metrics:
+Critical controls are expected to remain fully compliant:
 
 ```text
-latency
-tool-call count
-model usage
-cost
-failure rate
+transaction scope
+safety
+human review
+response structure
 ```
 
-#### Regression gates
+Aggregate quality gates evaluate:
 
-Prompt, model, retrieval, and tool changes will be evaluated before promotion so
-agent changes cannot silently reduce investigation quality.
+- case pass rate
+- tool selection
+- tool arguments
+- tool efficiency
+- groundedness
+- evidence completeness
+- citation correctness
+
+Evaluation results retain the M12 MLflow trace ID, enabling root-cause analysis
+from failed evaluation case back to model, tool, and retrieval execution.
+
+MLflow experiment:
+
+```text
+/Shared/epip-dev-fraud-agent-evaluation
+```
+
+Architecture documentation:
+
+```text
+docs/architecture/agent-evaluation.md
+```
+
+Demo runbook:
+
+```text
+docs/demo/M13-runbook.md
+```
 
 ---
 
-## Milestone 14 — AI/BI and Genie
+## Milestone 14 — Governed AI/BI Analytics
 
-Status: **NOT STARTED**
+Status: **COMPLETE**
+
+### Objective
+
+Expose EPIP payment operations, fraud-model signals, and fraud-agent quality
+through a governed Unity Catalog semantic layer and a portfolio-ready
+Databricks AI/BI dashboard.
+
+| Step | Description | Status |
+|---|---|---|
+| 14A | Governed analytics schema and Unity Catalog metric views | COMPLETE |
+| 14B | Three-page EPIP Payments Intelligence AI/BI dashboard | COMPLETE |
+| 14C | Genie Agent | DEFERRED / OPTIONAL |
+| 14D | Dashboard bundle validation and deployment | COMPLETE |
+| 14E | Architecture docs, runbook, tests, and milestone closeout | COMPLETE |
+
+### Analytics schema
+
+```text
+payments_dev.analytics
+```
+
+### Semantic base views
+
+```text
+payments_dev.analytics.payment_operations_base
+payments_dev.analytics.fraud_model_operations_base
+payments_dev.analytics.agent_quality_base
+```
+
+### Metric views
+
+```text
+payments_dev.analytics.payment_operations_metrics
+payments_dev.analytics.fraud_model_metrics
+payments_dev.analytics.agent_quality_metrics
+```
+
+Metric views expose reusable measures through:
+
+```sql
+MEASURE(<measure_name>)
+```
+
+### Payment semantic measures
+
+Examples:
+
+```text
+Transaction Count
+Total Payment Value
+Average Transaction Value
+Authorization Rate
+Decline Rate
+Card Not Present Rate
+Unique Customers
+Unique Merchants
+```
+
+### Fraud-model semantic measures
+
+Examples:
+
+```text
+Transactions Scored
+Predicted Fraud Count
+Predicted Fraud Rate
+Average Fraud Probability
+High Risk Transactions
+Cross-Border High Risk
+Card-Not-Present High Risk
+```
+
+Important semantic rule:
+
+```text
+predicted_fraud != confirmed fraud
+fraud_probability != proof of fraud
+```
+
+The HIGH / MEDIUM / LOW risk band is an analytics-only grouping derived from
+the Champion fraud-model probability.
+
+### Agent-quality semantic measures
+
+Examples:
+
+```text
+Evaluated Cases
+Case Pass Rate
+Average Overall Score
+Average Groundedness
+Average Evidence Completeness
+Average Investigation Quality
+Average Tool Selection
+Average Tool Argument Score
+Average Tool Efficiency
+Average Citation Score
+Scope Compliance Rate
+Safety Compliance Rate
+Human Review Compliance
+Average Agent Duration
+```
+
+### AI/BI dashboard
+
+Dashboard:
+
+```text
+EPIP Payments Intelligence
+```
+
+Pages:
+
+1. Executive Payments
+2. Fraud Intelligence
+3. Fraud Agent Quality
+
+The dashboard combines:
+
+- executive payment KPIs
+- payment trends and merchant analytics
+- Champion fraud-model monitoring
+- risk-band analysis
+- channel and cross-border model-risk analytics
+- M13 agent-quality metrics
+- safety, scope, and human-review compliance
+- failed evaluation-case detail and MLflow trace IDs
+
+### Dashboard-as-code
+
+The dashboard is serialized and bundle-managed through assets such as:
+
+```text
+bundle/resources/*.dashboard.yml
+src/analytics/*.lvdash.json
+```
+
+The existing UI-created dashboard is bound to the bundle so deployments update
+the managed resource rather than create a second independent copy.
+
+### Genie decision
+
+Genie Agent integration is intentionally deferred.
+
+It remains an optional future enhancement because the implemented Unity Catalog
+metric views already provide the governed semantic foundation required for
+future conversational analytics.
+
+Architecture documentation:
+
+```text
+docs/architecture/ai-bi-dashboard.md
+```
+
+Demo runbook:
+
+```text
+docs/demo/M14-runbook.md
+```
 
 ---
 
 ## Milestone 15 — Enterprise CI/CD
 
-Status: **NOT STARTED**
+Status: **NEXT**
+
+### Planned objective
+
+Industrialize validation, deployment, and promotion across EPIP data engineering,
+ML, GenAI, agent evaluation, analytics, and infrastructure assets.
+
+Planned scope includes:
+
+- pull-request quality gates
+- automated Ruff checks
+- automated formatting validation
+- automated mypy checks
+- automated pytest execution
+- Databricks bundle validation in CI
+- environment-aware bundle deployment
+- controlled promotion
+- Lakeflow pipeline CI/CD
+- ML validation and promotion gates
+- M13 agent evaluation as an AI promotion gate
+- dashboard deployment validation
+- Terraform validation
+- release traceability
+- rollback strategy
+- branch/environment governance
 
 ---
 
@@ -555,17 +812,50 @@ Status: **NOT STARTED**
 
 Status: **NOT STARTED**
 
+Planned focus:
+
+- Unity Catalog permissions
+- least-privilege service principals
+- RBAC / ABAC patterns
+- data classification
+- secrets management
+- workload identity
+- environment isolation
+- governance evidence
+
 ---
 
 ## Milestone 17 — Monitoring and Cost Optimisation
 
 Status: **NOT STARTED**
 
+Planned focus:
+
+- data-pipeline observability
+- ML monitoring
+- GenAI / agent monitoring
+- dashboard operational monitoring
+- cost attribution
+- compute optimisation
+- SQL warehouse optimisation
+- serverless usage controls
+- operational dashboards and alerts
+
 ---
 
 ## Milestone 18 — Azure Portability
 
 Status: **NOT STARTED**
+
+Planned focus:
+
+- Azure Databricks deployment mapping
+- ADLS Gen2 storage
+- Azure networking/security mapping
+- cloud-specific Terraform modules
+- service mapping from AWS
+- portability documentation
+- architecture trade-offs
 
 ---
 
@@ -585,9 +875,44 @@ Status: **NOT STARTED**
 | M10 | MLOps | COMPLETE |
 | M11 | Governed RAG and AI Search | COMPLETE |
 | M12 | Governed Fraud Investigation Agent | COMPLETE |
-| M13 | Agent evaluation and regression gates | NEXT |
-| M14 | AI/BI and Genie | NOT STARTED |
-| M15 | Enterprise CI/CD | NOT STARTED |
+| M13 | Agent evaluation and regression gates | COMPLETE |
+| M14 | Governed AI/BI semantic layer and dashboard | COMPLETE |
+| M15 | Enterprise CI/CD | NEXT |
 | M16 | Security and governance | NOT STARTED |
 | M17 | Monitoring and cost optimisation | NOT STARTED |
 | M18 | Azure portability | NOT STARTED |
+
+---
+
+## Current Portfolio Story
+
+The implemented platform now demonstrates the following end-to-end path:
+
+```text
+Synthetic Payments Domain
+        ↓
+Batch + Streaming Ingestion
+        ↓
+Bronze / Silver / Gold
+        ↓
+Data Quality + CDC + SCD
+        ↓
+Feature Store
+        ↓
+Fraud ML + Forecasting
+        ↓
+MLOps + Champion Model
+        ↓
+Governed RAG
+        ↓
+Fraud Investigation Agent
+        ↓
+Agent Evaluation + Regression Gates
+        ↓
+Governed Metric Views
+        ↓
+AI/BI Dashboard
+```
+
+Milestone 15 will connect these capabilities through enterprise CI/CD and
+controlled promotion.
