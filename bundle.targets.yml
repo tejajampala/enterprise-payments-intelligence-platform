@@ -9,6 +9,9 @@ targets:
   ci:
     mode: development
 
+    variables:
+      catalog_name: payments_ci
+
     workspace:
       root_path: /Workspace/Users/${workspace.current_user.userName}/.bundle/${bundle.name}/${bundle.target}
 
