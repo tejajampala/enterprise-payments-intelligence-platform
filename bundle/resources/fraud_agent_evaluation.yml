@@ -1,0 +1,20 @@
+resources:
+  jobs:
+    fraud_agent_evaluation_setup:
+      name: epip-${bundle.target}-fraud-agent-evaluation-setup
+
+      queue:
+        enabled: true
+
+      environments:
+        - environment_key: agent_eval_setup_env
+          spec:
+            environment_version: "4"
+
+      tasks:
+        - task_key: create_agent_evaluation_assets
+          environment_key: agent_eval_setup_env
+          notebook_task:
+            notebook_path: ../../notebooks/agents/13_create_agent_evaluation_assets.py
+            base_parameters:
+              catalog_name: ${var.catalog_name}
