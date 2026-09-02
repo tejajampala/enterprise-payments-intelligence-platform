@@ -39,9 +39,14 @@ def test_databricks_ci_uses_github_oidc() -> None:
     assert "DATABRICKS_AUTH_TYPE: github-oidc" in source
     assert "DATABRICKS_HOST: ${{ vars.DATABRICKS_HOST }}" in source
     assert "DATABRICKS_CLIENT_ID: ${{ vars.DATABRICKS_CLIENT_ID }}" in source
+    assert "DATABRICKS_TOKEN_AUDIENCE: ${{ vars.DATABRICKS_ACCOUNT_ID }}" in source
 
-    assert "DATABRICKS_TOKEN" not in source
-    assert "DATABRICKS_CLIENT_SECRET" not in source
+    # CI must use GitHub OIDC, not stored Databricks credentials.
+    assert "DATABRICKS_TOKEN:" not in source
+    assert "secrets.DATABRICKS_TOKEN" not in source
+
+    assert "DATABRICKS_CLIENT_SECRET:" not in source
+    assert "secrets.DATABRICKS_CLIENT_SECRET" not in source
 
 
 def test_databricks_pr_gate_is_validate_and_plan_only() -> None:

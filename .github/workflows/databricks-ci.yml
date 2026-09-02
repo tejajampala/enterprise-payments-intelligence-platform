@@ -33,6 +33,7 @@ jobs:
       DATABRICKS_AUTH_TYPE: github-oidc
       DATABRICKS_HOST: ${{ vars.DATABRICKS_HOST }}
       DATABRICKS_CLIENT_ID: ${{ vars.DATABRICKS_CLIENT_ID }}
+      DATABRICKS_TOKEN_AUDIENCE: ${{ vars.DATABRICKS_ACCOUNT_ID }}
 
     steps:
       - name: Checkout repository
@@ -48,6 +49,11 @@ jobs:
 
           test -n "${DATABRICKS_CLIENT_ID}" || {
             echo "GitHub environment variable DATABRICKS_CLIENT_ID is required."
+            exit 1
+          }
+
+          test -n "${DATABRICKS_TOKEN_AUDIENCE}" || {
+            echo "GitHub environment variable DATABRICKS_TOKEN_AUDIENCE is required."
             exit 1
           }
 

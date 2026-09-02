@@ -1,0 +1,9 @@
+{
+  "oidc_policy": {
+    "issuer": "https://token.actions.githubusercontent.com",
+    "audiences": [
+      "f6539484-c223-4570-ac76-83eaf74283f5"
+    ],
+    "subject": "repo:tejajampala@33386784/enterprise-payments-intelligence-platform@1338977669:environment:ci"
+  }
+}
