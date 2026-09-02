@@ -53,7 +53,7 @@ jobs:
           }
 
           test -n "${DATABRICKS_TOKEN_AUDIENCE}" || {
-            echo "GitHub environment variable DATABRICKS_TOKEN_AUDIENCE is required."
+            echo "GitHub environment variable DATABRICKS_ACCOUNT_ID is required."
             exit 1
           }
 
