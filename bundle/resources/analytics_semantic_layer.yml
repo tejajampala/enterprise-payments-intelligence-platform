@@ -1,0 +1,31 @@
+resources:
+  schemas:
+    analytics_schema:
+      name: analytics
+      catalog_name: ${var.catalog_name}
+
+      comment: >-
+        Governed semantic analytics layer for EPIP AI/BI dashboards,
+        Genie, fraud-model monitoring, and agent-quality reporting.
+
+  jobs:
+    analytics_semantic_layer_setup:
+      name: epip-${bundle.target}-analytics-semantic-layer-setup
+
+      queue:
+        enabled: true
+
+      environments:
+        - environment_key: analytics_semantic_env
+          spec:
+            environment_version: "4"
+
+      tasks:
+        - task_key: create_semantic_metrics
+          environment_key: analytics_semantic_env
+
+          notebook_task:
+            notebook_path: ../../notebooks/analytics/14_create_semantic_metrics.py
+
+            base_parameters:
+              catalog_name: ${var.catalog_name}

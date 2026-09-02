@@ -1,0 +1,6 @@
+resources:
+  dashboards:
+    epip_payments_intelligence:
+      display_name: "EPIP Payments Intelligence"
+      warehouse_id: a27f5c421abb2fe2
+      file_path: ../../src/analytics/epip_payments_intelligence.lvdash.json
