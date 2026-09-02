@@ -27,6 +27,14 @@ variables:
   msk_service_credential_name:
     description: Unity Catalog service credential used by Databricks to access Amazon MSK.
     default: payments_msk_dev
+  
+  promotion_evidence_catalog:
+    description: Catalog containing governed ML and agent promotion evidence.
+    default: payments_dev
+
+  promotion_max_agent_evidence_age_days:
+    description: Maximum age of formal agent evaluation evidence for promotion.
+    default: "7"
 
 experimental:
   skip_name_prefix_for_schema: true

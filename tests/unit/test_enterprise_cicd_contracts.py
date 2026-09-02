@@ -10,6 +10,8 @@ CI_WORKFLOW = ROOT / ".github" / "workflows" / "ci.yml"
 DATABRICKS_WORKFLOW = ROOT / ".github" / "workflows" / "databricks-ci.yml"
 BUNDLE_TARGETS = ROOT / "bundle.targets.yml"
 DATABRICKS_DEPLOY_WORKFLOW = ROOT / ".github" / "workflows" / "databricks-deploy.yml"
+PROMOTION_WORKFLOW = ROOT / ".github" / "workflows" / "promotion-gates.yml"
+PROMOTION_RESOURCE = ROOT / "bundle" / "resources" / "promotion_gates.yml"
 
 
 def test_python_ci_retains_core_quality_gates() -> None:
@@ -122,3 +124,59 @@ def test_ci_uses_isolated_catalog() -> None:
 
     assert "ci:" in source
     assert "catalog_name: payments_ci" in source
+
+
+def test_controlled_deployment_includes_promotion_job() -> None:
+    source = DATABRICKS_DEPLOY_WORKFLOW.read_text(encoding="utf-8")
+
+    assert "jobs.promotion_quality_gates" in source
+
+
+def test_promotion_gates_run_after_successful_deployment() -> None:
+    source = PROMOTION_WORKFLOW.read_text(encoding="utf-8")
+
+    assert "workflow_run:" in source
+    assert "Databricks Controlled Deployment" in source
+    assert "completed" in source
+
+    assert "github.event.workflow_run.conclusion == 'success'" in source
+
+    assert "environment: ci" in source
+    assert "id-token: write" in source
+
+    assert "DATABRICKS_AUTH_TYPE: github-oidc" in source
+
+    assert "databricks bundle run -t ci promotion_quality_gates" in source
+
+    assert "DATABRICKS_TOKEN:" not in source
+    assert "DATABRICKS_CLIENT_SECRET:" not in source
+
+
+def test_promotion_job_contains_ml_and_agent_gates() -> None:
+    source = PROMOTION_RESOURCE.read_text(encoding="utf-8")
+
+    assert "promotion_quality_gates:" in source
+
+    assert "task_key: validate_fraud_model" in source
+    assert "task_key: validate_agent_evaluation" in source
+
+    assert "notebooks/promotion/15_validate_fraud_model.py" in source
+
+    assert "notebooks/promotion/15_validate_agent_evaluation.py" in source
+
+
+def test_agent_promotion_gate_requires_fresh_evidence() -> None:
+    source = (ROOT / "notebooks" / "promotion" / "15_validate_agent_evaluation.py").read_text(encoding="utf-8")
+
+    assert "evidence_is_fresh" in source
+    assert "EPIP_AGENT_PROMOTION_GATE=PASS" in source
+    assert "EPIP_AGENT_PROMOTION_GATE=FAIL" in source
+
+
+def test_ml_promotion_gate_checks_champion() -> None:
+    source = (ROOT / "notebooks" / "promotion" / "15_validate_fraud_model.py").read_text(encoding="utf-8")
+
+    assert "Champion" in source
+    assert "champion_matches_selected_model" in source
+    assert "EPIP_ML_PROMOTION_GATE=PASS" in source
+    assert "EPIP_ML_PROMOTION_GATE=FAIL" in source

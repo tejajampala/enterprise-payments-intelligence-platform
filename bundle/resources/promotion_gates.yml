@@ -1,0 +1,38 @@
+resources:
+  jobs:
+    promotion_quality_gates:
+      name: epip-${bundle.target}-promotion-quality-gates
+
+      queue:
+        enabled: true
+
+      environments:
+        - environment_key: promotion_gate_env
+          spec:
+            environment_version: "4"
+            dependencies:
+              - "mlflow==3.15.1"
+
+      tasks:
+        - task_key: validate_fraud_model
+          environment_key: promotion_gate_env
+
+          notebook_task:
+            notebook_path: ../../notebooks/promotion/15_validate_fraud_model.py
+
+            base_parameters:
+              evidence_catalog: ${var.promotion_evidence_catalog}
+              fraud_min_recall: "0.50"
+
+        - task_key: validate_agent_evaluation
+          depends_on:
+            - task_key: validate_fraud_model
+
+          environment_key: promotion_gate_env
+
+          notebook_task:
+            notebook_path: ../../notebooks/promotion/15_validate_agent_evaluation.py
+
+            base_parameters:
+              evidence_catalog: ${var.promotion_evidence_catalog}
+              max_evidence_age_days: ${var.promotion_max_agent_evidence_age_days}
