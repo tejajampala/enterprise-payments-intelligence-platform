@@ -1,0 +1,147 @@
+bundle:
+  name: enterprise-payments-intelligence-platform-prod
+
+  databricks_cli_version: ">= 1.10.0"
+
+  engine: direct
+
+
+variables:
+  catalog_name:
+    description: Production Unity Catalog catalog.
+    default: payments_prod
+
+  msk_bootstrap_servers:
+    description: Amazon MSK bootstrap broker endpoints.
+
+  msk_topic:
+    description: Kafka topic containing payment events.
+    default: payments.events.v1
+
+  msk_service_credential_name:
+    description: Unity Catalog service credential used to access Amazon MSK.
+
+  prod_service_principal_name:
+    description: Application ID of the EPIP production service principal.
+
+
+# Reuse the tested application source without copying it into a second project.
+sync:
+  paths:
+    - .
+    - ../../pipelines
+
+
+permissions:
+  - service_principal_name: ${var.prod_service_principal_name}
+    level: CAN_MANAGE
+
+
+targets:
+  prod:
+    mode: production
+
+    workspace:
+      root_path: /Workspace/Production/EPIP/.bundle/${bundle.name}/${bundle.target}
+
+    run_as:
+      service_principal_name: ${var.prod_service_principal_name}
+
+    presets:
+      pipelines_development: false
+
+      tags:
+        deployment_environment: production
+        deployment_owner: github-actions
+
+
+resources:
+  schemas:
+    bronze_schema:
+      name: bronze
+      catalog_name: ${var.catalog_name}
+
+      comment: >-
+        Production Bronze layer containing raw payment events
+        ingested from Amazon MSK.
+
+    silver_schema:
+      name: silver
+      catalog_name: ${var.catalog_name}
+
+      comment: >-
+        Production Silver layer containing trusted and
+        enriched payment transactions.
+
+    gold_schema:
+      name: gold
+      catalog_name: ${var.catalog_name}
+
+      comment: >-
+        Production Gold layer containing business-ready
+        payment analytics.
+
+
+  pipelines:
+    payment_events_streaming:
+      name: epip-${bundle.target}-payment-events-bronze
+
+      catalog: ${var.catalog_name}
+      schema: ${resources.schemas.bronze_schema.name}
+
+      serverless: true
+      continuous: false
+      development: false
+      channel: CURRENT
+
+      libraries:
+        - glob:
+            include: ../../pipelines/streaming/**
+
+      configuration:
+        payments.msk.bootstrapServers: ${var.msk_bootstrap_servers}
+        payments.msk.topic: ${var.msk_topic}
+        payments.msk.serviceCredential: ${var.msk_service_credential_name}
+
+        spark.sql.session.timeZone: UTC
+
+
+    silver_transformations:
+      name: epip-${bundle.target}-silver-transformations
+
+      catalog: ${var.catalog_name}
+      schema: ${resources.schemas.silver_schema.name}
+
+      serverless: true
+      continuous: false
+      development: false
+      channel: CURRENT
+
+      libraries:
+        - glob:
+            include: ../../pipelines/silver/**
+
+      configuration:
+        spark.sql.session.timeZone: UTC
+
+        payments.streaming.eventWatermark: "6 hours"
+        payments.streaming.lateThresholdSeconds: "7200"
+
+
+    gold_analytics:
+      name: epip-${bundle.target}-gold-analytics
+
+      catalog: ${var.catalog_name}
+      schema: ${resources.schemas.gold_schema.name}
+
+      serverless: true
+      continuous: false
+      development: false
+      channel: CURRENT
+
+      libraries:
+        - glob:
+            include: ../../pipelines/gold/**
+
+      configuration:
+        spark.sql.session.timeZone: UTC
