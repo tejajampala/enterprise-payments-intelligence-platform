@@ -1,0 +1,157 @@
+name: EPIP Production Release
+
+on:
+  workflow_run:
+    workflows:
+      - EPIP Promotion Gates
+
+    types:
+      - completed
+
+    branches:
+      - main
+
+
+permissions:
+  contents: read
+  id-token: write
+
+
+concurrency:
+  group: epip-production-release
+  cancel-in-progress: false
+
+
+jobs:
+  production-release:
+    name: Approved Production Release
+
+    if: github.event.workflow_run.conclusion == 'success'
+
+    runs-on: ubuntu-latest
+
+    timeout-minutes: 30
+
+    environment: production
+
+    env:
+      DATABRICKS_AUTH_TYPE: github-oidc
+
+      DATABRICKS_HOST: ${{ vars.DATABRICKS_HOST }}
+      DATABRICKS_CLIENT_ID: ${{ vars.DATABRICKS_CLIENT_ID }}
+      DATABRICKS_TOKEN_AUDIENCE: ${{ vars.DATABRICKS_ACCOUNT_ID }}
+
+      BUNDLE_VAR_prod_service_principal_name: ${{ vars.DATABRICKS_CLIENT_ID }}
+
+      BUNDLE_VAR_msk_service_credential_name: ${{ vars.MSK_SERVICE_CREDENTIAL_NAME }}
+
+      BUNDLE_VAR_msk_bootstrap_servers: ${{ secrets.MSK_BOOTSTRAP_SERVERS }}
+
+      RELEASE_SHA: ${{ github.event.workflow_run.head_sha }}
+
+
+    defaults:
+      run:
+        working-directory: deploy/prod
+
+
+    steps:
+      - name: Checkout main
+        uses: actions/checkout@v7
+
+        with:
+          ref: main
+          fetch-depth: 0
+
+
+      - name: Verify promoted revision is current main
+        shell: bash
+
+        run: |
+          CURRENT_SHA="$(git rev-parse HEAD)"
+
+          echo "Promoted SHA: ${RELEASE_SHA}"
+          echo "Current main: ${CURRENT_SHA}"
+
+          test "${CURRENT_SHA}" = "${RELEASE_SHA}" || {
+            echo "main has advanced since promotion validation."
+            echo "Production release is blocked until the newer revision completes promotion gates."
+            exit 1
+          }
+
+
+      - name: Validate production environment
+        shell: bash
+
+        run: |
+          test -n "${DATABRICKS_HOST}" || {
+            echo "DATABRICKS_HOST is required."
+            exit 1
+          }
+
+          test -n "${DATABRICKS_CLIENT_ID}" || {
+            echo "DATABRICKS_CLIENT_ID is required."
+            exit 1
+          }
+
+          test -n "${DATABRICKS_TOKEN_AUDIENCE}" || {
+            echo "DATABRICKS_ACCOUNT_ID is required."
+            exit 1
+          }
+
+          test -n "${BUNDLE_VAR_msk_service_credential_name}" || {
+            echo "MSK_SERVICE_CREDENTIAL_NAME is required."
+            exit 1
+          }
+
+          test -n "${BUNDLE_VAR_msk_bootstrap_servers}" || {
+            echo "MSK_BOOTSTRAP_SERVERS is required."
+            exit 1
+          }
+
+
+      - name: Install Databricks CLI
+        uses: databricks/setup-cli@main
+
+        with:
+          version: "1.10.0"
+
+
+      - name: Verify production identity
+        run: databricks current-user me
+
+
+      - name: Validate production bundle
+        run: databricks bundle validate -t prod
+
+
+      - name: Preview production release
+        run: databricks bundle plan -t prod
+
+
+      - name: Deploy production bundle
+        run: >
+          databricks bundle deploy
+          -t prod
+          --auto-approve
+          --fail-on-active-runs
+
+
+      - name: Show production resources
+        run: databricks bundle summary -t prod
+
+
+      - name: Record release provenance
+        shell: bash
+
+        run: |
+          {
+            echo "## EPIP Production Release"
+            echo ""
+            echo "- Commit: \`${RELEASE_SHA}\`"
+            echo "- Catalog: \`payments_prod\`"
+            echo "- Bundle target: \`prod\`"
+            echo "- Authentication: GitHub OIDC"
+            echo "- Deployment identity: production service principal"
+            echo "- Promotion prerequisite: M15D passed"
+          } >> "${GITHUB_STEP_SUMMARY}"

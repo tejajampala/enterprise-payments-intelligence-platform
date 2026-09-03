@@ -11,42 +11,57 @@ M15 builds on the existing GitHub Actions foundation rather than replacing it.
 ## Delivery architecture
 
 ```text
-Developer Branch
+                         GitHub
+
+Feature Branch
       │
       ▼
 Pull Request
       │
-      ├─────────────────────────────────────┐
-      │                                     │
-      ▼                                     ▼
-Python / Repo Quality                 Databricks Validation
-      │                                     │
-      ├─ pytest                              ├─ GitHub OIDC
-      ├─ Ruff                               ├─ Service Principal
-      ├─ formatting                         ├─ bundle validate
-      ├─ mypy                               └─ bundle plan
-      ├─ package build
-      └─ Terraform validate
-      │                                     │
-      └──────────────────┬──────────────────┘
-                         │
-                         ▼
-                    PR Can Merge
-                         │
-                         ▼
-                       main
-                         │
-                         ▼
-                  Controlled Deploy
-                         │
-                ┌────────┴─────────┐
-                ▼                  ▼
-          Pre-production       Production
-          deployment           promotion
-                │                  │
-                ▼                  ▼
-         Smoke / ML / AI     Approval + gates
-             gates
+      ├── pytest
+      ├── Ruff
+      ├── mypy
+      ├── Terraform validate
+      └── Databricks validate / plan
+                    │
+                    ▼
+                   main
+                    │
+                    ▼
+              GitHub OIDC
+                    │
+                    ▼
+           CI Service Principal
+                    │
+                    ▼
+              payments_ci
+                    │
+                    ▼
+           M15D Promotion Gates
+             │              │
+             ▼              ▼
+          Fraud ML       Fraud Agent
+             │              │
+             └──────┬───────┘
+                    ▼
+                   PASS
+                    │
+                    ▼
+          Production Environment
+                    │
+              Manual Approval
+                    │
+                    ▼
+              GitHub OIDC
+                    │
+                    ▼
+        Production Service Principal
+                    │
+                    ▼
+             payments_prod
+                    │
+                    ▼
+          Production Lakehouse
 ```
 
 ## Identity model

@@ -12,6 +12,9 @@ BUNDLE_TARGETS = ROOT / "bundle.targets.yml"
 DATABRICKS_DEPLOY_WORKFLOW = ROOT / ".github" / "workflows" / "databricks-deploy.yml"
 PROMOTION_WORKFLOW = ROOT / ".github" / "workflows" / "promotion-gates.yml"
 PROMOTION_RESOURCE = ROOT / "bundle" / "resources" / "promotion_gates.yml"
+PRODUCTION_RELEASE_WORKFLOW = ROOT / ".github" / "workflows" / "production-release.yml"
+
+PRODUCTION_BUNDLE = ROOT / "deploy" / "prod" / "databricks.yml"
 
 
 def test_python_ci_retains_core_quality_gates() -> None:
@@ -180,3 +183,91 @@ def test_ml_promotion_gate_checks_champion() -> None:
     assert "champion_matches_selected_model" in source
     assert "EPIP_ML_PROMOTION_GATE=PASS" in source
     assert "EPIP_ML_PROMOTION_GATE=FAIL" in source
+
+
+def test_production_release_requires_successful_promotion() -> None:
+    source = PRODUCTION_RELEASE_WORKFLOW.read_text(encoding="utf-8")
+
+    assert "workflow_run:" in source
+    assert "EPIP Promotion Gates" in source
+
+    assert "github.event.workflow_run.conclusion == 'success'" in source
+
+    assert "environment: production" in source
+
+    # Production must not be directly bypassable.
+    assert "workflow_dispatch:" not in source
+    assert "pull_request:" not in source
+
+
+def test_production_release_uses_oidc() -> None:
+    source = PRODUCTION_RELEASE_WORKFLOW.read_text(encoding="utf-8")
+
+    assert "id-token: write" in source
+
+    assert "DATABRICKS_AUTH_TYPE: github-oidc" in source
+
+    assert "DATABRICKS_CLIENT_ID: ${{ vars.DATABRICKS_CLIENT_ID }}" in source
+
+    assert "DATABRICKS_TOKEN_AUDIENCE: ${{ vars.DATABRICKS_ACCOUNT_ID }}" in source
+
+    assert "DATABRICKS_TOKEN:" not in source
+    assert "DATABRICKS_CLIENT_SECRET:" not in source
+
+
+def test_production_release_verifies_promoted_sha() -> None:
+    source = PRODUCTION_RELEASE_WORKFLOW.read_text(encoding="utf-8")
+
+    assert "github.event.workflow_run.head_sha" in source
+    assert "Verify promoted revision is current main" in source
+
+    assert 'CURRENT_SHA="$(git rev-parse HEAD)"' in source
+
+    assert 'test "${CURRENT_SHA}" = "${RELEASE_SHA}"' in source
+
+
+def test_production_uses_full_bundle_deployment() -> None:
+    source = PRODUCTION_RELEASE_WORKFLOW.read_text(encoding="utf-8")
+
+    assert "databricks bundle validate -t prod" in source
+    assert "databricks bundle plan -t prod" in source
+
+    assert "databricks bundle deploy" in source
+    assert "-t prod" in source
+
+    # Selective deployment is intentionally development-only.
+    assert "--select" not in source
+
+
+def test_production_bundle_is_production_mode() -> None:
+    source = PRODUCTION_BUNDLE.read_text(encoding="utf-8")
+
+    assert "mode: production" in source
+
+    assert "root_path: /Workspace/Production/EPIP/.bundle/${bundle.name}/${bundle.target}" in source
+
+    assert "service_principal_name: ${var.prod_service_principal_name}" in source
+
+
+def test_production_pipelines_disable_development_mode() -> None:
+    source = PRODUCTION_BUNDLE.read_text(encoding="utf-8")
+
+    assert source.count("development: false") == 4
+
+    assert "payment_events_streaming:" in source
+    assert "silver_transformations:" in source
+    assert "gold_analytics:" in source
+
+
+def test_production_bundle_is_cost_safe() -> None:
+    source = PRODUCTION_BUNDLE.read_text(encoding="utf-8")
+
+    assert "catalog_name: payments_prod" not in source
+    assert "default: payments_prod" in source
+
+    # Expensive/global resources stay outside the initial production bundle.
+    assert "vector_search_endpoints:" not in source
+    assert "external_locations:" not in source
+    assert "volumes:" not in source
+
+    assert "continuous: true" not in source
