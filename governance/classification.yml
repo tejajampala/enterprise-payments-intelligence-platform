@@ -1,37 +1,87 @@
-version: 1
+version: 2
+
+design:
+  principle: >
+    Separate sensitivity classification, PII type, and jurisdictional row keys
+    so that metadata, masking behavior, and row filtering remain independently
+    understandable and testable.
+
+  policy_model:
+    epip_classification:
+      purpose: >
+        Enterprise sensitivity tier used for discovery, audit, security inventory,
+        and ABAC policy scope.
+      enforcement_role: >
+        Applied at table level to determine whether ABAC policies should apply,
+        and at column level to document the sensitivity of individual fields.
+      abac_usage: >
+        Referenced by policy WHEN clauses, for example
+        has_tag_value('epip_classification', 'restricted').
+
+    epip_pii:
+      purpose: Identifies the semantic PII category of a sensitive column.
+      enforcement_role: Selects the appropriate type-specific column masking policy.
+      abac_usage: Referenced by MATCH COLUMNS clauses.
+
+    epip_region_key:
+      purpose: Identifies a column used for jurisdictional row-level security.
+      enforcement_role: Maps the row-filter UDF to the country column.
+      abac_usage: Referenced by MATCH COLUMNS and USING COLUMNS.
 
 classification_levels:
   public:
+    rank: 1
     description: Public or non-sensitive reference information.
-
   internal:
+    rank: 2
     description: Internal operational or analytical information.
-
   confidential:
-    description: Commercial, transaction, fraud or financial information.
-
+    rank: 3
+    description: Commercial, transaction, fraud, model, or financial information.
   restricted:
-    description: Personal or highly sensitive information requiring masking.
+    rank: 4
+    description: Personal or highly sensitive information requiring explicit protection.
 
 pii_categories:
   name:
     type: direct_identifier
-
+    masking_strategy: full_mask
   date_of_birth:
     type: personal_attribute
-
+    masking_strategy: reduce_precision_to_year
   email:
     type: direct_identifier
-
+    masking_strategy: preserve_domain_only
   phone:
     type: direct_identifier
-
+    masking_strategy: full_mask
   address:
     type: direct_identifier
-
+    masking_strategy: full_mask
   network_identifier:
     type: technical_identifier
+    masking_strategy: full_mask
 
 regional_scope:
   country:
-    description: Country used for row-level jurisdictional access.
+    description: Country used for jurisdictional row-level access.
+    example_policy:
+      group: epip-fraud-analysts-au
+      allowed_values:
+        - AU
+
+protected_assets:
+  payments_dev.silver.customers_current:
+    classification: restricted
+    rationale: Contains direct customer identifiers and personal attributes.
+    columns:
+      first_name: {classification: restricted, pii: name}
+      last_name: {classification: restricted, pii: name}
+      date_of_birth: {classification: restricted, pii: date_of_birth}
+      email: {classification: restricted, pii: email}
+      phone: {classification: restricted, pii: phone}
+      address_line_1: {classification: restricted, pii: address}
+      city: {classification: restricted, pii: address}
+      state: {classification: restricted, pii: address}
+      postcode: {classification: restricted, pii: address}
+      country: {classification: restricted, region_key: country}
