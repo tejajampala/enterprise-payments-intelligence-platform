@@ -1,67 +1,103 @@
-version: 1
+version: 2
+
+identity_model:
+  human_access: account_groups
+  automation_access: service_principals
+  direct_user_grants: discouraged
+  workspace_group_source: account
 
 principals:
   epip-platform-admins:
     description: Platform and governance administrators.
+    workspace_access: required
     environments:
-      dev:
-        catalog: payments_dev
-        access: manage
-      prod:
-        catalog: payments_prod
-        access: manage
+      dev: {catalog: payments_dev, access: governance_manage}
+      prod: {catalog: payments_prod, access: governance_manage}
+    pii_access: unmasked
 
   epip-data-engineers:
     description: Engineers responsible for ingestion and medallion pipelines.
+    workspace_access: required
     environments:
       dev:
         schemas:
-          ingestion: engineer
-          bronze: engineer
+          ingestion: read
+          bronze: read
           silver: engineer
           gold: engineer
+    pii_access: unmasked_for_engineering
 
   epip-ml-engineers:
     description: Engineers responsible for feature engineering and ML lifecycle.
+    workspace_access: required
     environments:
       dev:
         schemas:
           silver: read
           gold: read
-          features: engineer
-          ml: engineer
+          features: read_write
+          ml: read_write
           models: execute
+    pii_access: masked_when_querying_protected_silver
 
   epip-fraud-analysts:
     description: Fraud investigators consuming governed and curated evidence.
+    workspace_access: required
     environments:
       dev:
         schemas:
           gold: read
-          ai: read
           analytics: read
-        sensitive_customer_access: masked
+          silver:
+            tables:
+              customers_current: read
+    pii_access: masked
 
   epip-fraud-analysts-au:
-    description: Fraud analysts restricted to Australian customer records.
-    parent: epip-fraud-analysts
+    description: Fraud analysts with the same narrow customer access plus AU row scope.
+    workspace_access: required
+    base_role: fraud_analyst
+    inheritance_implementation: >
+      May use account-group nesting or explicit duplicate RBAC grants.
+      The SQL contract uses explicit grants so nesting is not required.
+    environments:
+      dev:
+        schemas:
+          gold: read
+          analytics: read
+          silver:
+            tables:
+              customers_current: read
+    pii_access: masked
     row_scope:
       country:
         - AU
 
   epip-bi-consumers:
     description: Business intelligence and dashboard consumers.
+    workspace_access: required
     environments:
       dev:
         schemas:
           gold: read
           analytics: read
+      prod:
+        schemas:
+          gold: read
+    pii_access: no_direct_silver_access
 
 service_principals:
   epip-github-actions-ci:
+    purpose: CI validation and controlled CI deployment.
     environment: ci
+    authentication: github_oidc
     production_access: prohibited
+    development_access: narrow_promotion_evidence_only
+    pii_policy_exception: false
 
   epip-github-actions-prod:
+    purpose: Approval-controlled production deployment.
     environment: prod
+    authentication: github_oidc
     development_access: prohibited
+    pii_policy_exception: false
