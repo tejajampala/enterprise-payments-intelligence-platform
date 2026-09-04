@@ -3,7 +3,7 @@
 An enterprise-grade Databricks reference implementation for payments data engineering,
 machine learning, MLOps, Generative AI, agentic AI, analytics, governance, and platform engineering.
 
-> **Project Status:** Active Development — Milestone 14 Governed AI/BI Analytics Complete
+> **Project Status:** Active Development — Milestone 16 Security and Governance Complete
 
 ---
 
@@ -995,8 +995,8 @@ for the full semantic-layer and dashboard validation flow.
 | 12 | Governed Fraud Investigation Agent | Complete |
 | 13 | Agent evaluation and regression gates | Complete |
 | 14 | Governed AI/BI semantic layer and dashboard | Complete |
-| 15 | Enterprise CI/CD | Next |
-| 16 | Security and governance | Not Started |
+| 15 | Enterprise CI/CD | Complete |
+| 16 | Security and governance | Complete |
 | 17 | Monitoring and cost optimisation | Not Started |
 | 18 | Azure portability | Not Started |
 
