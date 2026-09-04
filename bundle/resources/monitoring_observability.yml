@@ -1,0 +1,10 @@
+resources:
+  schemas:
+    monitoring_schema:
+      name: monitoring
+      catalog_name: ${var.catalog_name}
+
+      comment: >-
+        Governed EPIP platform observability schema containing monitoring,
+        reliability, performance and cost views built from Databricks system
+        tables and existing platform evidence.
