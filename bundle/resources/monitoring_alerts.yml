@@ -1,0 +1,106 @@
+resources:
+  alerts:
+    epip_pipeline_failure:
+      display_name: "EPIP - Pipeline Failure"
+      custom_description: "Triggers when a current EPIP pipeline has a FAILED latest update."
+      warehouse_id: ${var.sql_warehouse_id}
+      query_text: >-
+        SELECT alert_count
+        FROM ${var.catalog_name}.monitoring.operations_alert_candidates
+        WHERE alert_type = 'PIPELINE_FAILURE'
+      evaluation:
+        comparison_operator: GREATER_THAN
+        empty_result_state: OK
+        source:
+          name: alert_count
+        threshold:
+          value:
+            double_value: 0
+      schedule:
+        pause_status: PAUSED
+        quartz_cron_schedule: "0 0 * * * ?"
+        timezone_id: "Australia/Melbourne"
+
+    epip_data_freshness:
+      display_name: "EPIP - Data Freshness"
+      custom_description: "Triggers when monitored EPIP datasets are STALE or have NO_DATA."
+      warehouse_id: ${var.sql_warehouse_id}
+      query_text: >-
+        SELECT alert_count
+        FROM ${var.catalog_name}.monitoring.operations_alert_candidates
+        WHERE alert_type = 'DATA_FRESHNESS'
+      evaluation:
+        comparison_operator: GREATER_THAN
+        empty_result_state: OK
+        source:
+          name: alert_count
+        threshold:
+          value:
+            double_value: 0
+      schedule:
+        pause_status: PAUSED
+        quartz_cron_schedule: "0 15 * * * ?"
+        timezone_id: "Australia/Melbourne"
+
+    epip_dq_degradation:
+      display_name: "EPIP - DQ Degradation"
+      custom_description: "Triggers when a monitored EPIP dataset contains quarantined records."
+      warehouse_id: ${var.sql_warehouse_id}
+      query_text: >-
+        SELECT alert_count
+        FROM ${var.catalog_name}.monitoring.operations_alert_candidates
+        WHERE alert_type = 'DQ_DEGRADATION'
+      evaluation:
+        comparison_operator: GREATER_THAN
+        empty_result_state: OK
+        source:
+          name: alert_count
+        threshold:
+          value:
+            double_value: 0
+      schedule:
+        pause_status: PAUSED
+        quartz_cron_schedule: "0 20 * * * ?"
+        timezone_id: "Australia/Melbourne"
+
+    epip_agent_regression:
+      display_name: "EPIP - Agent Regression"
+      custom_description: "Triggers when the latest formal fraud-agent evaluation fails regression gates."
+      warehouse_id: ${var.sql_warehouse_id}
+      query_text: >-
+        SELECT alert_count
+        FROM ${var.catalog_name}.monitoring.operations_alert_candidates
+        WHERE alert_type = 'AGENT_REGRESSION'
+      evaluation:
+        comparison_operator: GREATER_THAN
+        empty_result_state: OK
+        source:
+          name: alert_count
+        threshold:
+          value:
+            double_value: 0
+      schedule:
+        pause_status: PAUSED
+        quartz_cron_schedule: "0 30 * * * ?"
+        timezone_id: "Australia/Melbourne"
+
+    epip_cost_anomaly:
+      display_name: "EPIP - Databricks Cost Anomaly"
+      custom_description: "Demo anomaly alert for estimated Databricks list cost; not a complete AWS budget alert."
+      warehouse_id: ${var.sql_warehouse_id}
+      query_text: >-
+        SELECT alert_count
+        FROM ${var.catalog_name}.monitoring.operations_alert_candidates
+        WHERE alert_type = 'DATABRICKS_COST_ANOMALY'
+      evaluation:
+        comparison_operator: GREATER_THAN
+        empty_result_state: OK
+        source:
+          name: alert_count
+        threshold:
+          value:
+            double_value: 0
+      schedule:
+        pause_status: PAUSED
+        quartz_cron_schedule: "0 0 8 * * ?"
+        timezone_id: "Australia/Melbourne"

@@ -16,9 +16,8 @@ has not actually implemented.
 # Current State
 
 ```text
-Completed: M1–M16
-Active:    M17 Monitoring, Observability and Cost Optimisation
-Future:    M18 Azure Portability
+Completed: M1–M17
+Project:   COMPLETE
 ```
 
 Primary platform:
@@ -143,7 +142,7 @@ flowchart TB
         WID["Service Principals<br/>OIDC"]
     end
 
-    subgraph MON["7. M17 OBSERVABILITY & COST — IN PROGRESS"]
+    subgraph MON["7. OBSERVABILITY & COST"]
         ST["System Tables"]
         EL["Lakeflow Event Logs"]
         PH["Pipeline + DQ Health"]
@@ -682,9 +681,9 @@ as a jurisdictional access rule.
 
 ---
 
-# 7. M17 Monitoring and Cost Architecture
+# 7. Monitoring, Observability and Cost Architecture
 
-M17 introduces observability as another cross-cutting platform capability.
+EPIP implements observability as another cross-cutting platform capability.
 
 The design intentionally starts with Databricks-native sources.
 
@@ -713,7 +712,7 @@ flowchart TB
     COST --> DASH
 ```
 
-## Planned monitoring domains
+## Implemented monitoring domains
 
 ### Pipeline health
 
@@ -761,9 +760,9 @@ flowchart TB
 
 ### Cost
 
-M17 will initially focus on Databricks-native billing/usage visibility.
+EPIP cost monitoring focuses on Databricks-native billing/usage visibility.
 
-Planned views include:
+Implemented cost views include:
 
 ```text
 daily Databricks cost
@@ -778,7 +777,7 @@ performance/cost relationships
 
 Databricks System Tables do not represent the complete AWS invoice.
 
-Therefore the M17 architecture will not claim full cost coverage for:
+Therefore the EPIP architecture does not claim full cost coverage for:
 
 - Amazon MSK
 - Amazon S3
@@ -970,20 +969,16 @@ of the platform itself.
 Completed architecture:
 
 ```text
-M1–M16
+M1–M17 COMPLETE
 ```
 
-Active architectural enhancement:
+EPIP is now a completed enterprise portfolio reference implementation.
 
-```text
-M17 — Monitoring, Observability and Cost Optimisation
-```
+Future maintenance should refine the implemented architecture, update platform APIs and
+documentation as Databricks/AWS evolve, and preserve the rule that diagrams describe
+what the repository actually implements.
 
-Future portability work:
-
-```text
-M18 — Azure Portability
-```
+No further implementation milestone is planned.
 
 This document must continue to represent what EPIP actually implements rather than
 silently drifting into an aspirational enterprise diagram.

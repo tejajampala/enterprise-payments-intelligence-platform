@@ -1,0 +1,1338 @@
+{
+  "datasets": [
+    {
+      "displayName": "Platform Operations Summary",
+      "name": "platform_summary",
+      "queryLines": [
+        "SELECT *\n",
+        "FROM platform_operations_summary\n"
+      ]
+    },
+    {
+      "displayName": "Pipeline Status Counts",
+      "name": "pipeline_status_counts",
+      "queryLines": [
+        "SELECT operational_status, COUNT(*) AS pipeline_count\n",
+        "FROM pipeline_operational_health\n",
+        "GROUP BY operational_status\n",
+        "ORDER BY operational_status\n"
+      ]
+    },
+    {
+      "displayName": "Daily Job Health",
+      "name": "job_daily_health",
+      "queryLines": [
+        "SELECT *\n",
+        "FROM job_daily_health\n",
+        "ORDER BY run_date\n"
+      ]
+    },
+    {
+      "displayName": "Current DQ Health",
+      "name": "dq_current_health",
+      "queryLines": [
+        "SELECT *\n",
+        "FROM dq_current_health\n",
+        "ORDER BY dataset_name\n"
+      ]
+    },
+    {
+      "displayName": "Freshness Status Counts",
+      "name": "freshness_status_counts",
+      "queryLines": [
+        "SELECT freshness_status, COUNT(*) AS dataset_count\n",
+        "FROM data_freshness_health\n",
+        "GROUP BY freshness_status\n",
+        "ORDER BY freshness_status\n"
+      ]
+    },
+    {
+      "displayName": "Daily High Security Events",
+      "name": "security_daily",
+      "queryLines": [
+        "SELECT event_date,\n",
+        "       SUM(CASE WHEN event_severity IN ('HIGH','CRITICAL') THEN event_count ELSE 0 END) AS high_security_events\n",
+        "FROM security_event_daily\n",
+        "GROUP BY event_date\n",
+        "ORDER BY event_date\n"
+      ]
+    },
+    {
+      "displayName": "Fraud Model Current Health",
+      "name": "fraud_model_current",
+      "queryLines": [
+        "SELECT *\n",
+        "FROM fraud_model_current_health\n"
+      ]
+    },
+    {
+      "displayName": "Agent Evaluation History",
+      "name": "agent_evaluation_history",
+      "queryLines": [
+        "SELECT created_at,\n",
+        "       pass_rate,\n",
+        "       avg_groundedness_score,\n",
+        "       avg_evidence_completeness_score,\n",
+        "       safety_rate,\n",
+        "       human_review_rate,\n",
+        "       overall_pass\n",
+        "FROM agent_evaluation_health\n",
+        "ORDER BY created_at\n"
+      ]
+    },
+    {
+      "displayName": "Daily Databricks Cost",
+      "name": "cost_daily",
+      "queryLines": [
+        "SELECT usage_date, SUM(estimated_list_cost) AS estimated_list_cost\n",
+        "FROM databricks_cost_daily\n",
+        "GROUP BY usage_date\n",
+        "ORDER BY usage_date\n"
+      ]
+    },
+    {
+      "displayName": "Databricks Cost by Workload",
+      "name": "cost_by_workload",
+      "queryLines": [
+        "SELECT workload_name, SUM(estimated_list_cost) AS estimated_list_cost\n",
+        "FROM databricks_cost_by_workload\n",
+        "GROUP BY workload_name\n",
+        "HAVING SUM(estimated_list_cost) > 0\n",
+        "ORDER BY estimated_list_cost DESC\n",
+        "LIMIT 10\n"
+      ]
+    },
+    {
+      "displayName": "Daily Query Performance",
+      "name": "query_daily",
+      "queryLines": [
+        "SELECT *\n",
+        "FROM query_performance_daily\n",
+        "ORDER BY query_date\n"
+      ]
+    }
+  ],
+  "pages": [
+    {
+      "name": "a17d0001",
+      "displayName": "Platform Health",
+      "pageType": "PAGE_TYPE_CANVAS",
+      "layout": [
+        {
+          "position": {
+            "height": 2,
+            "width": 3,
+            "x": 0,
+            "y": 0
+          },
+          "widget": {
+            "name": "failed_pipelines",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "platform_summary",
+                  "disaggregated": false,
+                  "fields": [
+                    {
+                      "expression": "`failed_pipelines`",
+                      "name": "failed_pipelines"
+                    }
+                  ]
+                }
+              }
+            ],
+            "spec": {
+              "data": {
+                "queryName": "main_query"
+              },
+              "encodings": {
+                "value": {
+                  "fieldName": "failed_pipelines",
+                  "rowNumber": 0
+                }
+              },
+              "frame": {
+                "showTitle": true,
+                "title": "Failed Pipelines"
+              },
+              "version": 2,
+              "widgetType": "counter"
+            }
+          }
+        },
+        {
+          "position": {
+            "height": 2,
+            "width": 3,
+            "x": 3,
+            "y": 0
+          },
+          "widget": {
+            "name": "never_run_pipelines",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "platform_summary",
+                  "disaggregated": false,
+                  "fields": [
+                    {
+                      "expression": "`never_run_pipelines`",
+                      "name": "never_run_pipelines"
+                    }
+                  ]
+                }
+              }
+            ],
+            "spec": {
+              "data": {
+                "queryName": "main_query"
+              },
+              "encodings": {
+                "value": {
+                  "fieldName": "never_run_pipelines",
+                  "rowNumber": 0
+                }
+              },
+              "frame": {
+                "showTitle": true,
+                "title": "Never Run Pipelines"
+              },
+              "version": 2,
+              "widgetType": "counter"
+            }
+          }
+        },
+        {
+          "position": {
+            "height": 2,
+            "width": 3,
+            "x": 6,
+            "y": 0
+          },
+          "widget": {
+            "name": "failed_jobs_24h",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "platform_summary",
+                  "disaggregated": false,
+                  "fields": [
+                    {
+                      "expression": "`failed_jobs_24h`",
+                      "name": "failed_jobs_24h"
+                    }
+                  ]
+                }
+              }
+            ],
+            "spec": {
+              "data": {
+                "queryName": "main_query"
+              },
+              "encodings": {
+                "value": {
+                  "fieldName": "failed_jobs_24h",
+                  "rowNumber": 0
+                }
+              },
+              "frame": {
+                "showTitle": true,
+                "title": "Failed Jobs - 24h"
+              },
+              "version": 2,
+              "widgetType": "counter"
+            }
+          }
+        },
+        {
+          "position": {
+            "height": 2,
+            "width": 3,
+            "x": 9,
+            "y": 0
+          },
+          "widget": {
+            "name": "failed_queries_24h",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "platform_summary",
+                  "disaggregated": false,
+                  "fields": [
+                    {
+                      "expression": "`failed_queries_24h`",
+                      "name": "failed_queries_24h"
+                    }
+                  ]
+                }
+              }
+            ],
+            "spec": {
+              "data": {
+                "queryName": "main_query"
+              },
+              "encodings": {
+                "value": {
+                  "fieldName": "failed_queries_24h",
+                  "rowNumber": 0
+                }
+              },
+              "frame": {
+                "showTitle": true,
+                "title": "Failed Queries - 24h"
+              },
+              "version": 2,
+              "widgetType": "counter"
+            }
+          }
+        },
+        {
+          "position": {
+            "height": 4,
+            "width": 6,
+            "x": 0,
+            "y": 2
+          },
+          "widget": {
+            "name": "pipeline_status",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "pipeline_status_counts",
+                  "disaggregated": false,
+                  "fields": [
+                    {
+                      "expression": "`operational_status`",
+                      "name": "operational_status"
+                    },
+                    {
+                      "expression": "`pipeline_count`",
+                      "name": "pipeline_count"
+                    }
+                  ]
+                }
+              }
+            ],
+            "spec": {
+              "data": {
+                "queryName": "main_query"
+              },
+              "encodings": {
+                "x": {
+                  "displayName": "operational_status",
+                  "fieldName": "operational_status",
+                  "scale": {
+                    "type": "categorical"
+                  }
+                },
+                "y": {
+                  "displayName": "pipeline_count",
+                  "fieldName": "pipeline_count",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                }
+              },
+              "frame": {
+                "showTitle": true,
+                "title": "Pipeline Status"
+              },
+              "version": 3,
+              "widgetType": "bar"
+            }
+          }
+        },
+        {
+          "position": {
+            "height": 4,
+            "width": 6,
+            "x": 6,
+            "y": 2
+          },
+          "widget": {
+            "name": "job_failures",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "job_daily_health",
+                  "disaggregated": false,
+                  "fields": [
+                    {
+                      "expression": "`run_date`",
+                      "name": "run_date"
+                    },
+                    {
+                      "expression": "`failed_job_runs`",
+                      "name": "failed_job_runs"
+                    }
+                  ]
+                }
+              }
+            ],
+            "spec": {
+              "data": {
+                "queryName": "main_query"
+              },
+              "encodings": {
+                "x": {
+                  "displayName": "run_date",
+                  "fieldName": "run_date",
+                  "scale": {
+                    "type": "temporal"
+                  }
+                },
+                "y": {
+                  "displayName": "failed_job_runs",
+                  "fieldName": "failed_job_runs",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                }
+              },
+              "frame": {
+                "showTitle": true,
+                "title": "Daily Failed Jobs"
+              },
+              "version": 3,
+              "widgetType": "line"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "a17d0002",
+      "displayName": "Data Quality & Security",
+      "pageType": "PAGE_TYPE_CANVAS",
+      "layout": [
+        {
+          "position": {
+            "height": 2,
+            "width": 4,
+            "x": 0,
+            "y": 0
+          },
+          "widget": {
+            "name": "stale_datasets",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "platform_summary",
+                  "disaggregated": false,
+                  "fields": [
+                    {
+                      "expression": "`stale_or_missing_datasets`",
+                      "name": "stale_or_missing_datasets"
+                    }
+                  ]
+                }
+              }
+            ],
+            "spec": {
+              "data": {
+                "queryName": "main_query"
+              },
+              "encodings": {
+                "value": {
+                  "fieldName": "stale_or_missing_datasets",
+                  "rowNumber": 0
+                }
+              },
+              "frame": {
+                "showTitle": true,
+                "title": "Stale / Missing Datasets"
+              },
+              "version": 2,
+              "widgetType": "counter"
+            }
+          }
+        },
+        {
+          "position": {
+            "height": 2,
+            "width": 4,
+            "x": 4,
+            "y": 0
+          },
+          "widget": {
+            "name": "dq_attention",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "platform_summary",
+                  "disaggregated": false,
+                  "fields": [
+                    {
+                      "expression": "`dq_attention_datasets`",
+                      "name": "dq_attention_datasets"
+                    }
+                  ]
+                }
+              }
+            ],
+            "spec": {
+              "data": {
+                "queryName": "main_query"
+              },
+              "encodings": {
+                "value": {
+                  "fieldName": "dq_attention_datasets",
+                  "rowNumber": 0
+                }
+              },
+              "frame": {
+                "showTitle": true,
+                "title": "DQ Attention"
+              },
+              "version": 2,
+              "widgetType": "counter"
+            }
+          }
+        },
+        {
+          "position": {
+            "height": 2,
+            "width": 4,
+            "x": 8,
+            "y": 0
+          },
+          "widget": {
+            "name": "security_high",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "platform_summary",
+                  "disaggregated": false,
+                  "fields": [
+                    {
+                      "expression": "`high_security_events_24h`",
+                      "name": "high_security_events_24h"
+                    }
+                  ]
+                }
+              }
+            ],
+            "spec": {
+              "data": {
+                "queryName": "main_query"
+              },
+              "encodings": {
+                "value": {
+                  "fieldName": "high_security_events_24h",
+                  "rowNumber": 0
+                }
+              },
+              "frame": {
+                "showTitle": true,
+                "title": "High Security Events - 24h"
+              },
+              "version": 2,
+              "widgetType": "counter"
+            }
+          }
+        },
+        {
+          "position": {
+            "height": 4,
+            "width": 6,
+            "x": 0,
+            "y": 2
+          },
+          "widget": {
+            "name": "dq_quarantine",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "dq_current_health",
+                  "disaggregated": false,
+                  "fields": [
+                    {
+                      "expression": "`dataset_name`",
+                      "name": "dataset_name"
+                    },
+                    {
+                      "expression": "`quarantined_records`",
+                      "name": "quarantined_records"
+                    }
+                  ]
+                }
+              }
+            ],
+            "spec": {
+              "data": {
+                "queryName": "main_query"
+              },
+              "encodings": {
+                "x": {
+                  "displayName": "dataset_name",
+                  "fieldName": "dataset_name",
+                  "scale": {
+                    "type": "categorical"
+                  }
+                },
+                "y": {
+                  "displayName": "quarantined_records",
+                  "fieldName": "quarantined_records",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                }
+              },
+              "frame": {
+                "showTitle": true,
+                "title": "Current Quarantine Records"
+              },
+              "version": 3,
+              "widgetType": "bar"
+            }
+          }
+        },
+        {
+          "position": {
+            "height": 4,
+            "width": 6,
+            "x": 6,
+            "y": 2
+          },
+          "widget": {
+            "name": "freshness_status",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "freshness_status_counts",
+                  "disaggregated": false,
+                  "fields": [
+                    {
+                      "expression": "`freshness_status`",
+                      "name": "freshness_status"
+                    },
+                    {
+                      "expression": "`dataset_count`",
+                      "name": "dataset_count"
+                    }
+                  ]
+                }
+              }
+            ],
+            "spec": {
+              "data": {
+                "queryName": "main_query"
+              },
+              "encodings": {
+                "x": {
+                  "displayName": "freshness_status",
+                  "fieldName": "freshness_status",
+                  "scale": {
+                    "type": "categorical"
+                  }
+                },
+                "y": {
+                  "displayName": "dataset_count",
+                  "fieldName": "dataset_count",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                }
+              },
+              "frame": {
+                "showTitle": true,
+                "title": "Dataset Freshness Status"
+              },
+              "version": 3,
+              "widgetType": "bar"
+            }
+          }
+        },
+        {
+          "position": {
+            "height": 4,
+            "width": 12,
+            "x": 0,
+            "y": 6
+          },
+          "widget": {
+            "name": "security_events",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "security_daily",
+                  "disaggregated": false,
+                  "fields": [
+                    {
+                      "expression": "`event_date`",
+                      "name": "event_date"
+                    },
+                    {
+                      "expression": "`high_security_events`",
+                      "name": "high_security_events"
+                    }
+                  ]
+                }
+              }
+            ],
+            "spec": {
+              "data": {
+                "queryName": "main_query"
+              },
+              "encodings": {
+                "x": {
+                  "displayName": "event_date",
+                  "fieldName": "event_date",
+                  "scale": {
+                    "type": "temporal"
+                  }
+                },
+                "y": {
+                  "displayName": "high_security_events",
+                  "fieldName": "high_security_events",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                }
+              },
+              "frame": {
+                "showTitle": true,
+                "title": "High/Critical Security Events"
+              },
+              "version": 3,
+              "widgetType": "line"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "a17d0003",
+      "displayName": "ML & Agent Health",
+      "pageType": "PAGE_TYPE_CANVAS",
+      "layout": [
+        {
+          "position": {
+            "height": 2,
+            "width": 3,
+            "x": 0,
+            "y": 0
+          },
+          "widget": {
+            "name": "transactions_scored",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "fraud_model_current",
+                  "disaggregated": false,
+                  "fields": [
+                    {
+                      "expression": "`transactions_scored`",
+                      "name": "transactions_scored"
+                    }
+                  ]
+                }
+              }
+            ],
+            "spec": {
+              "data": {
+                "queryName": "main_query"
+              },
+              "encodings": {
+                "value": {
+                  "fieldName": "transactions_scored",
+                  "rowNumber": 0
+                }
+              },
+              "frame": {
+                "showTitle": true,
+                "title": "Transactions Scored"
+              },
+              "version": 2,
+              "widgetType": "counter"
+            }
+          }
+        },
+        {
+          "position": {
+            "height": 2,
+            "width": 3,
+            "x": 3,
+            "y": 0
+          },
+          "widget": {
+            "name": "avg_fraud_probability",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "fraud_model_current",
+                  "disaggregated": false,
+                  "fields": [
+                    {
+                      "expression": "`avg_fraud_probability`",
+                      "name": "avg_fraud_probability"
+                    }
+                  ]
+                }
+              }
+            ],
+            "spec": {
+              "data": {
+                "queryName": "main_query"
+              },
+              "encodings": {
+                "value": {
+                  "fieldName": "avg_fraud_probability",
+                  "rowNumber": 0,
+                  "format": {
+                    "decimalPlaces": {
+                      "places": 0,
+                      "type": "exact"
+                    },
+                    "type": "number-percent"
+                  }
+                }
+              },
+              "frame": {
+                "showTitle": true,
+                "title": "Avg Fraud Probability"
+              },
+              "version": 2,
+              "widgetType": "counter"
+            }
+          }
+        },
+        {
+          "position": {
+            "height": 2,
+            "width": 3,
+            "x": 6,
+            "y": 0
+          },
+          "widget": {
+            "name": "agent_pass_rate",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "platform_summary",
+                  "disaggregated": false,
+                  "fields": [
+                    {
+                      "expression": "`latest_agent_pass_rate`",
+                      "name": "latest_agent_pass_rate"
+                    }
+                  ]
+                }
+              }
+            ],
+            "spec": {
+              "data": {
+                "queryName": "main_query"
+              },
+              "encodings": {
+                "value": {
+                  "fieldName": "latest_agent_pass_rate",
+                  "rowNumber": 0,
+                  "format": {
+                    "decimalPlaces": {
+                      "places": 0,
+                      "type": "exact"
+                    },
+                    "type": "number-percent"
+                  }
+                }
+              },
+              "frame": {
+                "showTitle": true,
+                "title": "Latest Agent Pass Rate"
+              },
+              "version": 2,
+              "widgetType": "counter"
+            }
+          }
+        },
+        {
+          "position": {
+            "height": 2,
+            "width": 3,
+            "x": 9,
+            "y": 0
+          },
+          "widget": {
+            "name": "agent_safety_rate",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "platform_summary",
+                  "disaggregated": false,
+                  "fields": [
+                    {
+                      "expression": "`latest_agent_safety_rate`",
+                      "name": "latest_agent_safety_rate"
+                    }
+                  ]
+                }
+              }
+            ],
+            "spec": {
+              "data": {
+                "queryName": "main_query"
+              },
+              "encodings": {
+                "value": {
+                  "fieldName": "latest_agent_safety_rate",
+                  "rowNumber": 0,
+                  "format": {
+                    "decimalPlaces": {
+                      "places": 0,
+                      "type": "exact"
+                    },
+                    "type": "number-percent"
+                  }
+                }
+              },
+              "frame": {
+                "showTitle": true,
+                "title": "Latest Agent Safety Rate"
+              },
+              "version": 2,
+              "widgetType": "counter"
+            }
+          }
+        },
+        {
+          "position": {
+            "height": 4,
+            "width": 6,
+            "x": 0,
+            "y": 2
+          },
+          "widget": {
+            "name": "agent_pass_trend",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "agent_evaluation_history",
+                  "disaggregated": false,
+                  "fields": [
+                    {
+                      "expression": "`created_at`",
+                      "name": "created_at"
+                    },
+                    {
+                      "expression": "`pass_rate`",
+                      "name": "pass_rate"
+                    }
+                  ]
+                }
+              }
+            ],
+            "spec": {
+              "data": {
+                "queryName": "main_query"
+              },
+              "encodings": {
+                "x": {
+                  "displayName": "created_at",
+                  "fieldName": "created_at",
+                  "scale": {
+                    "type": "temporal"
+                  }
+                },
+                "y": {
+                  "displayName": "pass_rate",
+                  "fieldName": "pass_rate",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                }
+              },
+              "frame": {
+                "showTitle": true,
+                "title": "Agent Evaluation Pass Rate"
+              },
+              "version": 3,
+              "widgetType": "line"
+            }
+          }
+        },
+        {
+          "position": {
+            "height": 4,
+            "width": 6,
+            "x": 6,
+            "y": 2
+          },
+          "widget": {
+            "name": "agent_groundedness_trend",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "agent_evaluation_history",
+                  "disaggregated": false,
+                  "fields": [
+                    {
+                      "expression": "`created_at`",
+                      "name": "created_at"
+                    },
+                    {
+                      "expression": "`avg_groundedness_score`",
+                      "name": "avg_groundedness_score"
+                    }
+                  ]
+                }
+              }
+            ],
+            "spec": {
+              "data": {
+                "queryName": "main_query"
+              },
+              "encodings": {
+                "x": {
+                  "displayName": "created_at",
+                  "fieldName": "created_at",
+                  "scale": {
+                    "type": "temporal"
+                  }
+                },
+                "y": {
+                  "displayName": "avg_groundedness_score",
+                  "fieldName": "avg_groundedness_score",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                }
+              },
+              "frame": {
+                "showTitle": true,
+                "title": "Agent Groundedness"
+              },
+              "version": 3,
+              "widgetType": "line"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "a17d0004",
+      "displayName": "Cost & Performance",
+      "pageType": "PAGE_TYPE_CANVAS",
+      "layout": [
+        {
+          "position": {
+            "height": 2,
+            "width": 4,
+            "x": 0,
+            "y": 0
+          },
+          "widget": {
+            "name": "cost_today",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "platform_summary",
+                  "disaggregated": false,
+                  "fields": [
+                    {
+                      "expression": "`databricks_list_cost_today`",
+                      "name": "databricks_list_cost_today"
+                    }
+                  ]
+                }
+              }
+            ],
+            "spec": {
+              "data": {
+                "queryName": "main_query"
+              },
+              "encodings": {
+                "value": {
+                  "fieldName": "databricks_list_cost_today",
+                  "rowNumber": 0
+                }
+              },
+              "frame": {
+                "showTitle": true,
+                "title": "Databricks List Cost - Today"
+              },
+              "version": 2,
+              "widgetType": "counter"
+            }
+          }
+        },
+        {
+          "position": {
+            "height": 2,
+            "width": 4,
+            "x": 4,
+            "y": 0
+          },
+          "widget": {
+            "name": "cost_7d",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "platform_summary",
+                  "disaggregated": false,
+                  "fields": [
+                    {
+                      "expression": "`databricks_list_cost_7d`",
+                      "name": "databricks_list_cost_7d"
+                    }
+                  ]
+                }
+              }
+            ],
+            "spec": {
+              "data": {
+                "queryName": "main_query"
+              },
+              "encodings": {
+                "value": {
+                  "fieldName": "databricks_list_cost_7d",
+                  "rowNumber": 0
+                }
+              },
+              "frame": {
+                "showTitle": true,
+                "title": "Databricks List Cost - 7d"
+              },
+              "version": 2,
+              "widgetType": "counter"
+            }
+          }
+        },
+        {
+          "position": {
+            "height": 2,
+            "width": 4,
+            "x": 8,
+            "y": 0
+          },
+          "widget": {
+            "name": "query_failures",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "platform_summary",
+                  "disaggregated": false,
+                  "fields": [
+                    {
+                      "expression": "`failed_queries_24h`",
+                      "name": "failed_queries_24h"
+                    }
+                  ]
+                }
+              }
+            ],
+            "spec": {
+              "data": {
+                "queryName": "main_query"
+              },
+              "encodings": {
+                "value": {
+                  "fieldName": "failed_queries_24h",
+                  "rowNumber": 0
+                }
+              },
+              "frame": {
+                "showTitle": true,
+                "title": "Failed Queries - 24h"
+              },
+              "version": 2,
+              "widgetType": "counter"
+            }
+          }
+        },
+        {
+          "position": {
+            "height": 4,
+            "width": 6,
+            "x": 0,
+            "y": 2
+          },
+          "widget": {
+            "name": "cost_trend",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "cost_daily",
+                  "disaggregated": false,
+                  "fields": [
+                    {
+                      "expression": "`usage_date`",
+                      "name": "usage_date"
+                    },
+                    {
+                      "expression": "`estimated_list_cost`",
+                      "name": "estimated_list_cost"
+                    }
+                  ]
+                }
+              }
+            ],
+            "spec": {
+              "data": {
+                "queryName": "main_query"
+              },
+              "encodings": {
+                "x": {
+                  "displayName": "usage_date",
+                  "fieldName": "usage_date",
+                  "scale": {
+                    "type": "temporal"
+                  }
+                },
+                "y": {
+                  "displayName": "estimated_list_cost",
+                  "fieldName": "estimated_list_cost",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                }
+              },
+              "frame": {
+                "showTitle": true,
+                "title": "Daily Estimated Databricks List Cost"
+              },
+              "version": 3,
+              "widgetType": "line"
+            }
+          }
+        },
+        {
+          "position": {
+            "height": 4,
+            "width": 6,
+            "x": 6,
+            "y": 2
+          },
+          "widget": {
+            "name": "cost_by_workload",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "cost_by_workload",
+                  "disaggregated": false,
+                  "fields": [
+                    {
+                      "expression": "`workload_name`",
+                      "name": "workload_name"
+                    },
+                    {
+                      "expression": "`estimated_list_cost`",
+                      "name": "estimated_list_cost"
+                    }
+                  ]
+                }
+              }
+            ],
+            "spec": {
+              "data": {
+                "queryName": "main_query"
+              },
+              "encodings": {
+                "x": {
+                  "displayName": "workload_name",
+                  "fieldName": "workload_name",
+                  "scale": {
+                    "type": "categorical"
+                  }
+                },
+                "y": {
+                  "displayName": "estimated_list_cost",
+                  "fieldName": "estimated_list_cost",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                }
+              },
+              "frame": {
+                "showTitle": true,
+                "title": "Top Workloads by Estimated List Cost"
+              },
+              "version": 3,
+              "widgetType": "bar"
+            }
+          }
+        },
+        {
+          "position": {
+            "height": 4,
+            "width": 12,
+            "x": 0,
+            "y": 6
+          },
+          "widget": {
+            "name": "query_p95",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "query_daily",
+                  "disaggregated": false,
+                  "fields": [
+                    {
+                      "expression": "`query_date`",
+                      "name": "query_date"
+                    },
+                    {
+                      "expression": "`p95_total_duration_seconds`",
+                      "name": "p95_total_duration_seconds"
+                    }
+                  ]
+                }
+              }
+            ],
+            "spec": {
+              "data": {
+                "queryName": "main_query"
+              },
+              "encodings": {
+                "x": {
+                  "displayName": "query_date",
+                  "fieldName": "query_date",
+                  "scale": {
+                    "type": "temporal"
+                  }
+                },
+                "y": {
+                  "displayName": "p95_total_duration_seconds",
+                  "fieldName": "p95_total_duration_seconds",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                }
+              },
+              "frame": {
+                "showTitle": true,
+                "title": "Query P95 Duration"
+              },
+              "version": 3,
+              "widgetType": "line"
+            }
+          }
+        }
+      ]
+    }
+  ]
+}
