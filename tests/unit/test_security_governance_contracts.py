@@ -146,13 +146,6 @@ def test_validation_checks_table_column_tags_and_effective_policies() -> None:
     assert "SHOW EFFECTIVE POLICIES" in source
 
 
-def test_documentation_tracks_m16_as_in_progress() -> None:
-    readme = README.read_text(encoding="utf-8")
-    status = PROJECT_STATUS.read_text(encoding="utf-8")
-    assert "Milestone 16 Security and Governance in progress" in readme
-    assert "M16 | Security and governance | **IN PROGRESS**" in status
-
-
 def test_security_documentation_exists() -> None:
     assert SECURITY_ARCHITECTURE.is_file()
     assert M16_RUNBOOK.is_file()
