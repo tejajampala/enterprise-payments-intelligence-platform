@@ -4,7 +4,7 @@ An enterprise-grade Databricks reference implementation for payments data engine
 machine learning, MLOps, Generative AI, agentic AI, analytics, security, governance,
 CI/CD, observability, and platform engineering on AWS.
 
-> **Project Status:** Active Development — Milestones 1–16 complete; Milestone 17 Monitoring, Observability and Cost Optimisation in progress.
+> **Project Status:** COMPLETE — Milestones 1–17 implemented and validated. EPIP is a completed enterprise portfolio project.
 
 ---
 
@@ -140,7 +140,7 @@ flowchart TB
         IDENT["Account Groups<br/>Service Principals + OIDC"]
     end
 
-    subgraph OBS["M17 — OBSERVABILITY & COST — IN PROGRESS"]
+    subgraph OBS["OBSERVABILITY & COST"]
         SYS["Databricks System Tables"]
         PIPEMON["Pipeline + DQ Health"]
         JOBMON["Jobs + Query Health"]
@@ -699,24 +699,22 @@ docs/demo/M16-runbook.md
 
 # Monitoring, Observability and Cost Optimisation
 
-**Milestone 17: IN PROGRESS**
+**Milestone 17: COMPLETE**
 
-M17 is building a platform-operations layer across the already implemented EPIP estate.
+M17 completes the EPIP platform by adding governed operational visibility across the
+implemented data, ML, AI, analytics, security and CI/CD estate.
 
-Planned implementation areas are:
+Implementation:
 
 ```text
 M17A  Architecture and project-state alignment
-M17B  Observability foundation and System Tables
-M17C  Lakeflow and Data Quality monitoring
-M17D  Jobs, query and security operational monitoring
-M17E  ML, GenAI and Agent monitoring
-M17F  Databricks cost attribution and optimisation
-M17G  Platform Operations & Cost dashboard and alerts
-M17H  Validation, documentation and milestone closeout
+M17B  Observability foundation and Databricks System Tables
+M17C  Lakeflow, Data Quality and freshness monitoring
+M17D  Jobs, tasks, queries, security, ML/agent health, Databricks cost,
+      operations dashboard, paused alerts, validation and project closeout
 ```
 
-Planned architecture:
+Operational evidence:
 
 ```text
 Databricks System Tables
@@ -727,16 +725,44 @@ Existing ML / Agent Evaluation Evidence
         ↓
 payments_dev.monitoring
         ↓
-Health / Quality / Cost Views
+Pipeline / DQ / Job / Query / Security / ML / Agent / Cost Views
         ↓
 EPIP Platform Operations & Cost
 AI/BI Dashboard
+        +
+Paused SQL Alerts
 ```
 
-M17 will focus on **Databricks platform cost** first.
+Implemented monitoring domains include:
 
-It will not claim complete AWS cloud-cost coverage unless an AWS cost source such as CUR
-or Cost Explorer is explicitly integrated in a later implementation.
+- pipeline operational health with explicit `NEVER_RUN` states
+- Lakeflow expectation, quarantine, event-trust and freshness monitoring
+- job and task reliability
+- query latency, queue, scan, pruning, spill, shuffle and cache indicators
+- SQL warehouse lifecycle and configuration visibility
+- curated EPIP audit/security events
+- Champion fraud-scoring freshness and prediction-distribution monitoring
+- persisted agent evaluation/regression monitoring with MLflow trace linkage
+- corrected Databricks billing usage and estimated list-cost attribution
+- evidence-based cost-optimisation candidates
+- consolidated Platform Operations & Cost dashboard
+- cost-safe version-controlled SQL alerts deployed paused by default
+
+M17 cost reporting is intentionally described as **Databricks estimated list cost**.
+It does not claim complete AWS cloud-cost coverage for Amazon MSK, Amazon S3, AWS data
+transfer or other AWS charges because EPIP does not integrate AWS CUR/Cost Explorer.
+
+Detailed architecture:
+
+```text
+docs/architecture/monitoring-cost-architecture.md
+```
+
+Runbook:
+
+```text
+docs/demo/M17-runbook.md
+```
 
 ---
 
@@ -869,7 +895,7 @@ docs/architecture/security-governance.md
 docs/demo/M16-runbook.md
 ```
 
-M17 monitoring assets will be added under:
+Monitoring and operations assets:
 
 ```text
 sql/monitoring/
@@ -877,7 +903,7 @@ docs/architecture/monitoring-cost-architecture.md
 docs/demo/M17-runbook.md
 ```
 
-and will culminate in:
+Operations dashboard:
 
 ```text
 EPIP Platform Operations & Cost
@@ -905,8 +931,7 @@ EPIP Platform Operations & Cost
 | 14 | Governed AI/BI semantic layer and dashboard | Complete |
 | 15 | Enterprise CI/CD | Complete |
 | 16 | Security and governance | **Complete** |
-| 17 | Monitoring, observability and cost optimisation | **In Progress** |
-| 18 | Azure portability | Not Started |
+| 17 | Monitoring, observability and cost optimisation | **Complete** |
 
 Detailed implementation status:
 
@@ -916,27 +941,23 @@ docs/PROJECT_STATUS.md
 
 ---
 
-# Current Milestone — M17
+# Project Complete
 
-Current focus:
-
-```text
-M17A — Architecture and Project-State Alignment
-```
-
-M17A includes:
-
-- mark M16 complete
-- mark M17 in progress
-- correct the target architecture
-- align the detailed architecture documentation with the actual deployed platform
-- establish the monitoring architecture boundary for subsequent M17 work
-
-After M17A:
+EPIP has completed all planned milestones:
 
 ```text
-M17B — Observability Foundation and Databricks System Tables
+M1–M17 COMPLETE
 ```
+
+The final milestone delivers platform operations, ML/agent monitoring, Databricks cost
+attribution, an operations dashboard, paused alert resources, final validation, and
+project closeout.
+
+No further implementation milestone is planned.
+
+The repository is now intended to be maintained as a completed, interview-ready enterprise
+reference implementation. Future maintenance should improve or update the implemented
+platform without silently adding undeployed architecture claims.
 
 ---
 

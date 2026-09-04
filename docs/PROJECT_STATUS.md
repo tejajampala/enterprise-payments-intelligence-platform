@@ -5,7 +5,7 @@ This document tracks the **actual deployed and validated implementation state** 
 A milestone is marked **COMPLETE** only when its implementation, tests, operational
 validation, and supporting documentation have been completed.
 
-> **Current status:** Milestones 1–16 complete. Milestone 17 Monitoring, Observability and Cost Optimisation is in progress.
+> **Current status:** Milestones 1–17 COMPLETE. EPIP is a completed enterprise portfolio implementation.
 
 ---
 
@@ -29,8 +29,7 @@ validation, and supporting documentation have been completed.
 | M14 | Governed AI/BI semantic layer and dashboard | COMPLETE |
 | M15 | Enterprise CI/CD | COMPLETE |
 | M16 | Security and governance | COMPLETE |
-| M17 | Monitoring, observability and cost optimisation | **IN PROGRESS** |
-| M18 | Azure portability | NOT STARTED |
+| M17 | Monitoring, observability and cost optimisation | **COMPLETE** |
 
 ---
 
@@ -655,40 +654,37 @@ treated as complete.
 
 # Milestone 17 — Monitoring, Observability and Cost Optimisation
 
-Status: **IN PROGRESS**
+Status: **COMPLETE**
 
 ## Objective
 
 Operationalize the EPIP platform by creating governed visibility into:
 
 - Lakeflow pipeline health
-- data-quality behaviour
-- data freshness
-- job execution
-- query performance
-- audit/security events
-- fraud-model operational health
-- agent quality and regression health
-- Databricks usage
-- Databricks cost attribution
-- optimisation opportunities
+- data-quality behaviour and freshness
+- job and task execution
+- query and SQL warehouse performance
+- selected operational security/audit events
+- fraud-model scoring health
+- agent evaluation and regression health
+- Databricks usage and estimated list cost
+- evidence-based cost optimisation
+- dashboard and alert-driven operations
 
-M17 will reuse Databricks-native operational evidence where possible instead of creating
-unnecessary custom logging.
+M17 reuses Databricks-native and already persisted EPIP evidence rather than introducing
+an unnecessary always-on monitoring stack.
 
 ## M17A — Architecture and Project-State Alignment
 
-Status: **IN PROGRESS**
+Status: **COMPLETE**
 
-Scope:
+Implemented:
 
-- mark M16 complete
-- mark M17 in progress
-- replace the outdated linear README architecture
-- update `docs/architecture/platform-architecture.md`
-- document real AWS infrastructure boundaries
-- explicitly represent data, ML, analytics, AI, CI/CD, governance, and observability
-  as separate but connected architectural concerns
+- marked M16 complete and M17 active
+- replaced the outdated linear target architecture
+- aligned platform architecture with the actually implemented AWS/Databricks estate
+- documented infrastructure boundaries
+- established the monitoring and cost architecture boundary
 
 Artifacts:
 
@@ -700,157 +696,287 @@ docs/architecture/platform-architecture.md
 
 ## M17B — Observability Foundation and System Tables
 
-Status: **NOT STARTED**
+Status: **COMPLETE**
 
-Planned:
+Implemented:
 
-- create `payments_dev.monitoring`
-- inventory available `system.*` schemas/tables
-- inspect actual System Table schemas before writing views
-- create base platform monitoring views
-- document observability-source contracts
+- governed `payments_dev.monitoring` schema
+- workspace System Table inventory
+- current EPIP pipeline inventory
+- current EPIP job inventory
+- logical pipeline-update history
+- logical job-run history
+- SCD2 handling for Lakeflow definitions
+- System Table readiness monitoring
+- observability contract tests and runbook
 
-Planned files:
+Core assets:
 
 ```text
-sql/monitoring/17_create_monitoring_schema.sql
-sql/monitoring/17_system_table_inventory.sql
-sql/monitoring/17_platform_health_views.sql
+payments_dev.monitoring.current_epip_pipelines
+payments_dev.monitoring.epip_pipeline_update_health
+payments_dev.monitoring.current_epip_jobs
+payments_dev.monitoring.epip_job_run_health
+payments_dev.monitoring.system_source_readiness
 ```
 
-## M17C — Lakeflow and Data Quality Monitoring
+## M17C — Lakeflow, Data Quality and Freshness Monitoring
 
-Status: **NOT STARTED**
+Status: **COMPLETE**
 
-Planned:
+Implemented:
 
-- pipeline update health
-- last successful update
-- failure state
-- execution duration
-- throughput
-- Lakeflow event-log metrics
-- expectation pass/failure trends
-- quarantine trends
-- late-event trends
-- freshness lag
+- current pipeline operational health
+- explicit `NEVER_RUN` state
+- Lakeflow expectation metrics
+- quarantine daily trends
+- failed-rule breakdown
+- duplicate / late / out-of-order event monitoring
+- business-time versus processing-time freshness monitoring
 
-## M17D — Jobs, Queries and Operational Security
+Core assets:
 
-Status: **NOT STARTED**
+```text
+payments_dev.monitoring.pipeline_operational_health
+payments_dev.monitoring.lakeflow_expectation_metrics
+payments_dev.monitoring.dq_quarantine_daily
+payments_dev.monitoring.dq_quarantine_rule_metrics
+payments_dev.monitoring.payment_event_exception_health
+payments_dev.monitoring.data_freshness_health
+```
 
-Planned:
+A zero-row historical quarantine view is a valid healthy state when no records have
+failed DQ. M17D adds a dashboard-ready current DQ summary that explicitly represents
+zero-quarantine datasets as healthy.
 
-- job run health
-- task failures
-- run duration
-- query performance
-- failed/slow query indicators
-- high-scan query indicators
-- selected audit/security events
+## M17D — Unified Enterprise Operations and Final Closeout
 
-## M17E — ML, GenAI and Agent Monitoring
+Status: **COMPLETE**
 
-Status: **NOT STARTED**
+M17D consolidates the remaining M17 scope and is the final EPIP implementation step.
 
-Planned:
+### Jobs and tasks
 
-- Champion fraud-model visibility
+Implemented:
+
+- current task definitions
+- logical task-run health
+- job `NEVER_RUN` state
+- daily job/task reliability
+- task-level failure diagnosis
+
+Core assets:
+
+```text
+payments_dev.monitoring.current_epip_job_tasks
+payments_dev.monitoring.epip_job_task_run_health
+payments_dev.monitoring.job_operational_health
+payments_dev.monitoring.job_daily_health
+```
+
+### Query and warehouse operations
+
+Implemented:
+
+- EPIP-attributed query history
+- failed query monitoring
+- total/execution/queue duration
+- read bytes/files
+- file pruning
+- local spill
+- shuffle reads
+- result-cache usage
+- SQL warehouse settings and lifecycle events
+
+Core assets:
+
+```text
+payments_dev.monitoring.epip_query_performance
+payments_dev.monitoring.query_performance_daily
+payments_dev.monitoring.warehouse_operational_health
+```
+
+Performance-status thresholds are portfolio diagnostics, not universal banking SLAs.
+
+### Operational security
+
+Implemented:
+
+- curated EPIP-related audit events
+- operation failure visibility
+- governance/resource change visibility
+- service-principal / run-as visibility where identifiable
+- daily security-event metrics
+
+Core assets:
+
+```text
+payments_dev.monitoring.epip_security_events
+payments_dev.monitoring.security_event_daily
+```
+
+The curated monitoring layer does not expose source IP addresses or raw request
+parameters.
+
+### Fraud-model health
+
+Implemented:
+
+- Champion model/version visibility
+- latest scoring timestamp
+- transactions scored
+- average fraud probability
+- predicted-fraud rate
+- high-risk rate
 - scoring freshness
-- prediction-distribution trends
-- model-evaluation history
-- agent case pass rate
+
+Core asset:
+
+```text
+payments_dev.monitoring.fraud_model_current_health
+```
+
+Important semantic rule remains:
+
+```text
+predicted_fraud != confirmed fraud
+fraud_probability != proof of fraud
+```
+
+Historical AP/F2/training evaluation continues to live in governed MLflow evidence rather
+than being fabricated as a SQL history table.
+
+### Agent health
+
+Implemented:
+
+- evaluation pass rate
 - groundedness
 - evidence completeness
 - tool-quality metrics
-- safety compliance
+- citation quality
+- safety
 - human-review compliance
+- regression gate status
+- failed-case diagnostics
 - MLflow trace linkage
 
-## M17F — Databricks Cost Attribution and Optimisation
+Core assets:
 
-Status: **NOT STARTED**
+```text
+payments_dev.monitoring.agent_evaluation_health
+payments_dev.monitoring.agent_latest_health
+payments_dev.monitoring.agent_failed_case_diagnostics
+```
 
-Planned:
+### Databricks cost and optimisation
 
-- Databricks billing System Tables
-- usage quantities
-- list-cost estimation
-- daily cost
+Implemented:
+
+- billing usage enrichment
+- effective list-price estimation
+- billing correction semantics
+- daily estimated Databricks list cost
 - cost by SKU
-- workload/resource attribution where metadata supports it
-- expensive jobs/queries
-- failure-related waste indicators
-- cost trend analysis
+- cost by workload
+- workload attribution quality
+- failed-job-cost candidates
+- top-cost-workload candidates
+- warehouse auto-stop review candidates
+
+Core assets:
+
+```text
+payments_dev.monitoring.databricks_usage_cost_detail
+payments_dev.monitoring.databricks_cost_daily
+payments_dev.monitoring.databricks_cost_by_sku
+payments_dev.monitoring.databricks_cost_by_workload
+payments_dev.monitoring.cost_optimisation_candidates
+```
 
 Scope boundary:
 
 ```text
-Databricks platform cost    → M17
-Complete AWS cloud bill     → not claimed without AWS cost-source integration
+Databricks platform usage / estimated list cost  → implemented
+Complete AWS cloud invoice                       → NOT claimed
 ```
 
-## M17G — Platform Operations and Cost Dashboard
+EPIP does not claim Amazon MSK, Amazon S3 or AWS network/data-transfer costs are included
+without a real AWS billing-source integration.
 
-Status: **NOT STARTED**
+### Consolidated operations
 
-Planned dashboard:
+Implemented:
+
+```text
+payments_dev.monitoring.dq_current_health
+payments_dev.monitoring.platform_operations_summary
+payments_dev.monitoring.operations_alert_candidates
+```
+
+### Operations dashboard
+
+Implemented dashboard:
 
 ```text
 EPIP Platform Operations & Cost
 ```
 
-Planned pages:
+Pages:
 
 1. Platform Health
-2. Lakeflow & Data Quality
+2. Data Quality & Security
 3. ML & Agent Health
 4. Cost & Performance
 
-Planned alerts:
+The operations dashboard is intentionally separate from:
 
-- pipeline failure
-- freshness breach
-- critical DQ degradation
-- agent regression failure
-- unexpected Databricks cost
+```text
+EPIP Payments Intelligence
+```
 
-## M17H — Validation and Closeout
+### Alerts
 
-Status: **NOT STARTED**
+Version-controlled SQL alerts are deployed paused by default:
 
-Planned:
+```text
+EPIP - Pipeline Failure
+EPIP - Data Freshness
+EPIP - DQ Degradation
+EPIP - Agent Regression
+EPIP - Databricks Cost Anomaly
+```
 
-- monitoring validation SQL
-- monitoring contract tests
-- architecture documentation
-- M17 demo runbook
-- dashboard bundle validation
-- final project-state update
-- M17 closeout PR
+Paused-by-default design prevents unnecessary scheduled warehouse starts and alert noise
+in the portfolio environment.
 
----
+No notification destination is invented.
 
-# Milestone 18 — Azure Portability
+### Final validation and documentation
 
-Status: **NOT STARTED**
+Final assets:
 
-Planned:
+```text
+sql/monitoring/17_validate_m17_complete.sql
+tests/unit/test_m17_complete_monitoring_contracts.py
 
-- Azure Databricks architecture mapping
-- ADLS Gen2 storage mapping
-- Azure identity/security mapping
-- networking differences
-- Azure-specific Terraform modules
-- AWS-to-Azure service mapping
-- portability documentation
-- architecture trade-offs
+docs/architecture/monitoring-cost-architecture.md
+docs/demo/M17-runbook.md
+
+bundle/resources/epip_platform_operations.dashboard.yml
+bundle/resources/monitoring_alerts.yml
+src/analytics/epip_platform_operations.lvdash.json
+```
+
+M17 is the final EPIP milestone.
+
+No further implementation milestone is planned.
 
 ---
 
 # Current Portfolio Story
 
-The implemented platform now demonstrates:
+The completed platform demonstrates:
 
 ```text
 AWS S3 / PostgreSQL-style Extracts / Amazon MSK
@@ -871,18 +997,15 @@ AWS S3 / PostgreSQL-style Extracts / Amazon MSK
         Unity Catalog Governance
                     +
         Security / RBAC / ABAC
+                    +
+   Monitoring / Operational Security / Cost
                     ↓
-       Monitoring & Cost (M17)
+        EPIP Platform Operations & Cost
 ```
 
-Current milestone:
+Final project state:
 
 ```text
-M17 — Monitoring, Observability and Cost Optimisation
-```
-
-Current step:
-
-```text
-M17A — Architecture and Project-State Alignment
+M1–M17 COMPLETE
+EPIP COMPLETE
 ```

@@ -1,0 +1,8 @@
+resources:
+  dashboards:
+    epip_platform_operations:
+      display_name: "EPIP Platform Operations & Cost"
+      warehouse_id: ${var.sql_warehouse_id}
+      dataset_catalog: ${var.catalog_name}
+      dataset_schema: monitoring
+      file_path: ../../src/analytics/epip_platform_operations.lvdash.json

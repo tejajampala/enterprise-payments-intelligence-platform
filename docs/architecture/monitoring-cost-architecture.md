@@ -3,46 +3,140 @@
 ## Status
 
 ```text
-Milestone 17 — IN PROGRESS
-Current step — M17B Observability Foundation
+Milestone 17 — FINAL EPIP MILESTONE
+M17A — COMPLETE
+M17B — COMPLETE
+M17C — COMPLETE
+M17D — COMPLETE after final validation and merge
 ```
 
-## Objective
-
-M17 adds operational visibility to the already implemented EPIP data, ML, AI,
-analytics, governance and CI/CD platform.
-
-The design is deliberately evidence-first:
-
-```text
-Platform telemetry
-      ↓
-Governed monitoring views
-      ↓
-Operational interpretation
-      ↓
-Dashboard / alert / optimisation decision
-```
-
-EPIP does not add custom logging when Databricks already exposes the required
-operational evidence through system tables or Lakeflow event logs.
+M17D consolidates the remaining observability, ML/AI monitoring, FinOps,
+dashboard, alerting and project-closeout work into the final EPIP milestone.
 
 ---
 
-## Confirmed Databricks System-Table Inventory
+# Objective
 
-The EPIP AWS workspace exposes the following relevant schemas and tables.
+EPIP observability answers five operational questions:
 
-### Billing
+1. Is the data platform healthy?
+2. Is trusted data still trustworthy and fresh?
+3. Are jobs, SQL queries and warehouses operating efficiently?
+4. Are fraud-model and agent outputs backed by current governed evidence?
+5. Where is Databricks usage and estimated list cost being consumed?
 
-```text
-system.billing.account_prices
-system.billing.attributed_usage
-system.billing.list_prices
-system.billing.usage
+The architecture reuses platform-native evidence instead of introducing a
+separate always-on monitoring stack.
+
+---
+
+# Architecture
+
+```mermaid
+flowchart TB
+
+    subgraph SOURCES["OBSERVABILITY EVIDENCE"]
+        SYS["Databricks System Tables"]
+        EVENT["Lakeflow Event Logs"]
+        DQ["Silver DQ / Quarantine / Exception Evidence"]
+        ML["Champion Fraud-Scoring Evidence"]
+        AGENT["M13 Agent Evaluation + Trace Evidence"]
+    end
+
+    subgraph MON["payments_dev.monitoring"]
+        PIPE["Pipeline Operational Health"]
+        DATA["DQ + Freshness"]
+        JOB["Job + Task Health"]
+        QUERY["Query + Warehouse Health"]
+        SEC["Operational Security"]
+        MLAI["ML + Agent Health"]
+        COST["Databricks Usage + Estimated List Cost"]
+        SUMMARY["Operations Summary + Alert Candidates"]
+    end
+
+    subgraph CONSUME["OPERATIONS CONSUMPTION"]
+        DASH["EPIP Platform Operations & Cost"]
+        ALERTS["Paused SQL Alerts"]
+        RUNBOOK["M17 Operations Runbook"]
+    end
+
+    SYS --> PIPE
+    SYS --> JOB
+    SYS --> QUERY
+    SYS --> SEC
+    SYS --> COST
+
+    EVENT --> DATA
+    DQ --> DATA
+
+    ML --> MLAI
+    AGENT --> MLAI
+
+    PIPE --> SUMMARY
+    DATA --> SUMMARY
+    JOB --> SUMMARY
+    QUERY --> SUMMARY
+    SEC --> SUMMARY
+    MLAI --> SUMMARY
+    COST --> SUMMARY
+
+    SUMMARY --> DASH
+    PIPE --> DASH
+    DATA --> DASH
+    JOB --> DASH
+    QUERY --> DASH
+    SEC --> DASH
+    MLAI --> DASH
+    COST --> DASH
+
+    SUMMARY --> ALERTS
+    DASH --> RUNBOOK
+    ALERTS --> RUNBOOK
 ```
 
-### Lakeflow
+---
+
+# 1. Monitoring Schema
+
+The governed monitoring contract is:
+
+```text
+payments_dev.monitoring
+```
+
+This schema separates operational consumption from the underlying raw platform
+metadata.
+
+The design principle is:
+
+```text
+account / workspace operational evidence
+                ↓
+        curated monitoring views
+                ↓
+        approved operational use
+```
+
+Consumers do not need unrestricted access to every raw System Table in order to
+use the final operational views.
+
+---
+
+# 2. Databricks-Native Evidence
+
+## Billing
+
+```text
+system.billing.usage
+system.billing.list_prices
+system.billing.attributed_usage
+system.billing.account_prices
+```
+
+M17D uses `usage` and `list_prices` for corrected usage and list-price
+estimation.
+
+## Lakeflow
 
 ```text
 system.lakeflow.jobs
@@ -51,331 +145,524 @@ system.lakeflow.job_run_timeline
 system.lakeflow.job_task_run_timeline
 system.lakeflow.pipelines
 system.lakeflow.pipeline_update_timeline
-system.lakeflow.zerobus_ingest
-system.lakeflow.zerobus_stream
 ```
 
-### Query
+Pipeline and job definition tables are treated as SCD2 sources.
+
+Long timeline executions are normalized into one logical run or update.
+
+## Query
 
 ```text
 system.query.history
 ```
 
-### Compute
+Monitored signals include:
+
+- status
+- total duration
+- execution duration
+- compute wait
+- capacity wait
+- files read
+- files pruned
+- bytes read
+- result-cache usage
+- local spill
+- shuffle reads
+- query source / job attribution
+
+## Compute
 
 ```text
-system.compute.clusters
-system.compute.instance_events
-system.compute.instance_pools
-system.compute.node_timeline
-system.compute.node_types
-system.compute.warehouse_events
 system.compute.warehouses
+system.compute.warehouse_events
 ```
 
-### Access
+The final dashboard monitors:
+
+- warehouse size
+- min/max clusters
+- auto-stop
+- latest lifecycle event
+- latest cluster count
+
+## Access / Audit
 
 ```text
 system.access.audit
-system.access.column_lineage
-system.access.table_lineage
-system.access.workspaces_latest
-system.access.inbound_network
-system.access.outbound_network
-system.access.assistant_events
-system.access.clean_room_events
 ```
+
+The curated monitoring view deliberately does not expose raw source IP addresses
+or raw request parameters.
+
+Request metadata is used only to identify EPIP-related activity before the
+curated projection is produced.
 
 ---
 
-## M17 Architecture
+# 3. Pipeline and Data-Quality Monitoring
 
-```mermaid
-flowchart TB
-    ST["Databricks System Tables"]
-    EL["Lakeflow Event Logs"]
-    ML["MLflow / Model Evidence"]
-    AE["Agent Evaluation Evidence"]
+Implemented views include:
 
-    ST --> MON["payments_dev.monitoring"]
-    EL --> MON
-    ML --> MON
-    AE --> MON
+```text
+current_epip_pipelines
+epip_pipeline_update_health
+pipeline_operational_health
 
-    MON --> PIPE["Pipeline Health"]
-    MON --> DQ["Data Quality + Freshness"]
-    MON --> JOB["Jobs + Query Health"]
-    MON --> SEC["Security / Audit"]
-    MON --> AIML["ML + Agent Health"]
-    MON --> COST["Billing + Cost Attribution"]
+lakeflow_expectation_metrics
+dq_quarantine_daily
+dq_quarantine_rule_metrics
+dq_current_health
 
-    PIPE --> DASH["EPIP Platform Operations & Cost"]
-    DQ --> DASH
-    JOB --> DASH
-    SEC --> DASH
-    AIML --> DASH
-    COST --> DASH
+payment_event_exception_health
+data_freshness_health
 ```
+
+## Explicit NEVER_RUN state
+
+A pipeline definition must not disappear merely because it has no update
+history.
+
+The monitoring contract therefore represents:
+
+```text
+definition exists + no update
+        ↓
+NEVER_RUN
+```
+
+## Explicit zero-quarantine state
+
+Historical quarantine views naturally contain no rows when nothing has failed.
+
+For dashboard use, `dq_current_health` explicitly represents:
+
+```text
+payment_events          0 quarantined → HEALTHY
+payment_transactions    0 quarantined → HEALTHY
+```
+
+This distinguishes a healthy zero-failure state from missing monitoring
+evidence.
+
+## Business time versus processing time
+
+EPIP uses deterministic synthetic historical payment timestamps.
+
+Therefore freshness separates:
+
+```text
+latest_business_time
+```
+
+from:
+
+```text
+latest_observed_at
+```
+
+Operational freshness is based on processing/trust evidence, not merely on the
+age of synthetic business events.
 
 ---
 
-## M17B Foundation
+# 4. Job and Task Monitoring
 
-M17B does not attempt to implement the entire monitoring platform.
-
-It establishes the governed monitoring contract using:
+Implemented views:
 
 ```text
-system.lakeflow.pipelines
-system.lakeflow.pipeline_update_timeline
-system.lakeflow.jobs
-system.lakeflow.job_run_timeline
-system.query.history
-system.billing.usage
-system.access.audit
+current_epip_jobs
+current_epip_job_tasks
+epip_job_run_health
+epip_job_task_run_health
+job_operational_health
+job_daily_health
 ```
 
-The first four become operational EPIP views. Query, billing and audit are
-initially represented in source-readiness checks and are expanded later.
-
-### Created monitoring views
+The same principles used for pipelines apply to jobs:
 
 ```text
-payments_dev.monitoring.current_epip_pipelines
-payments_dev.monitoring.epip_pipeline_update_health
-payments_dev.monitoring.current_epip_jobs
-payments_dev.monitoring.epip_job_run_health
-payments_dev.monitoring.system_source_readiness
+current job + no run history
+        ↓
+NEVER_RUN
 ```
+
+Task monitoring makes failed downstream steps visible even when the job-level
+summary alone is insufficient for diagnosis.
+
+Long job/task timelines can be emitted as multiple time slices, so M17D
+aggregates them back into logical runs before calculating duration and status.
 
 ---
 
-## Why SCD2 Handling Matters
+# 5. Query and Warehouse Monitoring
 
-`system.lakeflow.pipelines` and `system.lakeflow.jobs` are slowly changing
-dimension tables.
-
-Therefore this is incorrect:
+Implemented views:
 
 ```text
-filter deleted rows
-then choose latest row
+epip_query_performance
+query_performance_daily
+warehouse_operational_health
 ```
 
-because it can accidentally expose the last pre-deletion version.
+## Query attribution
 
-EPIP instead uses:
+System query history can cover more than EPIP.
 
-```text
-all history
-    ↓
-ROW_NUMBER by object key
-ORDER BY change_time DESC
-    ↓
-keep latest row
-    ↓
-then exclude delete_time
-```
+M17D attributes a query when:
 
-This is the same kind of temporal correctness principle used elsewhere in EPIP.
+1. it was launched by a current EPIP job; or
+2. its visible SQL text references EPIP/payment catalogs.
 
----
+This is intentionally conservative.
 
-## Why Timeline Aggregation Matters
+If statement text is redacted by platform privileges, job-based attribution can
+still work.
 
-Lakeflow job and pipeline timeline tables can split long-running executions into
-hourly slices.
+## Query indicators
 
-Therefore:
+The portfolio implementation surfaces evidence such as:
 
 ```text
-one row != always one logical run
-```
-
-M17B groups slices back to:
-
-```text
-pipeline_id + update_id
-```
-
-or:
-
-```text
-job_id + run_id
-```
-
-before calculating duration and health.
-
-This prevents long executions from being double-counted in later dashboards.
-
----
-
-## Current Health Semantics
-
-Pipeline result states:
-
-```text
-COMPLETED
 FAILED
-CANCELED
+SPILLING
+QUEUE_DELAY
+LONG_RUNNING
+HIGH_SCAN
+HEALTHY
 ```
 
-EPIP maps them to:
+The thresholds are demonstration heuristics, not universal financial-services
+SLAs.
 
-```text
-COMPLETED → HEALTHY
-FAILED    → ATTENTION
-CANCELED  → ATTENTION
-NULL      → IN_PROGRESS_OR_INCOMPLETE
-```
-
-Job result states are similarly normalized while preserving the raw Databricks
-result state and termination code.
-
-The normalized health label is a dashboard convenience. The raw system-table
-state remains available for troubleshooting.
+They are intended to point an engineer toward Query Profile and workload
+diagnosis, not to prescribe an automatic remediation.
 
 ---
 
-## Source Availability Semantics
+# 6. Operational Security Monitoring
 
-Not every system table has identical delivery timing or scope.
+Implemented views:
+
+```text
+epip_security_events
+security_event_daily
+```
+
+M17D focuses on operationally useful EPIP-related activity:
+
+- failed operations
+- governance changes
+- resource changes
+- service-principal / run-as activity where identifiable
+- selected Unity Catalog activity
+
+The monitoring layer deliberately avoids turning the operations dashboard into
+a raw audit-log browser.
+
+---
+
+# 7. Fraud-Model Monitoring
+
+Implemented view:
+
+```text
+fraud_model_current_health
+```
+
+The source is governed Champion scoring evidence already exposed through the
+EPIP analytics layer.
+
+Metrics include:
+
+- model name
+- model version
+- Champion alias
+- latest scoring timestamp
+- transactions scored
+- average fraud probability
+- predicted-fraud rate
+- high-risk rate
+- scoring freshness
+
+Important semantic rule:
+
+```text
+predicted_fraud != confirmed fraud
+fraud_probability != proof of fraud
+```
+
+Historical AP, F2, recall, precision and threshold evaluation remain governed
+MLflow training/evaluation evidence.
+
+M17D does not invent SQL history for metrics that were not separately persisted
+as Delta tables.
+
+---
+
+# 8. Agent Monitoring
+
+Implemented views:
+
+```text
+agent_evaluation_health
+agent_latest_health
+agent_failed_case_diagnostics
+```
+
+The source is the M13 persisted golden-evaluation evidence.
+
+Metrics include:
+
+- case pass rate
+- groundedness
+- evidence completeness
+- tool selection
+- tool arguments
+- tool efficiency
+- citation quality
+- scope compliance
+- human-review compliance
+- safety
+- duration
+- failed gates
+
+Failed cases preserve:
+
+```text
+trace_id
+```
+
+which supports the diagnostic path:
+
+```text
+Regression failure
+      ↓
+Failed evaluation case
+      ↓
+trace_id
+      ↓
+MLflow trace
+      ↓
+tool / retrieval / generation diagnosis
+```
+
+---
+
+# 9. Databricks Cost Attribution
+
+Implemented views:
+
+```text
+databricks_usage_cost_detail
+databricks_cost_daily
+databricks_cost_by_sku
+databricks_cost_by_workload
+cost_optimisation_candidates
+```
+
+## Billing correction semantics
+
+Databricks usage can contain:
+
+```text
+ORIGINAL
+RETRACTION
+RESTATEMENT
+```
+
+M17D does not filter only `ORIGINAL`.
+
+Usage and cost are summed so correction rows can produce the corrected total.
+
+## Price semantics
+
+Estimated list cost uses the effective list price applicable at usage time.
+
+The result is:
+
+```text
+Databricks estimated list cost
+```
+
+It is not presented as the final contracted invoice.
+
+## Attribution
+
+Where usage metadata supports it, cost is attributed to:
+
+```text
+JOB
+LAKEFLOW_PIPELINE
+SQL_WAREHOUSE
+ENDPOINT
+NOTEBOOK
+OTHER
+```
+
+Attribution quality is also exposed so a dashboard user can distinguish directly
+identified EPIP resources from broader workspace-level attribution.
+
+---
+
+# 10. Cost Optimisation
+
+The final monitoring layer surfaces evidence-based optimisation candidates.
 
 Examples:
 
 ```text
-billing usage
-    → account-global billing evidence
-    → can arrive later than operational telemetry
-
-Lakeflow / query / audit
-    → regional operational evidence
+failed job cost
+top-cost workloads
+warehouse auto-stop review
+query spill
+query queue delay
+large scans
+poor file pruning
 ```
 
-For this reason `system_source_readiness.latest_event_time` is informational.
+M17D does not automatically resize infrastructure based on these heuristics.
 
-M17B does not apply a single universal freshness SLA to all Databricks system
-tables.
-
----
-
-## Scope Boundaries
-
-### M17B
+The intended engineering loop is:
 
 ```text
-schema
-system-table inventory
-current pipelines
-pipeline update health
-current jobs
-job-run health
-source readiness
-```
-
-### M17C
-
-```text
-Lakeflow event logs
-expectations
-quarantine
-late events
-data freshness
-DQ trends
-```
-
-### M17D
-
-```text
-job task health
-query performance
-warehouse health
-audit/security events
-```
-
-### M17E
-
-```text
-fraud model health
-MLflow operational evidence
-agent quality
-agent traces
-```
-
-### M17F
-
-```text
-billing usage
-list prices
-attributed usage
-cost estimation
-cost attribution
-optimisation indicators
-```
-
-### M17G
-
-```text
-EPIP Platform Operations & Cost dashboard
-alerts
+observe
+  ↓
+identify hotspot
+  ↓
+inspect workload / Query Profile / run evidence
+  ↓
+change one design or compute variable
+  ↓
+measure again
 ```
 
 ---
 
-## Cost Boundary
+# 11. AWS Cost Boundary
 
-M17 monitors Databricks platform usage and cost.
+The dashboard covers Databricks platform usage and estimated Databricks list
+cost.
 
-Databricks billing system tables do not represent EPIP's complete AWS invoice.
+It does not represent the complete AWS invoice.
 
-Therefore M17 does not claim complete cost coverage for:
+Specifically, without a separate AWS billing integration it does not claim
+complete coverage for:
 
 ```text
 Amazon MSK
 Amazon S3
-AWS network/data-transfer charges
-other AWS services
+AWS data transfer
+other AWS infrastructure
+taxes / negotiated discounts / credits
 ```
 
-unless a separate AWS billing source is implemented.
+A future AWS CUR or Cost Explorer integration could extend the architecture, but
+it is intentionally not claimed as part of EPIP.
 
 ---
 
-## Security
+# 12. Final Operations Dashboard
 
-Raw system tables contain account-wide operational metadata.
-
-Monitoring consumers should not automatically receive direct access to the
-underlying system schemas.
-
-The preferred long-term pattern is:
+Dashboard:
 
 ```text
-restricted system tables
-        ↓
-curated payments_dev.monitoring views
-        ↓
-approved platform/operations consumers
+EPIP Platform Operations & Cost
 ```
 
-Later M17 stages can add explicit RBAC for the monitoring schema once the final
-consumer personas are defined.
+Pages:
+
+1. Platform Health
+2. Data Quality & Security
+3. ML & Agent Health
+4. Cost & Performance
+
+The operations dashboard remains separate from the business dashboard:
+
+```text
+EPIP Payments Intelligence
+```
+
+This is intentional.
+
+Business analytics and platform operations have different consumers, semantic
+contracts and operational responsibilities.
 
 ---
 
-## M17B Definition of Done
+# 13. Alerts
+
+Version-controlled paused alert resources:
 
 ```text
-[ ] monitoring schema bundle resource validates
-[ ] payments_dev.monitoring exists
-[ ] system-table inventory captured
-[ ] current EPIP pipeline view created
-[ ] pipeline update health view created
-[ ] current EPIP job view created
-[ ] job-run health view created
-[ ] source-readiness view created
-[ ] validation SQL passes
-[ ] unit tests pass
-[ ] bundle validation passes
-[ ] PR merged
+EPIP - Pipeline Failure
+EPIP - Data Freshness
+EPIP - DQ Degradation
+EPIP - Agent Regression
+EPIP - Databricks Cost Anomaly
 ```
+
+Alerts are deployed in `PAUSED` state by default.
+
+Reasons:
+
+- avoid unnecessary warehouse starts during portfolio development
+- prevent alert noise
+- require explicit operational ownership before activation
+- preserve cost control
+
+No notification destination is invented.
+
+The user can later configure approved destinations and unpause only the alerts
+they want to demonstrate.
+
+---
+
+# 14. Final M17 Architecture
+
+```text
+Data / Lakeflow / Query / Compute / Audit / ML / Agent / Billing evidence
+                                ↓
+                     payments_dev.monitoring
+                                ↓
+       ┌─────────────┬──────────┼──────────┬──────────────┐
+       ▼             ▼          ▼          ▼              ▼
+   Pipeline/DQ    Jobs/Tasks   Queries   ML/Agent       Cost/Security
+       └─────────────┴──────────┼──────────┴──────────────┘
+                                ▼
+                 Platform Operations Summary
+                                ↓
+               EPIP Platform Operations & Cost
+                                +
+                     Paused SQL Alerts
+```
+
+---
+
+# 15. Definition of Done
+
+M17 is complete when:
+
+```text
+[ ] M17D SQL views create successfully
+[ ] M17 final validation SQL runs successfully
+[ ] dashboard resource validates
+[ ] paused alert resources validate
+[ ] development bundle deploy succeeds
+[ ] contract tests pass
+[ ] full pytest passes
+[ ] Ruff passes
+[ ] mypy passes
+[ ] package build passes
+[ ] dev bundle validate/plan passes
+[ ] CI bundle validate/plan passes
+[ ] README marks M1-M17 complete
+[ ] PROJECT_STATUS marks M1-M17 complete
+[ ] platform architecture describes observability as implemented
+[ ] the obsolete future-milestone entry is removed
+[ ] final PR is merged
+```
+
+After the final M17D merge, EPIP is a completed portfolio project rather than a
+project with another planned milestone.
