@@ -1,0 +1,37 @@
+version: 1
+
+classification_levels:
+  public:
+    description: Public or non-sensitive reference information.
+
+  internal:
+    description: Internal operational or analytical information.
+
+  confidential:
+    description: Commercial, transaction, fraud or financial information.
+
+  restricted:
+    description: Personal or highly sensitive information requiring masking.
+
+pii_categories:
+  name:
+    type: direct_identifier
+
+  date_of_birth:
+    type: personal_attribute
+
+  email:
+    type: direct_identifier
+
+  phone:
+    type: direct_identifier
+
+  address:
+    type: direct_identifier
+
+  network_identifier:
+    type: technical_identifier
+
+regional_scope:
+  country:
+    description: Country used for row-level jurisdictional access.

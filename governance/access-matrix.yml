@@ -1,0 +1,67 @@
+version: 1
+
+principals:
+  epip-platform-admins:
+    description: Platform and governance administrators.
+    environments:
+      dev:
+        catalog: payments_dev
+        access: manage
+      prod:
+        catalog: payments_prod
+        access: manage
+
+  epip-data-engineers:
+    description: Engineers responsible for ingestion and medallion pipelines.
+    environments:
+      dev:
+        schemas:
+          ingestion: engineer
+          bronze: engineer
+          silver: engineer
+          gold: engineer
+
+  epip-ml-engineers:
+    description: Engineers responsible for feature engineering and ML lifecycle.
+    environments:
+      dev:
+        schemas:
+          silver: read
+          gold: read
+          features: engineer
+          ml: engineer
+          models: execute
+
+  epip-fraud-analysts:
+    description: Fraud investigators consuming governed and curated evidence.
+    environments:
+      dev:
+        schemas:
+          gold: read
+          ai: read
+          analytics: read
+        sensitive_customer_access: masked
+
+  epip-fraud-analysts-au:
+    description: Fraud analysts restricted to Australian customer records.
+    parent: epip-fraud-analysts
+    row_scope:
+      country:
+        - AU
+
+  epip-bi-consumers:
+    description: Business intelligence and dashboard consumers.
+    environments:
+      dev:
+        schemas:
+          gold: read
+          analytics: read
+
+service_principals:
+  epip-github-actions-ci:
+    environment: ci
+    production_access: prohibited
+
+  epip-github-actions-prod:
+    environment: prod
+    development_access: prohibited
