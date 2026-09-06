@@ -176,7 +176,7 @@
             "y": 0
           },
           "widget": {
-            "name": "authorization_rate",
+            "name": "Unique Customers",
             "queries": [
               {
                 "name": "main_query",
@@ -185,8 +185,8 @@
                   "disaggregated": false,
                   "fields": [
                     {
-                      "expression": "MEASURE(`authorization_rate`)",
-                      "name": "measure(authorization_rate)"
+                      "expression": "MEASURE(`unique_customers`)",
+                      "name": "measure(unique_customers)"
                     }
                   ]
                 }

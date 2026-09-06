@@ -8,7 +8,7 @@ SELECT
     MEASURE(transaction_count) AS transaction_count,
     MEASURE(total_payment_value) AS total_payment_value,
     MEASURE(average_transaction_value) AS average_transaction_value,
-    MEASURE(authorization_rate) AS authorization_rate,
+    MEASURE(unique_customers) AS unique_customers,
     MEASURE(decline_rate) AS decline_rate
 FROM payments_dev.analytics.payment_operations_metrics;
 
@@ -27,7 +27,6 @@ SELECT
     MEASURE(transaction_count) AS transaction_count,
     MEASURE(total_payment_value) AS total_payment_value,
     MEASURE(average_transaction_value) AS average_transaction_value,
-    MEASURE(authorization_rate) AS authorization_rate,
     MEASURE(decline_rate) AS decline_rate
 FROM payments_dev.analytics.payment_operations_metrics
 GROUP BY channel
