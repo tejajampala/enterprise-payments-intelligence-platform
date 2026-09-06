@@ -120,6 +120,11 @@ def test_databricks_deployment_runs_only_after_main_merge() -> None:
     assert "DATABRICKS_TOKEN:" not in source
     assert "DATABRICKS_CLIENT_SECRET:" not in source
 
+    assert "workflow_run:" in source
+    assert "- CI" in source
+    assert "github.event.workflow_run.conclusion == 'success'" in source
+    assert "github.event.workflow_run.head_sha" in source
+
 
 def test_ci_uses_isolated_catalog() -> None:
     source = BUNDLE_TARGETS.read_text(encoding="utf-8")
