@@ -755,6 +755,8 @@ Key workflows:
 
 # Observability & Cost
 
+**Milestone 17: COMPLETE**
+
 M17 completes the project with a governed platform-operations layer.
 
 Operational evidence comes from:

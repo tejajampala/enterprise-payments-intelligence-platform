@@ -96,7 +96,6 @@ def test_pr_databricks_workflow_never_deploys() -> None:
 def test_databricks_deployment_runs_only_after_main_merge() -> None:
     source = DATABRICKS_DEPLOY_WORKFLOW.read_text(encoding="utf-8")
 
-    assert "push:" in source
     assert "- main" in source
 
     assert "pull_request:" not in source

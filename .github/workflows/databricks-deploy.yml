@@ -1,10 +1,16 @@
 name: Databricks Controlled Deployment
 
 on:
-  push:
+  # Deploy only after the main CI workflow has completed successfully.
+  workflow_run:
+    workflows:
+      - CI
+    types:
+      - completed
     branches:
       - main
 
+  # Retain an explicit manual deployment option.
   workflow_dispatch:
 
 permissions:
@@ -18,6 +24,12 @@ concurrency:
 jobs:
   deploy:
     name: Deploy Databricks CI Bundle
+
+    # Automatic deployment is allowed only when CI succeeded.
+    # workflow_dispatch remains available for an intentional manual run.
+    if: >
+      github.event_name == 'workflow_dispatch' ||
+      github.event.workflow_run.conclusion == 'success'
 
     runs-on: ubuntu-latest
 
@@ -36,9 +48,43 @@ jobs:
       BUNDLE_VAR_s3_landing_url: ${{ secrets.S3_LANDING_URL }}
 
     steps:
-      - name: Checkout repository
+      # ------------------------------------------------------------
+      # Checkout exactly the revision that passed CI.
+      #
+      # For workflow_run:
+      #   use the SHA of the successful CI run.
+      #
+      # For workflow_dispatch:
+      #   use the SHA from the manually dispatched workflow.
+      # ------------------------------------------------------------
+      - name: Checkout validated revision
         uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event_name == 'workflow_run' && github.event.workflow_run.head_sha || github.sha }}
 
+      # ------------------------------------------------------------
+      # Verify that the checked-out commit is the expected commit.
+      # This prevents accidental deployment of a different revision.
+      # ------------------------------------------------------------
+      - name: Verify validated revision
+        shell: bash
+        env:
+          EXPECTED_SHA: ${{ github.event_name == 'workflow_run' && github.event.workflow_run.head_sha || github.sha }}
+        run: |
+          CHECKED_OUT_SHA="$(git rev-parse HEAD)"
+
+          echo "Expected SHA:    ${EXPECTED_SHA}"
+          echo "Checked-out SHA: ${CHECKED_OUT_SHA}"
+
+          test "${CHECKED_OUT_SHA}" = "${EXPECTED_SHA}" || {
+            echo "Checked-out revision does not match the validated revision."
+            exit 1
+          }
+
+      # ------------------------------------------------------------
+      # Fail early when required GitHub environment configuration
+      # has not been supplied.
+      # ------------------------------------------------------------
       - name: Validate deployment environment
         shell: bash
         run: |
@@ -67,22 +113,53 @@ jobs:
             exit 1
           }
 
+      # ------------------------------------------------------------
+      # Install the pinned Databricks CLI used by EPIP CI/CD.
+      # ------------------------------------------------------------
       - name: Install Databricks CLI
         uses: databricks/setup-cli@main
         with:
           version: "1.10.0"
 
+      # ------------------------------------------------------------
+      # Validate GitHub OIDC / Databricks workload identity.
+      # No Databricks PAT is required.
+      # ------------------------------------------------------------
       - name: Verify deployment identity
         run: databricks current-user me
 
+      # ------------------------------------------------------------
+      # Validate the isolated CI bundle configuration before planning
+      # or changing Databricks resources.
+      # ------------------------------------------------------------
       - name: Validate CI bundle
         run: databricks bundle validate -t ci
 
+      # ------------------------------------------------------------
+      # Preview only the controlled CI resources required by the
+      # promotion workflow.
+      # ------------------------------------------------------------
       - name: Preview controlled deployment
-        run: databricks bundle plan -t ci --select pipelines.payment_events_streaming,pipelines.silver_transformations,pipelines.gold_analytics,jobs.promotion_quality_gates
+        run: >
+          databricks bundle plan -t ci --select
+          pipelines.payment_events_streaming,pipelines.silver_transformations,pipelines.gold_analytics,jobs.promotion_quality_gates
 
+      # ------------------------------------------------------------
+      # Deploy the selected CI resources.
+      #
+      # This intentionally does not deploy the entire development
+      # portfolio into CI.
+      # ------------------------------------------------------------
       - name: Deploy controlled CI resources
-        run: databricks bundle deploy -t ci --auto-approve --fail-on-active-runs --select pipelines.payment_events_streaming,pipelines.silver_transformations,pipelines.gold_analytics,jobs.promotion_quality_gates
+        run: >
+          databricks bundle deploy -t ci
+          --auto-approve
+          --fail-on-active-runs
+          --select
+          pipelines.payment_events_streaming,pipelines.silver_transformations,pipelines.gold_analytics,jobs.promotion_quality_gates
 
+      # ------------------------------------------------------------
+      # Provide deployment evidence in the GitHub Actions log.
+      # ------------------------------------------------------------
       - name: Show deployed bundle resources
         run: databricks bundle summary -t ci
