@@ -198,14 +198,7 @@
               },
               "encodings": {
                 "value": {
-                  "fieldName": "measure(authorization_rate)",
-                  "format": {
-                    "decimalPlaces": {
-                      "places": 0,
-                      "type": "exact"
-                    },
-                    "type": "number-percent"
-                  },
+                  "fieldName": "measure(unique_customers)",
                   "rowNumber": 0
                 }
               },
@@ -213,7 +206,7 @@
                 "showTitle": true,
                 "title": {
                   "fields": [],
-                  "value": "Authorization Rate"
+                  "value": "Unique Customers"
                 }
               },
               "version": 2,

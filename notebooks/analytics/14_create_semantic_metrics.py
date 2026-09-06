@@ -348,20 +348,10 @@ spark.sql(
         display_name: Unique Merchants
         comment: Number of unique merchants receiving payments.
 
-      - name: authorized_transaction_count
-        expr: SUM(CASE WHEN source.transaction_status = 'AUTHORIZED' THEN 1 ELSE 0 END)
-        display_name: Authorized Transactions
-        comment: Transactions in AUTHORIZED status.
-
       - name: declined_transaction_count
         expr: SUM(CASE WHEN source.transaction_status = 'DECLINED' THEN 1 ELSE 0 END)
         display_name: Declined Transactions
         comment: Transactions in DECLINED status.
-
-      - name: authorization_rate
-        expr: 1.0 * SUM(CASE WHEN source.transaction_status = 'AUTHORIZED' THEN 1 ELSE 0 END) / NULLIF(COUNT(1), 0)
-        display_name: Authorization Rate
-        comment: Authorized transaction count divided by all transactions.
 
       - name: decline_rate
         expr: 1.0 * SUM(CASE WHEN source.transaction_status = 'DECLINED' THEN 1 ELSE 0 END) / NULLIF(COUNT(1), 0)
