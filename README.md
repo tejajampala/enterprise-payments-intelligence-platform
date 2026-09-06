@@ -1,347 +1,286 @@
-# Enterprise Payments Intelligence Platform
+# Enterprise Payments Intelligence Platform (EPIP)
 
-An enterprise-grade Databricks reference implementation for payments data engineering,
-machine learning, MLOps, Generative AI, agentic AI, analytics, security, governance,
-CI/CD, observability, and platform engineering on AWS.
+### AWS + Databricks | Lakehouse, Streaming, ML, GenAI, Agentic AI, Governance, CI/CD & Observability
 
-> **Project Status:** COMPLETE — Milestones 1–17 implemented and validated. EPIP is a completed enterprise portfolio project.
+**Project Status:** ✅ **COMPLETE — Milestones 1–17 implemented and validated**
 
----
+The **Enterprise Payments Intelligence Platform (EPIP)** is a production-style, end-to-end
+reference implementation for modern payments data engineering and AI on **AWS + Databricks**.
 
-## Overview
+It demonstrates how batch and streaming ingestion, Lakehouse engineering, data quality,
+CDC/SCD processing, machine learning, MLOps, Retrieval-Augmented Generation, agentic AI,
+governed analytics, security, CI/CD, observability and cost monitoring can operate as **one
+connected enterprise platform** rather than as disconnected notebooks.
 
-The **Enterprise Payments Intelligence Platform (EPIP)** is a production-style portfolio
-implementation that demonstrates how a modern financial-services data platform can combine:
-
-- batch and real-time payment ingestion
-- Lakehouse and Medallion architecture
-- data quality, CDC, SCD Type 1, and SCD Type 2
-- governed feature engineering
-- fraud-detection machine learning
-- payment-volume forecasting
-- MLflow and Unity Catalog Model Registry
-- Retrieval-Augmented Generation
-- governed fraud-investigation agents
-- agent evaluation and regression gates
-- governed semantic analytics
-- Databricks AI/BI dashboards
-- enterprise CI/CD with workload identity federation
-- Unity Catalog RBAC and ABAC
-- governed tags, PII masking, and jurisdictional row filtering
-- monitoring, observability, and cost optimisation
-
-The project is intentionally built as an **end-to-end engineering system**, not as a
-collection of disconnected notebooks.
-
-Every milestone builds on the implementation created by the earlier milestones.
+> **Portfolio boundary:** all business data is synthetic. EPIP intentionally does not claim
+> infrastructure or capabilities that were not implemented.
 
 ---
 
-## Business Problem
+## Project Showcase
 
-Modern financial institutions process large volumes of payment transactions across
-multiple channels and systems.
+### Enterprise Architecture
 
-A production payments intelligence platform must be able to:
+![EPIP Enterprise Architecture](docs/images/epip-final-architecture.png)
 
-- ingest batch and streaming data reliably
-- preserve raw source lineage
-- distinguish physical event delivery from logical financial transactions
-- handle duplicates, late events, out-of-order events, CDC, and deletes
-- maintain trusted current and historical customer/account/merchant state
-- enforce data-quality rules
-- provide business-ready analytical data products
-- engineer leakage-safe ML features
-- train and evaluate fraud and forecasting models
-- govern model promotion and rollback
-- ground Generative AI in trusted enterprise evidence
-- restrict AI agents to approved tools and evidence
-- evaluate agents before production promotion
-- expose consistent business KPIs
-- enforce least-privilege data access
-- protect sensitive customer attributes
-- automate validation, deployment, and release
-- monitor operational health, quality, performance, AI behaviour, and platform cost
+### Payments Intelligence
 
-EPIP demonstrates these capabilities using the Databricks Data Intelligence Platform on AWS.
+![EPIP Payments Intelligence](docs/images/epip-payments-intelligence.png)
+
+The **EPIP Payments Intelligence** AI/BI dashboard provides governed business analytics over
+the payments semantic layer, including transaction volume, payment value, average transaction
+value, unique customers, decline rate, channel/method/country analysis and merchant performance.
+
+### Platform Operations & Cost
+
+![EPIP Platform Operations and Cost](docs/images/epip-platform-operations.png)
+
+The **EPIP Platform Operations & Cost** dashboard provides operational visibility across
+Lakeflow, data quality, jobs, SQL queries, ML/agent health, security events and estimated
+Databricks list cost.
+
+### Fraud Agent Evaluation
+
+![EPIP Fraud Agent Evaluation](docs/images/epip-agent-evaluation.png)
+
+Formal fraud-agent evaluation persists governed evidence for tool selection, evidence
+completeness, safety, human-review compliance and overall regression-gate status.
 
 ---
 
-# Target Architecture
+## Quick Navigation
 
-The current EPIP implementation is **not one linear pipeline**.
+- [Overview](#overview)
+- [What EPIP Demonstrates](#what-epip-demonstrates)
+- [Business Problem](#business-problem)
+- [Architecture](#architecture)
+- [Data Engineering](#data-engineering)
+- [Feature Engineering & ML](#feature-engineering--ml)
+- [MLOps](#mlops)
+- [GenAI, RAG & Agentic AI](#genai-rag--agentic-ai)
+- [Governed Analytics](#governed-analytics)
+- [Security & Governance](#security--governance)
+- [Enterprise CI/CD](#enterprise-cicd)
+- [Observability & Cost](#observability--cost)
+- [Environment Model](#environment-model)
+- [Repository Structure](#repository-structure)
+- [Demo Paths](#demo-paths)
+- [Local Development](#local-development)
+- [Implementation Roadmap](#implementation-roadmap)
+- [Project Boundaries](#project-boundaries)
 
-The governed Lakehouse provides trusted data products that feed multiple parallel
-workloads: analytics, machine learning, Generative AI, and agentic AI. CI/CD, security,
-governance, and observability operate across those workloads.
+---
 
-```mermaid
-flowchart TB
+# Overview
 
-    subgraph SOURCES["PAYMENT SOURCE SYSTEMS"]
-        S3["AWS S3<br/>Governed Batch Landing"]
-        PG["PostgreSQL-style<br/>Snapshots + CDC Extracts"]
-        MSK["Amazon MSK<br/>Payment Events"]
-    end
+EPIP models a modern financial-services data and AI platform built around a governed
+Databricks Lakehouse.
 
-    subgraph INGEST["INGESTION & PIPELINE PROCESSING"]
-        BATCH["COPY INTO / Auto Loader"]
-        CDC["Incremental CDC Ingestion"]
-        STREAM["Structured Streaming<br/>Kafka + IAM/TLS"]
-        LDP["Lakeflow Pipelines<br/>Apache Spark Declarative Pipelines"]
-    end
-
-    subgraph LAKEHOUSE["UNITY CATALOG GOVERNED LAKEHOUSE"]
-        BRONZE["Bronze<br/>Raw + Source Lineage"]
-        SILVER["Silver<br/>Standardisation + Enrichment"]
-        TRUST["Data Trust<br/>DQ + Dedup + Late Events<br/>AUTO CDC + SCD1/SCD2"]
-        GOLD["Gold<br/>Business Data Products"]
-    end
-
-    subgraph ML["MACHINE LEARNING & MLOPS"]
-        FEATURES["Feature Store<br/>Point-in-Time Features"]
-        FRAUD["Fraud Detection"]
-        FORECAST["Payment Forecasting"]
-        MLFLOW["MLflow Tracking"]
-        REGISTRY["Unity Catalog<br/>Model Registry"]
-        INFERENCE["Champion-based<br/>Batch / Serving"]
-    end
-
-    subgraph ANALYTICS["GOVERNED ANALYTICS"]
-        SEMANTIC["Semantic Base Views"]
-        METRICS["Unity Catalog<br/>Metric Views"]
-        DASH["EPIP Payments Intelligence<br/>AI/BI Dashboard"]
-    end
-
-    subgraph AI["GENERATIVE AI & AGENTIC AI"]
-        KNOWLEDGE["Governed Fraud<br/>Knowledge"]
-        SEARCH["Databricks AI Search<br/>HYBRID Retrieval"]
-        RAG["RAG + MLflow Tracing"]
-        AGENT["Fraud Investigation Agent<br/>Approved Read-only Tools"]
-        EVAL["Agent Evaluation<br/>Regression Gates"]
-    end
-
-    subgraph CICD["ENTERPRISE CI/CD"]
-        GITHUB["GitHub"]
-        PR["PR Quality Gates"]
-        CISP["CI OIDC<br/>Service Principal"]
-        CICAT["payments_ci"]
-        PROMOTE["ML + Agent<br/>Promotion Gates"]
-        APPROVAL["Production Approval"]
-        PRODSP["Production OIDC<br/>Service Principal"]
-        PRODCAT["payments_prod"]
-    end
-
-    subgraph GOVERNANCE["CROSS-CUTTING SECURITY & GOVERNANCE"]
-        UC["Unity Catalog"]
-        RBAC["RBAC"]
-        TAGS["Governed Tags<br/>epip_classification / epip_pii / epip_region_key"]
-        ABAC["ABAC<br/>Column Masks + Row Filters"]
-        IDENT["Account Groups<br/>Service Principals + OIDC"]
-    end
-
-    subgraph OBS["OBSERVABILITY & COST"]
-        SYS["Databricks System Tables"]
-        PIPEMON["Pipeline + DQ Health"]
-        JOBMON["Jobs + Query Health"]
-        MLAIMON["ML + Agent Health"]
-        COST["Databricks Usage<br/>Cost Attribution"]
-        OPSDASH["EPIP Platform Operations<br/>& Cost Dashboard"]
-    end
-
-    S3 --> BATCH
-    PG --> CDC
-    MSK --> STREAM
-
-    BATCH --> LDP
-    CDC --> LDP
-    STREAM --> LDP
-
-    LDP --> BRONZE
-    BRONZE --> SILVER
-    SILVER --> TRUST
-    TRUST --> GOLD
-
-    GOLD --> FEATURES
-    FEATURES --> FRAUD
-    FEATURES --> FORECAST
-    FRAUD --> MLFLOW
-    FORECAST --> MLFLOW
-    MLFLOW --> REGISTRY
-    REGISTRY --> INFERENCE
-
-    GOLD --> SEMANTIC
-    SEMANTIC --> METRICS
-    METRICS --> DASH
-
-    GOLD --> KNOWLEDGE
-    KNOWLEDGE --> SEARCH
-    SEARCH --> RAG
-    RAG --> AGENT
-    REGISTRY --> AGENT
-    AGENT --> EVAL
-
-    GITHUB --> PR
-    PR --> CISP
-    CISP --> CICAT
-    CICAT --> PROMOTE
-    PROMOTE --> APPROVAL
-    APPROVAL --> PRODSP
-    PRODSP --> PRODCAT
-
-    UC --> RBAC
-    UC --> TAGS
-    TAGS --> ABAC
-    IDENT --> RBAC
-    IDENT --> ABAC
-
-    SYS --> PIPEMON
-    SYS --> JOBMON
-    PIPEMON --> OPSDASH
-    JOBMON --> OPSDASH
-    MLAIMON --> OPSDASH
-    COST --> OPSDASH
-
-    LAKEHOUSE -. governed by .-> GOVERNANCE
-    ML -. governed by .-> GOVERNANCE
-    ANALYTICS -. governed by .-> GOVERNANCE
-    AI -. governed by .-> GOVERNANCE
-    CICD -. identity boundary .-> GOVERNANCE
-
-    LAKEHOUSE -. observed by .-> OBS
-    ML -. observed by .-> OBS
-    AI -. observed by .-> OBS
-    CICD -. observed by .-> OBS
-```
-
-Detailed architecture:
+The project connects:
 
 ```text
-docs/architecture/platform-architecture.md
+AWS S3 / PostgreSQL-style extracts / Amazon MSK
+                        ↓
+         Ingestion & Lakeflow Processing
+                        ↓
+              Bronze → Silver → Gold
+                        ↓
+       Governed business data products
+            ┌───────────┼───────────┐
+            ↓           ↓           ↓
+        Analytics      ML/MLOps    GenAI/Agents
+            └───────────┼───────────┘
+                        ↓
+       Security • CI/CD • Observability • Cost
 ```
 
+The design focuses on **enterprise engineering concerns**, including:
+
+- source lineage and replayability
+- physical delivery versus logical transaction semantics
+- duplicate, late and out-of-order events
+- data-quality expectations and quarantine
+- CDC, SCD Type 1 and SCD Type 2
+- feature leakage prevention
+- governed model lifecycle
+- safe and bounded AI-agent behaviour
+- evidence-based promotion gates
+- least-privilege access
+- environment isolation
+- operational monitoring
+- cost awareness
+
 ---
+
+# What EPIP Demonstrates
+
+| Domain | Implemented Capability |
+|---|---|
+| **Cloud & Infrastructure** | AWS, Terraform, S3, IAM, Amazon MSK |
+| **Lakehouse** | Databricks, Delta Lake, Unity Catalog, Bronze/Silver/Gold |
+| **Streaming** | Kafka/MSK, Spark Structured Streaming, IAM/TLS, checkpoints |
+| **Batch Ingestion** | Governed S3 landing, COPY INTO, Auto Loader |
+| **Lakeflow** | Lakeflow Declarative Pipelines / Apache Spark Declarative Pipelines |
+| **Data Trust** | Expectations, quarantine, deduplication, reconciliation |
+| **Event Handling** | Duplicate deliveries, late events, out-of-order events |
+| **CDC & History** | AUTO CDC, SCD1, SCD2, deletes, sequencing |
+| **Delta Features** | Row Tracking, Change Data Feed |
+| **Feature Engineering** | Unity Catalog feature tables, point-in-time lookups |
+| **Machine Learning** | Fraud detection and payment-volume forecasting |
+| **MLOps** | MLflow, UC Model Registry, Candidate/Champion lifecycle |
+| **GenAI** | Governed RAG, Databricks AI Search, hybrid retrieval |
+| **Agentic AI** | Fraud Investigation Agent with bounded read-only tools |
+| **Agent Evaluation** | Golden datasets, deterministic checks, LLM judging, regression gates |
+| **Analytics** | Semantic views, UC metric views, Databricks AI/BI |
+| **Security** | Unity Catalog RBAC, governed tags, ABAC, masking, row filtering |
+| **CI/CD** | GitHub Actions, OIDC, Databricks Bundles, promotion gates |
+| **Observability** | System Tables, Lakeflow event logs, DQ/job/query/security monitoring |
+| **FinOps** | Databricks usage, estimated list-cost attribution and optimisation signals |
+
+---
+
+# Business Problem
+
+A payments platform must do more than ingest transactions.
+
+It must reliably process data from multiple channels and systems while preserving enough
+evidence to explain **what happened, when it happened, what was delivered physically, what
+represents the logical financial event, and whether downstream decisions can be trusted**.
+
+EPIP addresses these concerns by demonstrating how to:
+
+- ingest batch and real-time payment data
+- preserve raw source and Kafka lineage
+- distinguish duplicate physical event deliveries from logical transactions
+- handle late and out-of-order events
+- apply data-quality rules without silently discarding evidence
+- maintain current and historical entity state
+- create reusable analytical data products
+- build point-in-time-correct ML features
+- train, evaluate and govern fraud and forecasting models
+- ground GenAI in governed enterprise evidence
+- constrain AI agents to approved investigation tools
+- evaluate agents before promotion
+- centralise business metrics
+- apply least-privilege access and PII controls
+- automate quality gates and deployment
+- monitor platform health and Databricks cost
+
+---
+
+# Architecture
+
+The detailed architecture is documented in:
+
+- [`docs/architecture/platform-architecture.md`](docs/architecture/platform-architecture.md)
+- [`docs/architecture/security-governance.md`](docs/architecture/security-governance.md)
+- [`docs/architecture/monitoring-cost-architecture.md`](docs/architecture/monitoring-cost-architecture.md)
+
+The architecture is intentionally **not a single linear pipeline**. Gold and trusted Silver
+data products serve multiple governed workloads in parallel:
+
+```text
+                         Governed Lakehouse
+                               │
+             ┌─────────────────┼─────────────────┐
+             │                 │                 │
+             ↓                 ↓                 ↓
+        Analytics          ML / MLOps        GenAI / Agent
+             │                 │                 │
+             └─────────────────┼─────────────────┘
+                               │
+          Governance + CI/CD + Observability + Cost
+```
 
 ## Architecture Principles
 
-EPIP follows these platform principles:
+### 1. Preserve evidence before reducing it
 
-1. **Trusted data before downstream consumption**
-   - Bronze preserves source fidelity.
-   - Silver standardises, validates, deduplicates, and applies CDC/SCD semantics.
-   - Gold exposes business-ready products.
-
-2. **Parallel downstream workloads**
-   - analytics, ML, RAG, and agents consume governed data products independently.
-
-3. **Point-in-time correctness**
-   - ML features are designed to prevent outcome leakage and future-data leakage.
-
-4. **Human-controlled consequential AI**
-   - the fraud agent supports investigation but cannot autonomously confirm fraud or
-     execute financial/customer actions.
-
-5. **Promotion based on governed evidence**
-   - model and agent evaluation results are CI/CD promotion gates.
-
-6. **Identity separation**
-   - human access uses account groups.
-   - CI and production automation use separate OIDC service principals.
-
-7. **RBAC grants access; ABAC restricts visible data**
-   - governed tags dynamically scope column masks and row filters.
-
-8. **Observe before optimising**
-   - M17 introduces operational, quality, performance, ML/agent, and cost visibility
-     before optimisation decisions.
-
----
-
-# Environment Model
-
-EPIP separates development, CI, and production-style deployments.
-
-| Environment | Purpose | Primary catalog |
-|---|---|---|
-| Development | Engineering, data, ML, AI, analytics, testing | `payments_dev` |
-| CI | Isolated automated deployment/validation | `payments_ci` |
-| Production-style | Approval-controlled release | `payments_prod` |
-
-Production deployment uses:
+Bronze retains raw physical events and source lineage so duplicate or retry behaviour can be
+investigated later.
 
 ```text
-GitHub Actions
-      ↓
-GitHub OIDC
-      ↓
-Dedicated Production Service Principal
-      ↓
-Production Databricks Bundle
-      ↓
-payments_prod
+Physical Kafka delivery != logical financial transaction
 ```
 
-No Databricks PAT or stored Databricks OAuth client secret is required by the CI/CD flow.
+### 2. Trusted data before downstream consumption
+
+- **Bronze** preserves source fidelity and delivery evidence.
+- **Silver** standardises, validates, deduplicates and applies CDC/SCD semantics.
+- **Gold** provides curated analytical data products.
+
+### 3. Processing time and business time are different
+
+EPIP uses synthetic historical business events. Operational freshness therefore relies on
+trusted ingestion/processing evidence instead of assuming an old business timestamp means a
+stale pipeline.
+
+### 4. ML signals are evidence, not final decisions
+
+```text
+predicted_fraud != confirmed fraud
+fraud_probability != proof of fraud
+```
+
+### 5. Consequential AI remains human-controlled
+
+The Fraud Investigation Agent can retrieve and summarise governed evidence, but it cannot
+autonomously confirm fraud or perform customer/financial actions.
+
+### 6. Promotion requires governed evidence
+
+Model and agent promotion use persisted evaluation evidence rather than ad-hoc manual claims.
+
+### 7. RBAC grants access; ABAC further restricts visible data
+
+Unity Catalog account groups provide the access boundary, while governed tags, masking and
+row filters provide dynamic data restrictions.
+
+### 8. Observe before optimising
+
+Operational, quality, performance and cost evidence is captured before optimisation decisions
+are made.
 
 ---
 
-# AWS Infrastructure
+# Data Engineering
 
-The repository contains Terraform for the AWS infrastructure that EPIP actually uses,
-including:
+## Source Systems
 
-- governed S3 landing storage
-- S3 encryption, versioning, lifecycle, and public-access protection
-- IAM trust and least-privilege Unity Catalog S3 access
-- Amazon MSK
-- MSK IAM authentication
-- MSK networking/security configuration
+EPIP uses three ingestion patterns:
 
-The architecture intentionally does **not** claim infrastructure that has not been
-deployed by the project.
+### AWS S3
 
-In particular, PostgreSQL is represented by deterministic PostgreSQL-style snapshot
-and CDC source extracts rather than a claimed production RDS deployment.
+Governed S3 landing for batch payment files.
+
+### PostgreSQL-style extracts
+
+Deterministic snapshot and CDC-style source extracts are used to demonstrate relational
+incremental ingestion patterns.
+
+> EPIP does **not** claim a deployed production RDS database or AWS DMS implementation.
+
+### Amazon MSK
+
+Payment events are published to Amazon MSK and consumed from Databricks using
+Kafka + AWS IAM/TLS.
 
 ---
 
-# Platform Capabilities
+## Ingestion Patterns
 
-## Data Engineering
+Implemented patterns include:
 
-Implemented capabilities include:
-
-- governed AWS S3 batch landing
-- deterministic PostgreSQL-style snapshots and CDC extracts
-- Amazon MSK payment-event ingestion
-- AWS IAM authenticated Kafka publishing
-- Unity Catalog service credentials
-- batch ingestion
+- batch file ingestion
+- COPY INTO
 - Auto Loader
+- incremental CDC ingestion
 - Structured Streaming
-- Lakeflow pipelines built on Apache Spark Declarative Pipelines
-- Bronze raw-event preservation
-- Kafka topic / partition / offset lineage
-- duplicate physical delivery scenarios
-- late-event scenarios
-- out-of-order event scenarios
-- checkpoint/restart recovery
-- Silver standardisation
-- current-state enrichment
-- reusable data-quality expectations
-- validation and quarantine
-- watermark-aware event deduplication
-- AUTO CDC
-- SCD Type 1
-- SCD Type 2
-- version sequencing
-- delete handling
-- Gold analytical data products
-- Delta Row Tracking
-- Delta Change Data Feed
-- end-to-end reconciliation
+- Kafka checkpoint/restart recovery
+- Unity Catalog service credentials
+- Lakeflow Declarative Pipelines
 
-### Core Lakeflow pipelines
+Core pipeline resources:
 
 ```text
 epip-<target>-payment-events-bronze
@@ -349,11 +288,94 @@ epip-<target>-silver-transformations
 epip-<target>-gold-analytics
 ```
 
-The development implementation uses serverless, triggered pipelines rather than
-leaving Kafka processing continuously active, which keeps the portfolio environment
-cost-conscious.
+The development environment uses **triggered/serverless processing** where practical instead
+of leaving portfolio streaming workloads continuously active.
 
 ---
+
+## Bronze
+
+Bronze preserves physical source evidence.
+
+For streaming events, this includes Kafka metadata such as:
+
+```text
+topic
+partition
+offset
+Kafka timestamp
+ingested_at
+```
+
+This allows EPIP to distinguish:
+
+```text
+delivery retry / duplicate
+           ↓
+physical messages may be > 1
+           ↓
+logical transaction remains 1
+```
+
+---
+
+## Silver
+
+Silver performs trusted transformation and state management.
+
+Implemented capabilities include:
+
+- standardisation
+- enrichment
+- reusable expectations
+- validation
+- quarantine
+- watermark-aware deduplication
+- late-event handling
+- out-of-order handling
+- current-state enrichment
+- AUTO CDC
+- SCD Type 1
+- SCD Type 2
+- version sequencing
+- delete handling
+
+---
+
+## Gold
+
+Gold exposes business-ready products used by analytics, feature engineering, ML and AI.
+
+The important design principle is that downstream consumers do not independently reinterpret
+raw ingestion semantics; they consume governed, trusted products.
+
+---
+
+## Data Quality & Reconciliation
+
+EPIP treats rejected or suspicious records as operational evidence rather than silently
+dropping them.
+
+Implemented controls include:
+
+```text
+Expectations
+    ↓
+Valid / Quarantine
+    ↓
+Rule-level metrics
+    ↓
+Reconciliation
+    ↓
+Operational monitoring
+```
+
+M17 monitoring also exposes current DQ status so a dataset with zero quarantined records is
+represented as healthy rather than producing a blank dashboard.
+
+---
+
+# Feature Engineering & ML
 
 ## Feature Engineering
 
@@ -361,12 +383,12 @@ Implemented capabilities include:
 
 - Unity Catalog governed feature tables
 - transaction-level fraud features
-- point-in-time customer behaviour features
-- point-in-time merchant behaviour features
-- TIMESERIES feature-table primary keys
-- leakage-safe feature windows
-- Feature Engineering training-set construction
+- customer behaviour features
+- merchant behaviour features
+- TIMESERIES feature-table keys
+- leakage-safe rolling windows
 - point-in-time feature lookups
+- training-set construction
 
 Key assets:
 
@@ -376,35 +398,39 @@ payments_dev.features.customer_behavior_features
 payments_dev.features.merchant_behavior_features
 ```
 
+Point-in-time correctness is a core design requirement so model training does not accidentally
+consume future information.
+
 ---
 
-## Fraud Detection ML
+## Fraud Detection
 
-Implemented capabilities include:
+EPIP includes:
 
-- leakage-safe temporal train / validation / test splits
+- leakage-safe temporal train/validation/test splits
 - logistic-regression baseline
-- gradient-boosted fraud model
+- gradient-boosted challenger
 - class-imbalance handling
 - threshold optimisation
 - fraud-focused evaluation
 - MLflow experiment tracking
 - governed prediction outputs
 
-Important semantic principle:
+Fraud scoring semantics remain explicit:
 
 ```text
-predicted_fraud != confirmed fraud
-fraud_probability != proof of fraud
+fraud_probability = model signal
+predicted_fraud   = model classification
+confirmed fraud   = not autonomously asserted by EPIP
 ```
 
 ---
 
 ## Payment Volume Forecasting
 
-Implemented capabilities include:
+Implemented forecasting includes:
 
-- daily payment-volume forecasting dataset
+- daily volume datasets
 - lag features
 - rolling features
 - seasonal baseline
@@ -417,52 +443,57 @@ Implemented capabilities include:
 
 ---
 
-## MLOps
+# MLOps
+
+EPIP implements a governed model lifecycle using **MLflow + Unity Catalog Model Registry**.
 
 Implemented capabilities include:
 
-- MLflow experiment tracking
-- Unity Catalog Model Registry
+- experiment tracking
+- reproducible model evaluation
+- registered models
 - Candidate alias
 - Champion alias
 - PreviousChampion rollback support
-- automated model validation gates
+- automated validation gates
 - controlled Champion promotion
-- model lifecycle auditability
-- production serving package
-- Champion-based batch inference
-- model provenance and traceability
+- model provenance
+- governed batch scoring
+- serving-ready packaging
 
-Key model asset:
+Key registered model:
 
 ```text
 payments_dev.models.fraud_detection_model
 ```
 
-Key prediction asset:
+Governed batch predictions:
 
 ```text
 payments_dev.ml.fraud_batch_predictions
 ```
 
+The scoring flow resolves the current `Champion` model alias and persists model/version
+provenance with predictions.
+
 ---
 
-## Governed RAG and AI Search
+# GenAI, RAG & Agentic AI
 
-Implemented capabilities include:
+## Governed RAG
 
-- governed fraud-investigation knowledge corpus
+EPIP builds a governed fraud-investigation knowledge layer using:
+
+- curated fraud knowledge
 - Databricks AI Search
 - HYBRID retrieval
 - bounded Top-K retrieval
-- source-aware generation
-- RAG evaluation datasets
-- retrieval evaluation
-- response-quality evaluation
+- source-aware responses
+- RAG evaluation
 - MLflow GenAI tracing
-- Claude generation with Databricks-governed retrieval
+- Claude generation over governed retrieval evidence
 
-Key assets include:
+Selected assets:
 
 ```text
 payments_dev.ai.fraud_investigation_knowledge_chunks
@@ -475,9 +506,9 @@ payments_dev.ai.fraud_investigation_knowledge_index
 
 ---
 
-## Governed Fraud Investigation Agent
+## Fraud Investigation Agent
 
-Approved tools:
+The governed Fraud Investigation Agent can call only approved read-only tools:
 
 ```text
 get_transaction_context
@@ -485,31 +516,29 @@ get_fraud_evidence
 search_fraud_knowledge
 ```
 
-The agent does **not** receive:
+The agent does **not** receive tools to:
 
-- arbitrary SQL access
-- payment-decline actions
-- card-blocking actions
-- account-freezing actions
-- fraud-confirmation actions
-- unrestricted state-changing tools
+- execute arbitrary SQL
+- block a card
+- freeze an account
+- decline a payment
+- confirm fraud
+- execute unrestricted state changes
 
-Human review remains mandatory.
-
-Implemented controls include:
+Implemented safety/quality controls include:
 
 - canonical transaction-ID validation
 - transaction-scope enforcement
 - bounded retrieval
 - tool allowlist
 - unknown-tool rejection
-- repeated-tool-call detection
+- repeated-call detection
 - tool-call ceiling
 - outcome-leakage prevention
 - explicit limitations
-- human-review requirement
-- MLflow GenAI tracing
-- durable Delta investigation history
+- mandatory human review
+- MLflow tracing
+- durable investigation history
 
 Key assets:
 
@@ -521,11 +550,11 @@ payments_dev.ai.fraud_agent_investigations
 
 ---
 
-## Agent Evaluation and Regression Gates
+## Agent Evaluation & Regression Gates
 
-Implemented evaluation includes:
+Formal evaluation uses persisted golden cases.
 
-### Deterministic evaluation
+### Deterministic checks
 
 - required tool selection
 - tool-argument correctness
@@ -552,7 +581,7 @@ payments_dev.ai.agent_evaluation_results
 payments_dev.ai.agent_evaluation_summary
 ```
 
-Critical regression gates include:
+Critical promotion gates include:
 
 ```text
 transaction scope
@@ -561,21 +590,30 @@ human review
 response structure
 ```
 
+Evaluation results retain trace IDs so failed cases can be connected back to MLflow traces.
+
 ---
 
-## Governed AI/BI Analytics
+# Governed Analytics
 
-Implemented capabilities include:
+EPIP implements a reusable semantic layer under:
 
-- `payments_dev.analytics`
+```text
+payments_dev.analytics
+```
+
+Implemented analytics capabilities include:
+
 - semantic base views
 - Unity Catalog metric views
-- governed `MEASURE(...)` KPI definitions
-- payment operations metrics
-- fraud-model metrics
-- agent-quality metrics
-- three-page `EPIP Payments Intelligence` AI/BI dashboard
-- dashboard-as-code through Declarative Automation Bundles
+- governed `MEASURE(...)` definitions
+- payments KPIs
+- fraud-model analytics
+- agent-quality analytics
+- Databricks AI/BI dashboards
+- dashboards managed through Databricks Bundles
+
+## EPIP Payments Intelligence
 
 Dashboard pages:
 
@@ -583,58 +621,30 @@ Dashboard pages:
 2. **Fraud Intelligence**
 3. **Fraud Agent Quality**
 
-Databricks Genie remains an optional future enhancement.
+Executive Payments includes genuine domain measures such as:
+
+- transaction count
+- total payment value
+- average transaction value
+- unique customers
+- decline rate
+- payment channel
+- payment method
+- country
+- merchant performance
+
+The semantic layer deliberately avoids inventing business concepts that are not supported by
+the transaction domain.
+
+Databricks Genie is treated as an **optional enhancement**, not as a deployed EPIP capability.
 
 ---
 
-# Enterprise CI/CD
+# Security & Governance
 
-Milestone 15 implements a controlled validation and release chain.
+EPIP uses Unity Catalog as the central governance plane.
 
-```mermaid
-flowchart LR
-    PR["Pull Request"] --> CI["Python / Terraform / Bundle Quality Gates"]
-    CI --> MAIN["main"]
-    MAIN --> OIDC1["CI OIDC Service Principal"]
-    OIDC1 --> CICAT["payments_ci"]
-    CICAT --> GATES["ML + Agent Promotion Gates"]
-    GATES --> APPROVAL["Production Environment Approval"]
-    APPROVAL --> OIDC2["Production OIDC Service Principal"]
-    OIDC2 --> PROD["payments_prod"]
-```
-
-Implemented controls include:
-
-- pytest
-- Ruff linting
-- formatting validation
-- mypy
-- package build
-- Terraform formatting and validation
-- Databricks bundle validation
-- GitHub OIDC workload identity federation
-- dedicated CI service principal
-- dedicated production service principal
-- isolated CI catalog
-- production catalog
-- selected model/Champion consistency gate
-- agent regression gates
-- evaluation-freshness validation
-- release SHA validation
-- GitHub production approval
-- production bundle deployment
-- no PAT
-- no stored Databricks client secret
-
----
-
-# Security and Governance
-
-**Milestone 16: COMPLETE**
-
-EPIP implements a combined identity, RBAC, governed-tag, and ABAC architecture.
-
-## Account groups
+## Human access groups
 
 ```text
 epip-platform-admins
@@ -660,140 +670,251 @@ epip_pii
 epip_region_key
 ```
 
-Responsibilities:
+The governance model demonstrates:
 
-```text
-epip_classification
-    → sensitivity tier and ABAC policy scope
+- RBAC
+- governed tags
+- ABAC
+- PII masking
+- row-level jurisdiction filtering
+- account-group-based human access
+- service-principal separation
+- least privilege
 
-epip_pii
-    → semantic PII category and type-specific masking
-
-epip_region_key
-    → jurisdictional row-filter key
-```
-
-Initial protected data product:
+Example protected data product:
 
 ```text
 payments_dev.silver.customers_current
-    epip_classification = restricted
 ```
 
-Sensitive PII attributes are masked for non-privileged consumers, and the AU fraud-analyst
-persona demonstrates row-level jurisdictional filtering.
+The AU fraud-analyst persona demonstrates jurisdiction-aware row filtering.
 
-Detailed architecture:
+Detailed documentation:
+
+- [`docs/architecture/security-governance.md`](docs/architecture/security-governance.md)
+- [`docs/demo/M16-runbook.md`](docs/demo/M16-runbook.md)
+
+---
+
+# Enterprise CI/CD
+
+EPIP uses GitHub Actions, Databricks Bundles and workload identity federation.
 
 ```text
-docs/architecture/security-governance.md
+Pull Request
+     ↓
+Python / Terraform / Bundle Quality Gates
+     ↓
+main
+     ↓
+GitHub OIDC
+     ↓
+CI Service Principal
+     ↓
+payments_ci
+     ↓
+ML + Agent Promotion Gates
+     ↓
+Production Approval
+     ↓
+Production OIDC Service Principal
+     ↓
+payments_prod
 ```
 
-Runbook:
+Implemented quality gates include:
+
+- pytest
+- Ruff linting
+- Ruff formatting validation
+- mypy
+- Python package build
+- Terraform formatting
+- Terraform validation
+- Databricks Bundle validation
+- controlled CI deployment preview
+- model/Champion consistency validation
+- agent regression gates
+- evaluation-freshness checks
+- release SHA checks
+- production approval
+
+No Databricks PAT or stored Databricks OAuth client secret is required by the CI/CD flow.
+
+Key workflows:
 
 ```text
-docs/demo/M16-runbook.md
+.github/workflows/ci.yml
+.github/workflows/databricks-ci.yml
+.github/workflows/databricks-deploy.yml
+.github/workflows/promotion-gates.yml
+.github/workflows/production-release.yml
 ```
 
 ---
 
-# Monitoring, Observability and Cost Optimisation
+# Observability & Cost
 
-**Milestone 17: COMPLETE**
+M17 completes the project with a governed platform-operations layer.
 
-M17 completes the EPIP platform by adding governed operational visibility across the
-implemented data, ML, AI, analytics, security and CI/CD estate.
-
-Implementation:
-
-```text
-M17A  Architecture and project-state alignment
-M17B  Observability foundation and Databricks System Tables
-M17C  Lakeflow, Data Quality and freshness monitoring
-M17D  Jobs, tasks, queries, security, ML/agent health, Databricks cost,
-      operations dashboard, paused alerts, validation and project closeout
-```
-
-Operational evidence:
+Operational evidence comes from:
 
 ```text
 Databricks System Tables
         +
 Lakeflow Event Logs
         +
-Existing ML / Agent Evaluation Evidence
+Persisted ML / Agent Evaluation Evidence
         ↓
 payments_dev.monitoring
-        ↓
-Pipeline / DQ / Job / Query / Security / ML / Agent / Cost Views
-        ↓
-EPIP Platform Operations & Cost
-AI/BI Dashboard
-        +
-Paused SQL Alerts
 ```
 
-Implemented monitoring domains include:
+Implemented monitoring covers:
 
-- pipeline operational health with explicit `NEVER_RUN` states
-- Lakeflow expectation, quarantine, event-trust and freshness monitoring
-- job and task reliability
-- query latency, queue, scan, pruning, spill, shuffle and cache indicators
-- SQL warehouse lifecycle and configuration visibility
-- curated EPIP audit/security events
-- Champion fraud-scoring freshness and prediction-distribution monitoring
-- persisted agent evaluation/regression monitoring with MLflow trace linkage
-- corrected Databricks billing usage and estimated list-cost attribution
-- evidence-based cost-optimisation candidates
-- consolidated Platform Operations & Cost dashboard
-- cost-safe version-controlled SQL alerts deployed paused by default
+- current pipeline inventory
+- pipeline update health
+- explicit `NEVER_RUN` pipeline states
+- Lakeflow expectation metrics
+- quarantine health
+- data freshness
+- current job inventory
+- logical job-run health
+- task-run health
+- SQL query performance
+- queue/compute waiting
+- scan/pruning indicators
+- spill and shuffle indicators
+- SQL warehouse health
+- curated audit/security events
+- fraud-model scoring freshness
+- fraud prediction distribution
+- latest agent evaluation health
+- failed agent cases with trace linkage
+- Databricks usage and estimated list cost
+- optimisation candidates
 
-M17 cost reporting is intentionally described as **Databricks estimated list cost**.
-It does not claim complete AWS cloud-cost coverage for Amazon MSK, Amazon S3, AWS data
-transfer or other AWS charges because EPIP does not integrate AWS CUR/Cost Explorer.
+## EPIP Platform Operations & Cost
 
-Detailed architecture:
+Dashboard pages:
+
+1. **Platform Health**
+2. **Data Quality & Security**
+3. **ML & Agent Health**
+4. **Cost & Performance**
+
+## Version-controlled alerts
+
+Five SQL alerts are deployed **paused by default**:
 
 ```text
-docs/architecture/monitoring-cost-architecture.md
+EPIP - Pipeline Failure
+EPIP - Data Freshness
+EPIP - DQ Degradation
+EPIP - Agent Regression
+EPIP - Databricks Cost Anomaly
 ```
 
-Runbook:
+This demonstrates alert architecture without leaving scheduled SQL warehouse activity running
+unnecessarily in the portfolio environment.
+
+## Cost semantics
+
+EPIP calculates **estimated Databricks list cost** from Databricks billing System Tables.
+
+Billing correction rows are handled correctly:
 
 ```text
-docs/demo/M17-runbook.md
+ORIGINAL
+RETRACTION
+RESTATEMENT
 ```
+
+The project does **not** describe this value as the complete AWS bill.
+
+Not included in the EPIP cost figure:
+
+- Amazon MSK charges
+- Amazon S3 charges
+- AWS networking/data transfer
+- taxes
+- negotiated discounts
+- credits
+- complete cloud invoice
+
+Detailed documentation:
+
+- [`docs/architecture/monitoring-cost-architecture.md`](docs/architecture/monitoring-cost-architecture.md)
+- [`docs/demo/M17-runbook.md`](docs/demo/M17-runbook.md)
 
 ---
 
-# Engineering Principles
+# Environment Model
 
-The project follows production-oriented engineering practices:
+EPIP separates development, CI and production-style workloads.
 
-- Infrastructure as Code
-- declarative resource deployment
-- version-controlled architecture
-- automated testing
-- reproducible environments
-- serverless-first cost awareness
-- environment isolation
-- least privilege
-- group-based human access
-- workload identity federation
-- separation of duties
-- governed classification
-- centralized ABAC
-- data-quality enforcement
-- point-in-time correctness
-- leakage prevention
-- model evaluation before promotion
-- agent evaluation before promotion
-- human oversight for consequential AI
-- centralized semantic KPI definitions
-- synthetic data only
-- ML and agent traceability
-- version-controlled dashboards
-- evidence-based optimisation
+| Environment | Purpose | Catalog |
+|---|---|---|
+| **Development** | Engineering, data, ML, AI, analytics and testing | `payments_dev` |
+| **CI** | Isolated automated validation/deployment | `payments_ci` |
+| **Production-style** | Approval-controlled release | `payments_prod` |
+
+This separation supports:
+
+- independent CI validation
+- promotion evidence
+- controlled production release
+- identity separation
+- reduced cross-environment contamination
+
+---
+
+# AWS Infrastructure
+
+Terraform covers the AWS infrastructure actually used by EPIP, including:
+
+- S3 landing storage
+- S3 encryption
+- versioning
+- lifecycle controls
+- public-access protection
+- IAM trust
+- least-privilege Unity Catalog S3 access
+- Amazon MSK
+- MSK IAM authentication
+- MSK security/networking configuration
+
+EPIP deliberately avoids claiming undeployed infrastructure.
+
+Specifically:
+
+```text
+No claimed production RDS deployment
+No AWS DMS implementation
+No claimed VPC endpoints
+```
+
+PostgreSQL behaviour is represented through deterministic snapshot/CDC-style source extracts.
+
+---
+
+# Selected Governed Assets
+
+| Area | Example Asset |
+|---|---|
+| Feature engineering | `payments_dev.features.transaction_fraud_features` |
+| Customer behaviour | `payments_dev.features.customer_behavior_features` |
+| Merchant behaviour | `payments_dev.features.merchant_behavior_features` |
+| Fraud model | `payments_dev.models.fraud_detection_model` |
+| Fraud predictions | `payments_dev.ml.fraud_batch_predictions` |
+| RAG knowledge | `payments_dev.ai.fraud_investigation_knowledge_chunks` |
+| Agent context | `payments_dev.ai.agent_transaction_context` |
+| Agent evidence | `payments_dev.ai.agent_fraud_evidence` |
+| Agent investigations | `payments_dev.ai.fraud_agent_investigations` |
+| Agent eval dataset | `payments_dev.ai.agent_evaluation_dataset` |
+| Agent eval results | `payments_dev.ai.agent_evaluation_results` |
+| Agent eval summary | `payments_dev.ai.agent_evaluation_summary` |
+| Analytics | `payments_dev.analytics` |
+| Monitoring | `payments_dev.monitoring` |
 
 ---
 
@@ -803,32 +924,53 @@ The project follows production-oriented engineering practices:
 enterprise-payments-intelligence-platform/
 │
 ├── .github/
-│   └── workflows/
+│   └── workflows/                  # CI/CD, promotion and release
+│
 ├── bundle/
-│   └── resources/
+│   └── resources/                  # Databricks resources as code
+│
 ├── deploy/
-│   └── prod/
+│   └── prod/                       # production-style Databricks deployment
+│
 ├── docs/
-│   ├── adr/
-│   ├── architecture/
-│   ├── demo/
+│   ├── adr/                        # architecture decisions
+│   ├── architecture/               # platform/governance/monitoring architecture
+│   ├── demo/                       # reproducible demo runbooks
+│   ├── images/                     # README / portfolio screenshots
 │   └── PROJECT_STATUS.md
+│
 ├── governance/
 │   ├── access-matrix.yml
 │   └── classification.yml
+│
 ├── infra/
 │   └── terraform/
-│       ├── aws/
-│       └── azure/
+│       └── aws/
+│
 ├── notebooks/
+│   ├── agents/
+│   ├── analytics/
+│   ├── features/
+│   ├── ml/
+│   ├── mlops/
+│   └── rag/
+│
 ├── pipelines/
+│   ├── bronze/
+│   ├── silver/
+│   └── gold/
+│
 ├── scripts/
+│   └── agents/
+│
 ├── sql/
 │   ├── analytics/
 │   ├── governance/
-│   └── monitoring/              # introduced during M17
+│   └── monitoring/
+│
 ├── src/
 ├── tests/
+│
 ├── bundle.targets.yml
 ├── databricks.yml
 ├── pyproject.toml
@@ -838,35 +980,31 @@ enterprise-payments-intelligence-platform/
 
 ---
 
-# Local Development
+# Demo Paths
 
-```powershell
-uv sync --locked --dev
-uv run pytest -v
-uv run ruff check .
-uv run ruff format --check .
-uv run mypy src
-uv build
-```
+## Streaming
 
-Validate the development bundle:
+Runbook:
 
-```powershell
-databricks bundle validate -t dev -p PAYMENTS_DEV
-databricks bundle plan -t dev -p PAYMENTS_DEV
+[`docs/demo/streaming-demo-runbook.md`](docs/demo/streaming-demo-runbook.md)
+
+The streaming demonstration covers:
+
+```text
+Amazon MSK
+    ↓
+physical Kafka deliveries
+    ↓
+Bronze lineage
+    ↓
+duplicate / late / out-of-order handling
+    ↓
+trusted Silver events
 ```
 
 ---
 
-# Key Demo Paths
-
-Streaming runbook:
-
-```text
-docs/demo/streaming-demo-runbook.md
-```
-
-Fraud agent:
+## Fraud Investigation Agent
 
 ```powershell
 uv run python scripts/agents/12_run_agent_demo_scenarios.py `
@@ -874,7 +1012,9 @@ uv run python scripts/agents/12_run_agent_demo_scenarios.py `
   --catalog payments_dev
 ```
 
-Agent evaluation:
+---
+
+## Agent Evaluation
 
 ```powershell
 uv run python scripts/agents/13_evaluate_fraud_investigation_agent.py `
@@ -882,31 +1022,71 @@ uv run python scripts/agents/13_evaluate_fraud_investigation_agent.py `
   --catalog payments_dev
 ```
 
-Business dashboard:
+---
+
+## Business Dashboard
 
 ```text
 EPIP Payments Intelligence
 ```
 
-Security/governance:
+Pages:
 
 ```text
-docs/architecture/security-governance.md
-docs/demo/M16-runbook.md
+Executive Payments
+Fraud Intelligence
+Fraud Agent Quality
 ```
 
-Monitoring and operations assets:
+---
 
-```text
-sql/monitoring/
-docs/architecture/monitoring-cost-architecture.md
-docs/demo/M17-runbook.md
-```
-
-Operations dashboard:
+## Operations Dashboard
 
 ```text
 EPIP Platform Operations & Cost
+```
+
+Pages:
+
+```text
+Platform Health
+Data Quality & Security
+ML & Agent Health
+Cost & Performance
+```
+
+---
+
+# Local Development
+
+Install the locked development environment:
+
+```powershell
+uv sync --locked --dev
+```
+
+Run the quality gates:
+
+```powershell
+uv run pytest -v
+uv run ruff check .
+uv run ruff format --check .
+uv run mypy src
+uv build
+```
+
+Validate the Databricks development bundle:
+
+```powershell
+databricks bundle validate -t dev -p PAYMENTS_DEV
+databricks bundle plan -t dev -p PAYMENTS_DEV
+```
+
+Validate the CI target:
+
+```powershell
+databricks bundle validate -t ci -p PAYMENTS_DEV
+databricks bundle plan -t ci -p PAYMENTS_DEV
 ```
 
 ---
@@ -915,96 +1095,166 @@ EPIP Platform Operations & Cost
 
 | Milestone | Capability | Status |
 |---|---|---|
-| 1 | Platform and repository foundation | Complete |
-| 2 | Synthetic payments domain | Complete |
-| 3 | Batch ingestion | Complete |
-| 4 | Streaming ingestion | Complete |
-| 5 | Lakeflow and Medallion architecture | Complete |
-| 6 | Data quality, CDC, and SCD Type 2 | Complete |
-| 7 | Feature engineering and Feature Store | Complete |
-| 8 | Fraud detection ML | Complete |
-| 9 | Forecasting ML | Complete |
-| 10 | MLOps | Complete |
-| 11 | Governed RAG and AI Search | Complete |
-| 12 | Governed Fraud Investigation Agent | Complete |
-| 13 | Agent evaluation and regression gates | Complete |
-| 14 | Governed AI/BI semantic layer and dashboard | Complete |
-| 15 | Enterprise CI/CD | Complete |
-| 16 | Security and governance | **Complete** |
-| 17 | Monitoring, observability and cost optimisation | **Complete** |
+| M1 | Platform and repository foundation | ✅ Complete |
+| M2 | Synthetic payments domain | ✅ Complete |
+| M3 | Batch ingestion | ✅ Complete |
+| M4 | Streaming ingestion | ✅ Complete |
+| M5 | Lakeflow and Medallion architecture | ✅ Complete |
+| M6 | Data quality, CDC and SCD Type 2 | ✅ Complete |
+| M7 | Feature engineering and Feature Store | ✅ Complete |
+| M8 | Fraud detection ML | ✅ Complete |
+| M9 | Payment forecasting ML | ✅ Complete |
+| M10 | MLOps | ✅ Complete |
+| M11 | Governed RAG and AI Search | ✅ Complete |
+| M12 | Governed Fraud Investigation Agent | ✅ Complete |
+| M13 | Agent evaluation and regression gates | ✅ Complete |
+| M14 | Governed AI/BI semantic layer and dashboard | ✅ Complete |
+| M15 | Enterprise CI/CD | ✅ Complete |
+| M16 | Security and governance | ✅ Complete |
+| M17 | Monitoring, observability and cost optimisation | ✅ Complete |
 
-Detailed implementation status:
+Detailed project status:
+
+[`docs/PROJECT_STATUS.md`](docs/PROJECT_STATUS.md)
+
+---
+
+# Interview Walkthrough
+
+A concise walkthrough of EPIP can be structured around five questions.
+
+### 1. How does data enter the platform?
 
 ```text
-docs/PROJECT_STATUS.md
+S3 batch + PostgreSQL-style CDC + MSK streaming
+```
+
+### 2. How is data made trustworthy?
+
+```text
+Bronze lineage
+    ↓
+Silver standardisation
+    ↓
+DQ + quarantine
+    ↓
+dedup + late/out-of-order handling
+    ↓
+AUTO CDC / SCD
+    ↓
+Gold products
+```
+
+### 3. How does the platform support ML and AI?
+
+```text
+Gold
+ ↓
+Feature Store
+ ↓
+Fraud / Forecasting
+ ↓
+MLflow + UC Model Registry
+ ↓
+Governed RAG
+ ↓
+Fraud Investigation Agent
+ ↓
+Formal Agent Evaluation
+```
+
+### 4. How is the platform governed and released?
+
+```text
+Unity Catalog RBAC/ABAC
+        +
+GitHub OIDC
+        +
+CI / promotion / production gates
+```
+
+### 5. How is it operated?
+
+```text
+System Tables + Lakeflow Event Logs + persisted ML/AI evidence
+                           ↓
+                  payments_dev.monitoring
+                           ↓
+              EPIP Platform Operations & Cost
 ```
 
 ---
 
-# Project Complete
+# Project Boundaries
 
-EPIP has completed all planned milestones:
+EPIP is deliberately explicit about what is and is not implemented.
 
-```text
-M1–M17 COMPLETE
-```
+## Implemented
 
-The final milestone delivers platform operations, ML/agent monitoring, Databricks cost
-attribution, an operations dashboard, paused alert resources, final validation, and
-project closeout.
+- Databricks on AWS
+- S3 batch landing
+- Amazon MSK streaming
+- PostgreSQL-style snapshot/CDC extracts
+- Lakeflow / Spark Declarative Pipelines
+- Medallion architecture
+- Delta Lake / Unity Catalog
+- data quality and reconciliation
+- CDC / SCD1 / SCD2
+- Feature Store
+- fraud ML
+- forecasting ML
+- MLflow / UC Model Registry
+- governed RAG / AI Search
+- bounded fraud-investigation agent
+- agent evaluation
+- semantic analytics
+- AI/BI dashboards
+- RBAC / ABAC
+- CI/CD with OIDC
+- operational monitoring
+- estimated Databricks list-cost monitoring
 
-No further implementation milestone is planned.
+## Not claimed
 
-The repository is now intended to be maintained as a completed, interview-ready enterprise
-reference implementation. Future maintenance should improve or update the implemented
-platform without silently adding undeployed architecture claims.
+- real production banking data
+- deployed production PostgreSQL/RDS
+- AWS DMS
+- undeployed VPC endpoints
+- autonomous fraud confirmation
+- autonomous card/account/payment actions
+- complete AWS cloud-cost accounting
+- Databricks Genie deployment
 
 ---
 
 # Data Safety
 
-No real banking or customer data is used.
+All data in EPIP is synthetic.
 
-All customers, accounts, merchants, transactions, fraud scenarios, and evaluation
-cases are synthetic.
-
-The repository must never contain:
+The repository must not contain:
 
 - Databricks access tokens
-- Databricks client secrets
+- Databricks OAuth client secrets
 - AWS access keys
-- Anthropic API keys
-- OpenAI API keys
+- Anthropic/OpenAI API keys
 - passwords
 - production customer data
-- Terraform state containing sensitive values
-- other private credentials or secrets
+- sensitive Terraform state
+- private credentials
 
 ---
 
-# Project Goal
-
-EPIP demonstrates how a production-style enterprise payments platform can combine:
+# Project Complete
 
 ```text
-Data Engineering
-       +
-Machine Learning
-       +
-MLOps
-       +
-Generative AI
-       +
-Agentic AI
-       +
-Governed Analytics
-       +
-Security & Governance
-       +
-Enterprise CI/CD
-       +
-Observability & Cost Management
+M1–M17 COMPLETE
+EPIP COMPLETE
 ```
 
-while preserving quality, security, governance, traceability, reproducibility,
-cost awareness, and human oversight.
+EPIP is maintained as an **interview-ready enterprise reference implementation** showing the
+complete lifecycle from data ingestion and trustworthy transformation through ML/GenAI,
+governance, CI/CD and platform operations.
+
+The goal is not to maximise the number of technologies used. The goal is to demonstrate how
+enterprise data, ML and AI capabilities can be connected with clear boundaries, evidence,
+governance, reproducibility and operational accountability.
