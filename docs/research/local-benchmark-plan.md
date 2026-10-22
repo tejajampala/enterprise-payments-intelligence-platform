@@ -31,7 +31,7 @@ The runner uses only the standard library. pytest is required only for the test 
 
 ## Evidence boundaries
 
-Passing local simulations supports reproducibility of the **local integrity method** under the tested synthetic cases. It does not independently verify the original Lakeflow data path, prove real-world fraud reduction, establish external adoption, or itself satisfy national importance under EB-2 NIW.
+Passing local simulations supports reproducibility of the **local integrity method** under the tested synthetic cases. It does not independently verify the original Lakeflow data path, prove real-world fraud reduction, establish external adoption, or establish effectiveness beyond the tested synthetic scenarios.
 
 ## Next engineering sequence
 
